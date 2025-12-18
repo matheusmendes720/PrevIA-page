@@ -37,8 +37,8 @@ export default function LagFeaturesTab() {
   });
   
   // Bollinger Bands (SMA ± 2*std)
-  const upperBand = sma7.map((ma, i) => ma && rstd7[i] ? ma + 2 * rstd7[i] : null);
-  const lowerBand = sma7.map((ma, i) => ma && rstd7[i] ? ma - 2 * rstd7[i] : null);
+  const upperBand = sma7.map((ma, i) => ma && rstd7[i] ? ma + 2 * rstd7[i] : 0);
+  const lowerBand = sma7.map((ma, i) => ma && rstd7[i] ? ma - 2 * rstd7[i] : 0);
   
   // Current values (last non-NaN)
   const currentSMA7 = sma7.filter(v => !isNaN(v)).slice(-1)[0] || 0;

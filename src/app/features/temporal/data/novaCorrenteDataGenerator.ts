@@ -37,8 +37,8 @@ const NOVA_CORRENTE_SUPPLIERS: Supplier[] = [
   {
     id: 'furukawa',
     name: 'Furukawa Electric Brasil',
-    leadTime: 45,
-    leadTimeVariance: 8.5,
+    avgLeadTime: 45,
+    leadTimeStd: 8.5,
     reliability: 92.3,
     riskScore: 0.45,
     category: 'Cabos e Fibra Óptica',
@@ -49,8 +49,8 @@ const NOVA_CORRENTE_SUPPLIERS: Supplier[] = [
   {
     id: 'prysmian',
     name: 'Prysmian Telecom Cables',
-    leadTime: 38,
-    leadTimeVariance: 5.2,
+    avgLeadTime: 38,
+    leadTimeStd: 5.2,
     reliability: 95.8,
     riskScore: 0.28,
     category: 'Infraestrutura',
@@ -61,8 +61,8 @@ const NOVA_CORRENTE_SUPPLIERS: Supplier[] = [
   {
     id: 'commscope',
     name: 'CommScope Brasil',
-    leadTime: 52,
-    leadTimeVariance: 11.3,
+    avgLeadTime: 52,
+    leadTimeStd: 11.3,
     reliability: 89.2,
     riskScore: 0.62,
     category: 'Equipamentos Rede',
@@ -73,8 +73,8 @@ const NOVA_CORRENTE_SUPPLIERS: Supplier[] = [
   {
     id: 'huawei-brasil',
     name: 'Huawei Technologies Brasil',
-    leadTime: 60,
-    leadTimeVariance: 14.7,
+    avgLeadTime: 60,
+    leadTimeStd: 14.7,
     reliability: 87.1,
     riskScore: 0.73,
     category: '5G Equipment',
@@ -85,8 +85,8 @@ const NOVA_CORRENTE_SUPPLIERS: Supplier[] = [
   {
     id: 'ericsson-brasil',
     name: 'Ericsson do Brasil',
-    leadTime: 42,
-    leadTimeVariance: 4.8,
+    avgLeadTime: 42,
+    leadTimeStd: 4.8,
     reliability: 96.4,
     riskScore: 0.22,
     category: 'Core Network',
@@ -97,8 +97,8 @@ const NOVA_CORRENTE_SUPPLIERS: Supplier[] = [
   {
     id: 'nokia-brasil',
     name: 'Nokia Solutions Brasil',
-    leadTime: 48,
-    leadTimeVariance: 7.1,
+    avgLeadTime: 48,
+    leadTimeStd: 7.1,
     reliability: 94.2,
     riskScore: 0.35,
     category: 'RAN & Transport',
@@ -612,7 +612,7 @@ export function generateNovaCorrenteDataset(): GeneratedDataset {
   }));
   
   // Generate lead time data
-  const leadTimeData: { timestamp: string; supplierId: string; leadTime: number; material: string; }[] = [];
+  const leadTimeData: { timestamp: string; supplierId: string; avgLeadTime: number; material: string; }[] = [];
   NOVA_CORRENTE_SUPPLIERS.forEach(supplier => {
     supplier.materials.forEach(material => {
       for (let i = 0; i < config.duration; i += 7) { // Weekly sampling
@@ -625,7 +625,7 @@ export function generateNovaCorrenteDataset(): GeneratedDataset {
         leadTimeData.push({
           timestamp: dateStr,
           supplierId: supplier.id,
-          leadTime: Math.max(1, supplier.leadTime + leadTimeVariation),
+          avgLeadTime: Math.max(1, supplier.leadTime + leadTimeVariation),
           material
         });
       }
@@ -654,7 +654,7 @@ export function generateNovaCorrenteDataset(): GeneratedDataset {
   const transformedSuppliers = NOVA_CORRENTE_SUPPLIERS.map(supplier => ({
     id: supplier.id,
     name: supplier.name,
-    avgLeadTime: supplier.leadTime,
+    avgavgLeadTime: supplier.leadTime,
     leadTimeStd: supplier.leadTimeVariance,
     trend: Math.random() > 0.5 ? Math.floor(Math.random() * 5) : -Math.floor(Math.random() * 3), // Random trend for demo
     reliability: supplier.reliability / 100, // Convert to 0-1 range

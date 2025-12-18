@@ -263,7 +263,9 @@ export class CanvasOptimizer {
     (ctx as any).imageSmoothingEnabled = false;
     
     // Use willReadFrequently hint
-    ctx.getContextAttributes && (ctx as any).willReadFrequently;
+    if (ctx.getContextAttributes) {
+      (ctx as any).willReadFrequently = true;
+    }
   }
 
   /**
