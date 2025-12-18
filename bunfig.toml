@@ -14,8 +14,8 @@ frozenLockfile = false
 [run]
 # Use Bun's native bundler for faster builds
 bun = true
-# Shell
-shell = "sh"
+# Shell - Bun only supports 'bun' or 'system'
+shell = "system"
 # Silent mode for cleaner output
 silent = false
 
