@@ -116,19 +116,19 @@ export async function getConversationHistory(
   }
 
   try {
-    const thread = await langbaseClient.pipes.getThread(conversationId)
+    const thread = await langbaseClient.pipes.getThread(conversationId) as LangbaseThread
 
     return {
       threadId: conversationId,
-      messages: thread.messages.map((msg: any) => ({
+      messages: (thread.messages || []).map((msg) => ({
         id: msg.id,
         role: msg.role,
         content: msg.content,
         timestamp: msg.timestamp,
         sources: msg.sources,
       })),
-      createdAt: thread.createdAt,
-      updatedAt: thread.updatedAt,
+      createdAt: thread.createdAt || new Date().toISOString(),
+      updatedAt: thread.updatedAt || new Date().toISOString(),
     }
   } catch (error: any) {
     console.error('Get history error:', error)
