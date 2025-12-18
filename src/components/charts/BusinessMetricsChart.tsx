@@ -69,8 +69,9 @@ const BusinessMetricsChart: React.FC<BusinessMetricsChartProps> = memo(({ materi
       tier: item.tier_nivel,
       materials: item.material_count || 0,
       penalty: item.total_sla_penalty_brl || 0,
-      movements: item.total_movements || 0,
-      percentage: ((item.material_count || 0) / tierAnalytics.reduce((sum, t) => sum + (t.material_count || 0), 0) * 100).toFixed(1)
+      availability: item.avg_availability_target || 0,
+      downtime: item.avg_downtime_hours || 0,
+      risk: item.high_risk_count || 0,
     }));
   }, [tierAnalytics]);
 
@@ -233,19 +234,6 @@ const BusinessMetricsChart: React.FC<BusinessMetricsChartProps> = memo(({ materi
       </div>
     );
   };
-
-  // Memoize tier chart data
-  const tierChartData = useMemo(() => {
-    const validData = (tierAnalytics || []).filter(item => item && item.tier_nivel);
-    return validData.map((item) => ({
-      tier: item.tier_nivel,
-      materials: item.material_count || 0,
-      penalty: item.total_sla_penalty_brl || 0,
-      availability: item.avg_availability_target || 0,
-      downtime: item.avg_downtime_hours || 0,
-      risk: item.high_risk_count || 0,
-    }));
-  }, [tierAnalytics]);
 
   const renderTiersChart = () => {
     if (tierAnalytics.length === 0) {
