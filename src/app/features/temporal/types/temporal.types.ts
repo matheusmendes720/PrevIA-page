@@ -307,6 +307,9 @@ export interface Supplier {
   materials: string[];
   riskScore: number;
   performance: 'excellent' | 'good' | 'fair' | 'poor';
+  category?: string; // optional category
+  performanceScore?: number; // optional score
+  slaCompliance?: number; // optional SLA %
 }
 
 export interface ReorderPoint {

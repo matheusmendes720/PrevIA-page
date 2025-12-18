@@ -621,11 +621,11 @@ export function generateNovaCorrenteDataset(): GeneratedDataset {
         const dateStr = date.toISOString().split('T')[0];
         
         // Add variance to lead time
-        const leadTimeVariation = (Math.random() - 0.5) * 2 * supplier.leadTimeVariance;
+        const leadTimeVariation = (Math.random() - 0.5) * 2 * supplier.leadTimeStd;
         leadTimeData.push({
           timestamp: dateStr,
           supplierId: supplier.id,
-          avgLeadTime: Math.max(1, supplier.leadTime + leadTimeVariation),
+          leadTime: Math.max(1, supplier.avgLeadTime + leadTimeVariation),
           material
         });
       }
@@ -654,11 +654,11 @@ export function generateNovaCorrenteDataset(): GeneratedDataset {
   const transformedSuppliers = NOVA_CORRENTE_SUPPLIERS.map(supplier => ({
     id: supplier.id,
     name: supplier.name,
-    avgavgLeadTime: supplier.leadTime,
-    leadTimeStd: supplier.leadTimeVariance,
+    avgLeadTime: supplier.avgLeadTime,
+    leadTimeStd: supplier.leadTimeStd,
     trend: Math.random() > 0.5 ? Math.floor(Math.random() * 5) : -Math.floor(Math.random() * 3), // Random trend for demo
     reliability: supplier.reliability / 100, // Convert to 0-1 range
-    variance: (supplier.leadTimeVariance / supplier.leadTime) * 100,
+    variance: (supplier.leadTimeStd / supplier.avgLeadTime) * 100,
     backlog: Math.floor(Math.random() * 50),
     materials: supplier.materials,
     riskScore: supplier.riskScore,

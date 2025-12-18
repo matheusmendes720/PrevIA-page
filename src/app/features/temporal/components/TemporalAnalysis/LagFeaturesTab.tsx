@@ -32,7 +32,7 @@ export default function LagFeaturesTab() {
   
   // Calculate momentum (rate of change)
   const momentum7 = filteredData.values.map((val, i) => {
-    if (i < 7 || !filteredData.values[i - 7]) return null;
+    if (i < 7 || !filteredData.values[i - 7]) return 0;
     return ((val - filteredData.values[i - 7]) / filteredData.values[i - 7]) * 100;
   });
   
