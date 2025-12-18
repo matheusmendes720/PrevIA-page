@@ -51,6 +51,29 @@ const BusinessMetricsChart: React.FC<BusinessMetricsChartProps> = memo(({ materi
     fetchData();
   }, [materialId, addToast]);
 
+  // Memoize chart data BEFORE any early returns (Rules of Hooks)
+  const top5ChartData = useMemo(() => {
+    const validData = (top5Families || []).filter(item => item && (item.family_id || item.family_name));
+    return validData.map((item) => ({
+      name: item.family_name || `Família ${item.family_id}`,
+      movements: item.total_movements || 0,
+      percentage: item.percentage || 0,
+      materials: item.unique_materials || 0,
+      sites: item.unique_sites || 0,
+    }));
+  }, [top5Families]);
+
+  const tierChartData = useMemo(() => {
+    const validData = (tierAnalytics || []).filter(item => item && item.tier_nivel);
+    return validData.map((item) => ({
+      tier: item.tier_nivel,
+      materials: item.material_count || 0,
+      penalty: item.total_sla_penalty_brl || 0,
+      movements: item.total_movements || 0,
+      percentage: ((item.material_count || 0) / tierAnalytics.reduce((sum, t) => sum + (t.material_count || 0), 0) * 100).toFixed(1)
+    }));
+  }, [tierAnalytics]);
+
   if (loading) {
     return (
       <Card>
@@ -134,18 +157,6 @@ const BusinessMetricsChart: React.FC<BusinessMetricsChartProps> = memo(({ materi
       </Card>
     );
   }
-
-  // Memoize chart data to avoid recalculation on every render
-  const top5ChartData = useMemo(() => {
-    const validData = (top5Families || []).filter(item => item && (item.family_id || item.family_name));
-    return validData.map((item) => ({
-      name: item.family_name || `Família ${item.family_id}`,
-      movements: item.total_movements || 0,
-      percentage: item.percentage || 0,
-      materials: item.unique_materials || 0,
-      sites: item.unique_sites || 0,
-    }));
-  }, [top5Families]);
 
   const renderTop5Chart = () => {
     if (top5Families.length === 0) {

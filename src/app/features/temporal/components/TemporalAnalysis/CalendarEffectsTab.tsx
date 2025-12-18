@@ -279,7 +279,7 @@ export default function CalendarEffectsTab() {
             <p>
               Q4 HIGH SEASON ({highSeasonMonths.map(m => m.month).join(', ')}): Black Friday + Christmas = +110% MATERIAL_ELETRICO demand. {' '}
               Q1 LOW: Post-holiday -35% (Carnaval impact). {' '}
-              Volume discounts: Negotiate 15% discount with Huawei/Ericsson/Nokia for Q4 pre-orders >R$ 10M. {' '}
+              Volume discounts: Negotiate 15% discount with Huawei/Ericsson/Nokia for Q4 pre-orders &gt;R$ 10M. {' '}
               Rainy season (Nov-Apr): FERRO_E_AÇO +58%, logistics delays, increase safety stock 26d→42d.
             </p>
           </div>

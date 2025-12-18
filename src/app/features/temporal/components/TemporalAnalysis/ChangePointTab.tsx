@@ -224,10 +224,10 @@ export default function ChangePointTab() {
           <div className="insight-card">
             <strong>5G Rollout Regime Analysis (Nova Corrente):</strong>
             <p>
-              Regime 1 (Oct '23-Nov '23): Pre-5G baseline, 850 un/d MATERIAL_ELETRICO, stable suppliers. {' '}
-              Regime 2 (Dec '23-May '24): Phase 1 deployment capitais, +42% demand, Huawei/Ericsson ramping. {' '}
-              Regime 3 (Jun '24-Sep '24): ANATEL auction surge +145%, R$ 12.5M pre-orders, lead times critical. {' '}
-              Regime 4 (Oct '24+): Normalized 1450 un/d, mature 5G operations, suppliers adapted.
+              Regime 1 (Oct &apos;23-Nov &apos;23): Pre-5G baseline, 850 un/d MATERIAL_ELETRICO, stable suppliers. {' '}
+              Regime 2 (Dec &apos;23-May &apos;24): Phase 1 deployment capitais, +42% demand, Huawei/Ericsson ramping. {' '}
+              Regime 3 (Jun &apos;24-Sep &apos;24): ANATEL auction surge +145%, R$ 12.5M pre-orders, lead times critical. {' '}
+              Regime 4 (Oct &apos;24+): Normalized 1450 un/d, mature 5G operations, suppliers adapted.
             </p>
           </div>
           
