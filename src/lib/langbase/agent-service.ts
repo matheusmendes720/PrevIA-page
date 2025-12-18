@@ -43,6 +43,20 @@ interface LangbaseStreamChunk {
   done?: boolean;
 }
 
+interface LangbaseMessage {
+  id: string;
+  role: string;
+  content: string;
+  timestamp: string;
+  sources?: any[];
+}
+
+interface LangbaseThread {
+  messages: LangbaseMessage[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 // ============================================================================
 // Core Agent Operations
 // ============================================================================
@@ -150,7 +164,7 @@ export async function getConversationHistory(
 
     return {
       threadId: conversationId,
-      messages: (thread.messages || []).map((msg) => ({
+      messages: (thread.messages || []).map((msg: LangbaseMessage) => ({
         id: msg.id,
         role: msg.role,
         content: msg.content,
