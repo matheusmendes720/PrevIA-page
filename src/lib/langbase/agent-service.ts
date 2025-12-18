@@ -14,6 +14,36 @@ import type {
 } from './types'
 
 // ============================================================================
+// Langbase API Response Types
+// ============================================================================
+
+interface LangbaseUsage {
+  totalTokens?: number;
+  promptTokens?: number;
+  completionTokens?: number;
+}
+
+interface LangbaseSource {
+  title?: string;
+  content?: string;
+  score?: number;
+  metadata?: any;
+}
+
+interface LangbaseResult {
+  completion?: string;
+  usage?: LangbaseUsage;
+  sources?: LangbaseSource[];
+  model?: string;
+  finishReason?: string;
+}
+
+interface LangbaseStreamChunk {
+  completion?: string;
+  done?: boolean;
+}
+
+// ============================================================================
 // Core Agent Operations
 // ============================================================================
 
@@ -59,15 +89,15 @@ export async function runAgent(req: AgentRequest): Promise<AgentResponse> {
         userId: req.userId,
         timestamp: new Date().toISOString(),
       },
-    })
+    }) as LangbaseResult
 
     const processingTime = Date.now() - startTime
 
     return {
-      response: result.completion,
+      response: result.completion || '',
       conversationId: threadId,
-      tokensUsed: result.usage?.totalTokens,
-      sources: result.sources?.map((s: any) => ({
+      tokensUsed: result.usage?.totalTokens || 0,
+      sources: (result.sources || []).map((s) => ({
         title: s.title || 'Untitled',
         content: s.content || '',
         score: s.score || 0,
@@ -211,10 +241,10 @@ export async function* streamAgent(req: AgentRequest): AsyncGenerator<string> {
         userId: req.userId,
         timestamp: new Date().toISOString(),
       },
-    })
+    }) as AsyncIterable<LangbaseStreamChunk>
 
     for await (const chunk of stream) {
-      if (chunk.completion) {
+      if (chunk && chunk.completion) {
         yield chunk.completion
       }
     }
