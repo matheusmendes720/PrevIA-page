@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Corrente - Mapa Interativo de Telecomunicações</title>
+    
+    <!-- D3.js Libraries -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #003366 0%, #0066cc 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            background: #f8f9fa;
+            padding: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .control-group label {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .control-group select,
+        .control-group input {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .control-group select:focus,
+        .control-group input:focus {
+            border-color: #003366;
+        }
+        
+        #map-container {
+            padding: 30px;
+            background: white;
+        }
+        
+        #brazil-map {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .legend h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .tooltip h4 {
+            margin-bottom: 5px;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            padding-bottom: 5px;
+        }
+        
+        .tooltip p {
+            margin: 3px 0;
+            font-size: 13px;
+        }
+        
+        .stats-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #003366;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+            }
+            
+            .legend {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🇧🇷 Nova Corrente Telecom</h1>
+            <p>Mapa Interativo de Infraestrutura Brasileira</p>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="metric-select">Métrica:</label>
+                <select id="metric-select">
+                    <option value="subscribers">Assinantes</option>
+                    <option value="penetration">Penetração</option>
+                    <option value="towers">Torres de Celular</option>
+                    <option value="coverage">Cobertura 5G</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="year-select">Ano:</label>
+                <input type="range" id="year-select" min="2020" max="2024" value="2024" step="1">
+                <span id="year-display">2024</span>
+            </div>
+            
+            <div class="control-group">
+                <label>
+                    <input type="checkbox" id="show-tooltips"> Mostrar Tooltips
+                </label>
+            </div>
+        </div>
+        
+        <div id="map-container">
+            <div class="loading" id="loading">Carregando mapa...</div>
+            <svg id="brazil-map"></svg>
+            <div class="legend">
+                <h3>Legenda</h3>
+                <div id="legend-items"></div>
+            </div>
+            <div class="tooltip" id="tooltip"></div>
+        </div>
+        
+        <div class="stats-panel">
+            <div class="stats-grid" id="stats-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const config = {
+            width: 1000,
+            height: 1000,
+            projectionType: 'mercator'
+        };
+        
+        // Initialize SVG
+        const svg = d3.select('#brazil-map')
+            .attr('width', config.width)
+            .attr('height', config.height);
+        
+        // Tooltip element
+        const tooltip = d3.select('#tooltip');
+        
+        // Sample Brazilian telecom data by state
+        const telecomData = {
+            "Acre": { subscribers: 850, penetration: 72, towers: 450, coverage: 55 },
+            "Alagoas": { subscribers: 1200, penetration: 68, towers: 680, coverage: 48 },
+            "Amapá": { subscribers: 420, penetration: 75, towers: 230, coverage: 62 },
+            "Amazonas": { subscribers: 2100, penetration: 60, towers: 1100, coverage: 45 },
+            "Bahia": { subscribers: 5500, penetration: 72, towers: 3200, coverage: 58 },
+            "Ceará": { subscribers: 3800, penetration: 75, towers: 2100, coverage: 65 },
+            "Distrito Federal": { subscribers: 2100, penetration: 85, towers: 950, coverage: 90 },
+            "Espírito Santo": { subscribers: 1800, penetration: 78, towers: 980, coverage: 72 },
+            "Goiás": { subscribers: 3200, penetration: 70, towers: 1800, coverage: 68 },
+            "Maranhão": { subscribers: 3400, penetration: 68, towers: 1900, coverage: 52 },
+            "Mato Grosso": { subscribers: 1800, penetration: 65, towers: 1000, coverage: 58 },
+            "Mato Grosso do Sul": { subscribers: 1200, penetration: 72, towers: 680, coverage: 65 },
+            "Minas Gerais": { subscribers: 8500, penetration: 75, towers: 4800, coverage: 70 },
+            "Pará": { subscribers: 3800, penetration: 62, towers: 2100, coverage: 48 },
+            "Paraíba": { subscribers: 1800, penetration: 70, towers: 1000, coverage: 62 },
+            "Paraná": { subscribers: 5200, penetration: 78, towers: 2900, coverage: 75 },
+            "Pernambuco": { subscribers: 4800, penetration: 72, towers: 2700, coverage: 68 },
+            "Piauí": { subscribers: 1600, penetration: 65, towers: 900, coverage: 55 },
+            "Rio de Janeiro": { subscribers: 8200, penetration: 82, towers: 4500, coverage: 85 },
+            "Rio Grande do Norte": { subscribers: 1800, penetration: 70, towers: 1000, coverage: 65 },
+            "Rio Grande do Sul": { subscribers: 5200, penetration: 80, towers: 2900, coverage: 78 },
+            "Rondônia": { subscribers: 950, penetration: 68, towers: 520, coverage: 58 },
+            "Roraima": { subscribers: 320, penetration: 72, towers: 180, coverage: 65 },
+            "Santa Catarina": { subscribers: 3800, penetration: 82, towers: 2100, coverage: 80 },
+            "São Paulo": { subscribers: 18500, penetration: 88, towers: 10200, coverage: 92 },
+            "Sergipe": { subscribers: 1200, penetration: 68, towers: 680, coverage: 62 },
+            "Tocantins": { subscribers: 850, penetration: 65, towers: 480, coverage: 58 }
+        };
+        
+        // Color scales
+        const colorScales = {
+            subscribers: d3.scaleThreshold()
+                .domain([500, 2000, 5000, 10000])
+                .range(['#f7fcf5', '#c2e699', '#78c679', '#238443', '#0e4c27']),
+            penetration: d3.scaleLinear()
+                .domain([50, 65, 75, 85, 95])
+                .range(['#fee5d9', '#fcae91', '#fb6a4a', '#de2d26', '#a50f15']),
+            towers: d3.scaleThreshold()
+                .domain([300, 1000, 3000, 6000])
+                .range(['#e3f2fd', '#90caf9', '#42a5f5', '#1e88e5', '#0d47a1']),
+            coverage: d3.scaleLinear()
+                .domain([0, 30, 50, 70, 85, 100])
+                .range(['#fff5eb', '#fee6ce', '#fdae6b', '#e6550d', '#a63603', '#7f2704'])
+        };
+        
+        // Load and render map
+        async function loadMap() {
+            try {
+                // Using a simplified GeoJSON for Brazilian states
+                // In production, load from: https://github.com/codeforamerica/click_that_hood
+                const brazilGeoJson = await fetch('https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.json')
+                    .then(res => res.json())
+                    .catch(() => {
+                        // Fallback to manual coordinates if fetch fails
+                        return getBrazilStatesGeoJSON();
+                    });
+                
+                document.getElementById('loading').style.display = 'none';
+                
+                // Create projection
+                const projection = d3.geoMercator()
+                    .fitSize([config.width, config.height], topojson.feature(brazilGeoJson, brazilGeoJson.objects.states));
+                
+                // Create path generator
+                const path = d3.geoPath().projection(projection);
+                
+                // Draw states
+                const states = svg.append('g')
+                    .selectAll('path')
+                    .data(topojson.feature(brazilGeoJson, brazilGeoJson.objects.states).features)
+                    .enter()
+                    .append('path')
+                    .attr('d', path)
+                    .attr('fill', d => {
+                        const stateName = d.properties.name;
+                        const data = telecomData[stateName] || {};
+                        const metric = document.getElementById('metric-select').value;
+                        const value = data[metric] || 0;
+                        return colorScales[metric](value);
+                    })
+                    .attr('stroke', '#333')
+                    .attr('stroke-width', 0.5)
+                    .attr('class', 'state-path')
+                    .on('mouseover', function(event, d) {
+                        const stateName = d.properties.name;
+                        const data = telecomData[stateName] || {};
+                        
+                        // Highlight state
+                        d3.select(this)
+                            .attr('stroke', '#ff6b6b')
+                            .attr('stroke-width', 2);
+                        
+                        // Show tooltip
+                        const showTooltips = document.getElementById('show-tooltips').checked;
+                        if (showTooltips) {
+                            showTooltip(event, stateName, data);
+                        }
+                    })
+                    .on('mouseout', function(event, d) {
+                        // Reset highlight
+                        d3.select(this)
+                            .attr('stroke', '#333')
+                            .attr('stroke-width', 0.5);
+                        
+                        // Hide tooltip
+                        hideTooltip();
+                    })
+                    .on('click', function(event, d) {
+                        const stateName = d.properties.name;
+                        const data = telecomData[stateName] || {};
+                        
+                        // Update stats
+                        updateStats(stateName, data);
+                    });
+                
+                // Update legend
+                updateLegend(document.getElementById('metric-select').value);
+                
+                // Update stats with overall metrics
+                updateOverallStats();
+                
+            } catch (error) {
+                console.error('Error loading map:', error);
+                document.getElementById('loading').textContent = 'Erro ao carregar mapa. Verifique sua conexão.';
+            }
+        }
+        
+        // Show tooltip
+        function showTooltip(event, stateName, data) {
+            const metric = document.getElementById('metric-select').value;
+            const metricLabels = {
+                subscribers: 'Assinantes (mil)',
+                penetration: 'Penetração (%)',
+                towers: 'Torres',
+                coverage: 'Cobertura 5G (%)'
+            };
+            
+            tooltip
+                .html(`
+                    <h4>${stateName}</h4>
+                    <p><strong>${metricLabels[metric]}:</strong> ${data[metric] || 0}</p>
+                    <p><strong>Assinantes:</strong> ${data.subscribers || 0} mil</p>
+                    <p><strong>Penetração:</strong> ${data.penetration || 0}%</p>
+                    <p><strong>Torres:</strong> ${data.towers || 0}</p>
+                    <p><strong>5G:</strong> ${data.coverage || 0}%</p>
+                `)
+                .style('left', (event.pageX + 10) + 'px')
+                .style('top', (event.pageY - 10) + 'px')
+                .style('opacity', 1);
+        }
+        
+        // Hide tooltip
+        function hideTooltip() {
+            tooltip.style('opacity', 0);
+        }
+        
+        // Update legend
+        function updateLegend(metric) {
+            const legendItems = document.getElementById('legend-items');
+            legendItems.innerHTML = '';
+            
+            const labels = {
+                subscribers: ['< 500', '500-2K', '2K-5K', '5K-10K', '> 10K'],
+                penetration: ['0-50%', '50-65%', '65-75%', '75-85%', '85-95%'],
+                towers: ['< 300', '300-1K', '1K-3K', '3K-6K', '> 6K'],
+                coverage: ['0-30%', '30-50%', '50-70%', '70-85%', '85-100%']
+            };
+            
+            const colors = colorScales[metric].range();
+            
+            labels[metric].forEach((label, i) => {
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+                item.innerHTML = `
+                    <div class="legend-color" style="background-color: ${colors[i]}"></div>
+                    <span style="font-size: 12px;">${label}</span>
+                `;
+                legendItems.appendChild(item);
+            });
+        }
+        
+        // Update stats for clicked state
+        function updateStats(stateName, data) {
+            const statsGrid = document.getElementById('stats-grid');
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${stateName}</div>
+                    <div class="stat-label">Estado Selecionado</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.subscribers || 0}</div>
+                    <div class="stat-label">Assinantes (mil)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.penetration || 0}%</div>
+                    <div class="stat-label">Penetração</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.towers || 0}</div>
+                    <div class="stat-label">Torres</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.coverage || 0}%</div>
+                    <div class="stat-label">Cobertura 5G</div>
+                </div>
+            `;
+        }
+        
+        // Update overall stats
+        function updateOverallStats() {
+            const totals = Object.values(telecomData).reduce((acc, data) => ({
+                subscribers: acc.subscribers + (data.subscribers || 0),
+                towers: acc.towers + (data.towers || 0),
+                penetration: (acc.penetration + (data.penetration || 0)) / (Object.keys(telecomData).length + 1)
+            }), { subscribers: 0, towers: 0, penetration: 0 });
+            
+            const statsGrid = document.getElementById('stats-grid');
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${totals.subscribers.toFixed(0)}</div>
+                    <div class="stat-label">Total Assinantes (mil)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${totals.towers}</div>
+                    <div class="stat-label">Total Torres</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${totals.penetration.toFixed(1)}%</div>
+                    <div class="stat-label">Penetração Média</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">27</div>
+                    <div class="stat-label">Estados</div>
+                </div>
+            `;
+        }
+        
+        // Event listeners
+        document.getElementById('metric-select').addEventListener('change', function() {
+            loadMap();
+        });
+        
+        document.getElementById('year-select').addEventListener('input', function() {
+            document.getElementById('year-display').textContent = this.value;
+            // In production, update map data based on year
+        });
+        
+        // Fallback GeoJSON if external fetch fails
+        function getBrazilStatesGeoJSON() {
+            // Simplified Brazilian states GeoJSON
+            // In production, use the actual TopoJSON from the source
+            return {
+                type: "Topology",
+                objects: {
+                    states: {
+                        type: "GeometryCollection",
+                        geometries: []
+                    }
+                }
+            };
+        }
+        
+        // Initialize
+        loadMap();
+    </script>
+</body>
+</html>
+

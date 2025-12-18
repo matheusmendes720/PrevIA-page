@@ -1,0 +1,52 @@
+# Bun configuration for faster development and builds
+[install]
+# Use faster install strategy
+auto = true
+# Cache dependencies for faster installs
+cache = true
+# Use production dependencies for faster installs
+production = false
+# Optional peer dependencies
+optional = true
+# Frozen lockfile
+frozenLockfile = false
+
+[run]
+# Use Bun's native bundler for faster builds
+bun = true
+# Shell
+shell = "sh"
+# Silent mode for cleaner output
+silent = false
+
+# Build optimizations
+[build]
+# Enable minification
+minify = true
+# Enable source maps in development
+sourcemap = "external"
+# Target environment
+target = "browser"
+# Enable code splitting
+splitting = true
+# Output format
+format = "esm"
+
+# Development optimizations
+[dev]
+# Hot module reloading
+hmr = true
+# Watch mode
+watch = true
+
+# Performance tuning
+[loader]
+# Optimize loader for TypeScript
+".ts" = "tsx"
+".tsx" = "tsx"
+".js" = "jsx"
+".jsx" = "jsx"
+
+
+
+

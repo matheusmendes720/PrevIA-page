@@ -1,0 +1,4 @@
+# Netlify redirects for Next.js
+/ /main 200
+/features/* /features/:splat 200
+/* /index.html 200

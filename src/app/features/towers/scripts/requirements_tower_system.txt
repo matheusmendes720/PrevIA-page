@@ -1,0 +1,51 @@
+# Tower Location System - Complete Requirements
+# Install with: pip install -r scripts/requirements_tower_system.txt
+
+# Core Dependencies
+pandas>=1.5.0
+numpy>=1.23.0
+requests>=2.28.0
+
+# Data Processing
+openpyxl>=3.0.0  # Excel export
+pyarrow>=10.0.0  # Parquet support
+fastparquet>=2022.0.0  # Alternative Parquet engine
+
+# Spatial & Geographic
+geopy>=2.3.0  # Geocoding and distance calculations
+rtree>=1.0.0  # Spatial indexing (requires libspatialindex)
+shapely>=2.0.0  # Geometric operations
+
+# Visualization
+folium>=0.14.0  # Interactive maps
+matplotlib>=3.6.0  # Charts
+seaborn>=0.12.0  # Statistical plots
+
+# Reporting
+reportlab>=3.6.0  # PDF generation
+
+# Large Dataset Processing
+dask>=2023.0.0  # Parallel processing for large datasets
+dask[dataframe]>=2023.0.0
+
+# Database
+sqlalchemy>=2.0.0  # Database support
+pytables>=3.8.0  # HDF5 support
+
+# Web & API
+flask>=2.3.0  # REST API
+flask-cors>=4.0.0  # CORS support
+
+# Utilities
+python-dotenv>=1.0.0  # Environment variables
+tqdm>=4.65.0  # Progress bars
+
+# Optional but Recommended
+beautifulsoup4>=4.11.0  # Web scraping
+lxml>=4.9.0  # XML/HTML parsing
+psutil>=5.9.0  # System monitoring
+
+# Development & Testing
+pytest>=7.4.0  # Testing framework
+pytest-cov>=4.1.0  # Coverage reporting
+

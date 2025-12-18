@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Corrente - Enhanced Brazil Telecom Map</title>
+    
+    <!-- D3.js Libraries -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0a192f 0%, #172a45 100%);
+            min-height: 100vh;
+            padding: 0;
+            color: #ccd6f6;
+        }
+        
+        .container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #003366 0%, #0066cc 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .header-left h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .header-left p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 300px;
+            background: #112240;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid rgba(100, 255, 218, 0.1);
+        }
+        
+        .sidebar h3 {
+            color: #64ffda;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .filter-group {
+            margin-bottom: 20px;
+        }
+        
+        .filter-group label {
+            display: block;
+            color: #8892b0;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+        
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+            padding: 8px 12px;
+            background: #172a45;
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            border-radius: 6px;
+            color: #ccd6f6;
+            font-size: 14px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+        
+        .map-container {
+            flex: 1;
+            position: relative;
+            background: #0a192f;
+        }
+        
+        #map-svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(17, 34, 64, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            min-width: 150px;
+        }
+        
+        .legend h4 {
+            color: #64ffda;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            border-radius: 3px;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(10, 25, 47, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #64ffda;
+            font-size: 13px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            max-width: 300px;
+            z-index: 1000;
+        }
+        
+        .tooltip h4 {
+            color: #64ffda;
+            margin-bottom: 8px;
+            border-bottom: 1px solid rgba(100, 255, 218, 0.3);
+            padding-bottom: 5px;
+        }
+        
+        .tooltip-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 4px 0;
+        }
+        
+        .tooltip-label {
+            color: #8892b0;
+        }
+        
+        .tooltip-value {
+            font-weight: 600;
+            color: #ccd6f6;
+        }
+        
+        .stats-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(17, 34, 64, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid rgba(100, 255, 218, 0.2);
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #64ffda;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #8892b0;
+        }
+        
+        .tower-marker {
+            fill: #64ffda;
+            stroke: #0a192f;
+            stroke-width: 1;
+            opacity: 0.7;
+            cursor: pointer;
+        }
+        
+        .tower-marker:hover {
+            opacity: 1;
+            stroke: #64ffda;
+            stroke-width: 2;
+        }
+        
+        .coastline {
+            stroke: #64ffda;
+            stroke-width: 2;
+            stroke-dasharray: 5,5;
+            fill: none;
+            opacity: 0.3;
+        }
+        
+        .salvador-highlight {
+            fill: #64ffda;
+            opacity: 0.2;
+            stroke: #64ffda;
+            stroke-width: 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <h1>🇧🇷 Nova Corrente - Enhanced Geographic Analytics</h1>
+                <p>Interactive Brazil Telecom Infrastructure Map with 18,000+ Towers</p>
+            </div>
+            <div class="header-right">
+                <span>Total Towers: <strong>18,000+</strong></span>
+                <span>5G Coverage: <strong>63.61%</strong></span>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <!-- Sidebar with filters -->
+            <div class="sidebar">
+                <h3>🗺️ Map Filters</h3>
+                
+                <div class="filter-group">
+                    <label>View Mode:</label>
+                    <select id="view-mode">
+                        <option value="demand">Demand Heatmap</option>
+                        <option value="climate">Climate Risk</option>
+                        <option value="5g">5G Coverage</option>
+                        <option value="clients">Client Distribution</option>
+                        <option value="corrosion">Corrosion Risk</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Client Filter:</label>
+                    <select id="client-filter">
+                        <option value="all">All Clients</option>
+                        <option value="vivo">Vivo (32%)</option>
+                        <option value="claro">Claro (27%)</option>
+                        <option value="tim">TIM (20%)</option>
+                        <option value="ihs">IHS Towers (21%)</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Technology:</label>
+                    <select id="tech-filter">
+                        <option value="all">All Technologies</option>
+                        <option value="5g">5G Only</option>
+                        <option value="4g">4G Only</option>
+                        <option value="legacy">Legacy</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Alert Level:</label>
+                    <select id="alert-filter">
+                        <option value="all">All Alerts</option>
+                        <option value="critical">Critical Only</option>
+                        <option value="warning">Warning Only</option>
+                        <option value="normal">Normal</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="show-towers" checked>
+                        <label for="show-towers">Show Tower Markers</label>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="show-coast" checked>
+                        <label for="show-coast">Highlight Coastal Regions</label>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="show-salvador" checked>
+                        <label for="show-salvador">Highlight Salvador (BA)</label>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="show-5g-overlay">
+                        <label for="show-5g-overlay">Show 5G Coverage Overlay</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Map container -->
+            <div class="map-container">
+                <svg id="map-svg"></svg>
+                <div class="tooltip" id="tooltip"></div>
+                <div class="legend" id="legend"></div>
+                <div class="stats-bar" id="stats-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const config = {
+            width: window.innerWidth - 300,
+            height: window.innerHeight - 120,
+            projectionType: 'mercator'
+        };
+        
+        // Initialize SVG
+        const svg = d3.select('#map-svg')
+            .attr('width', config.width)
+            .attr('height', config.height);
+        
+        const tooltip = d3.select('#tooltip');
+        
+        // Enhanced regional data with Nova Corrente specific features
+        const enhancedTelecomData = {
+            "Southeast": {
+                towers: 7200,
+                subscribers: 45000,
+                penetration: 82,
+                coverage: 72,
+                avg_humidity: 68,
+                avg_temp: 22.5,
+                corrosion_risk: 25,
+                has_coastal: true,
+                clients: {vivo: 1440, claro: 1944, tim: 1440, ihs: 2376},
+                tech: {5g: 3600, 4g: 2520, legacy: 1080}
+            },
+            "Northeast": {
+                towers: 4500,
+                subscribers: 27000,
+                penetration: 70,
+                coverage: 58,
+                avg_humidity: 78,
+                avg_temp: 26.8,
+                corrosion_risk: 65,
+                has_coastal: true,
+                clients: {vivo: 1440, claro: 1215, tim: 900, ihs: 945},
+                tech: {5g: 1800, 4g: 1800, legacy: 900},
+                salvador_focus: true
+            },
+            "South": {
+                towers: 2700,
+                subscribers: 15600,
+                penetration: 80,
+                coverage: 75,
+                avg_humidity: 72,
+                avg_temp: 18.5,
+                corrosion_risk: 30,
+                has_coastal: true,
+                clients: {vivo: 864, claro: 729, tim: 540, ihs: 567},
+                tech: {5g: 1350, 4g: 1080, legacy: 270}
+            },
+            "Central-West": {
+                towers: 1800,
+                subscribers: 10800,
+                penetration: 68,
+                coverage: 62,
+                avg_humidity: 65,
+                avg_temp: 25.2,
+                corrosion_risk: 20,
+                has_coastal: false,
+                clients: {vivo: 576, claro: 486, tim: 360, ihs: 378},
+                tech: {5g: 720, 4g: 900, legacy: 180}
+            },
+            "North": {
+                towers: 1800,
+                subscribers: 9600,
+                penetration: 64,
+                coverage: 52,
+                avg_humidity: 82,
+                avg_temp: 27.5,
+                corrosion_risk: 45,
+                has_coastal: true,
+                clients: {vivo: 576, claro: 486, tim: 360, ihs: 378},
+                tech: {5g: 540, 4g: 1080, legacy: 180}
+            }
+        };
+        
+        // Color scales for different view modes
+        const colorScales = {
+            demand: d3.scaleLinear()
+                .domain([0, 500, 1000, 2000, 5000])
+                .range(['#0a192f', '#1e3a5f', '#3d5a80', '#64a3d1', '#64ffda']),
+            climate: d3.scaleLinear()
+                .domain([20, 40, 60, 80, 100])
+                .range(['#238443', '#78c679', '#c2e699', '#fee08b', '#e6550d']),
+            "5g": d3.scaleLinear()
+                .domain([0, 30, 50, 70, 85, 100])
+                .range(['#0a192f', '#1e3a5f', '#3d5a80', '#64a3d1', '#64ffda', '#00ff88']),
+            clients: d3.scaleOrdinal()
+                .domain(['vivo', 'claro', 'tim', 'ihs', 'other'])
+                .range(['#00BFA5', '#FFC107', '#2196F3', '#9C27B0', '#757575']),
+            corrosion: d3.scaleLinear()
+                .domain([0, 20, 40, 60, 80, 100])
+                .range(['#238443', '#78c679', '#c2e699', '#fee08b', '#fdae6b', '#f46d43'])
+        };
+        
+        // Simulate tower coordinates (in production, load from OpenCellID or internal DB)
+        function generateTowerCoordinates(region, count) {
+            const regionBounds = {
+                'Southeast': {minLat: -25, maxLat: -19, minLon: -50, maxLon: -39},
+                'Northeast': {minLat: -18, maxLat: -2, minLon: -46, maxLon: -34},
+                'South': {minLat: -34, maxLat: -26, minLon: -58, maxLon: -48},
+                'Central-West': {minLat: -21, maxLat: -14, minLon: -62, maxLon: -47},
+                'North': {minLat: 5, maxLat: -2, minLon: -73, maxLon: -44}
+            };
+            
+            const bounds = regionBounds[region] || regionBounds['Southeast'];
+            const towers = [];
+            
+            for (let i = 0; i < count; i++) {
+                towers.push({
+                    lat: bounds.minLat + Math.random() * (bounds.maxLat - bounds.minLat),
+                    lon: bounds.minLon + Math.random() * (bounds.maxLon - bounds.minLon),
+                    region: region,
+                    alert: ['critical', 'warning', 'normal'][Math.floor(Math.random() * 3)]
+                });
+            }
+            
+            return towers;
+        }
+        
+        // Load and render enhanced map
+        async function loadEnhancedMap() {
+            try {
+                const brazilGeoJson = await fetch('https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.json')
+                    .then(res => res.json())
+                    .catch(() => getFallbackGeoJSON());
+                
+                // Create projection
+                const projection = d3.geoMercator()
+                    .fitSize([config.width, config.height], topojson.feature(brazilGeoJson, brazilGeoJson.objects.states));
+                
+                const path = d3.geoPath().projection(projection);
+                
+                // Draw states with regional coloring
+                const states = svg.append('g')
+                    .attr('id', 'states-layer')
+                    .selectAll('path')
+                    .data(topojson.feature(brazilGeoJson, brazilGeoJson.objects.states).features)
+                    .enter()
+                    .append('path')
+                    .attr('d', path)
+                    .attr('fill', d => {
+                        const stateName = d.properties.name;
+                        const region = getRegionForState(stateName);
+                        const data = enhancedTelecomData[region] || enhancedTelecomData['Southeast'];
+                        const viewMode = document.getElementById('view-mode').value;
+                        
+                        if (viewMode === 'demand') {
+                            return colorScales.demand(data.towers);
+                        } else if (viewMode === 'climate') {
+                            return colorScales.climate(data.corrosion_risk);
+                        } else if (viewMode === '5g') {
+                            return colorScales["5g"](data.coverage);
+                        } else if (viewMode === 'corrosion') {
+                            return colorScales.corrosion(data.corrosion_risk);
+                        }
+                        return colorScales.demand(data.towers);
+                    })
+                    .attr('stroke', '#8892b0')
+                    .attr('stroke-width', 0.8)
+                    .on('mouseover', function(event, d) {
+                        d3.select(this).attr('stroke', '#64ffda').attr('stroke-width', 2);
+                        const stateName = d.properties.name;
+                        const region = getRegionForState(stateName);
+                        const data = enhancedTelecomData[region] || enhancedTelecomData['Southeast'];
+                        showEnhancedTooltip(event, stateName, region, data);
+                    })
+                    .on('mouseout', function() {
+                        d3.select(this).attr('stroke', '#8892b0').attr('stroke-width', 0.8);
+                        hideTooltip();
+                    })
+                    .on('click', function(event, d) {
+                        const stateName = d.properties.name;
+                        const region = getRegionForState(stateName);
+                        const data = enhancedTelecomData[region] || enhancedTelecomData['Southeast'];
+                        updateStatsPanel(stateName, region, data);
+                    });
+                
+                // Add tower markers if enabled
+                addTowerMarkers(projection);
+                
+                // Add Salvador highlight if enabled
+                addSalvadorHighlight(projection);
+                
+                // Update legend
+                updateEnhancedLegend();
+                
+                // Update stats
+                updateOverallStatsPanel();
+                
+            } catch (error) {
+                console.error('Error loading map:', error);
+            }
+        }
+        
+        function addTowerMarkers(projection) {
+            if (!document.getElementById('show-towers').checked) return;
+            
+            const towersLayer = svg.append('g').attr('id', 'towers-layer');
+            
+            Object.entries(enhancedTelecomData).forEach(([region, data]) => {
+                const towers = generateTowerCoordinates(region, Math.floor(data.towers / 100));
+                
+                towersLayer.selectAll(`.tower-${region}`)
+                    .data(towers)
+                    .enter()
+                    .append('circle')
+                    .attr('class', 'tower-marker')
+                    .attr('cx', d => projection([d.lon, d.lat])[0])
+                    .attr('cy', d => projection([d.lon, d.lat])[1])
+                    .attr('r', 2)
+                    .on('mouseover', function(event, d) {
+                        d3.select(this).attr('r', 4);
+                    })
+                    .on('mouseout', function() {
+                        d3.select(this).attr('r', 2);
+                    });
+            });
+        }
+        
+        function addSalvadorHighlight(projection) {
+            if (!document.getElementById('show-salvador').checked) return;
+            
+            // Approximate Salvador coordinates
+            const salvadorCoords = projection([-38.48, -12.97]);
+            
+            svg.append('circle')
+                .attr('class', 'salvador-highlight')
+                .attr('cx', salvadorCoords[0])
+                .attr('cy', salvadorCoords[1])
+                .attr('r', 30);
+                
+            svg.append('text')
+                .attr('x', salvadorCoords[0])
+                .attr('y', salvadorCoords[1] - 35)
+                .attr('text-anchor', 'middle')
+                .attr('fill', '#64ffda')
+                .attr('font-size', '12px')
+                .attr('font-weight', 'bold')
+                .text('Salvador (BA)');
+        }
+        
+        function getRegionForState(stateName) {
+            const southeast = ['Rio de Janeiro', 'São Paulo', 'Minas Gerais', 'Espírito Santo'];
+            const northeast = ['Bahia', 'Pernambuco', 'Ceará', 'Maranhão', 'Paraíba', 'Alagoas', 'Sergipe', 'Piauí', 'Rio Grande do Norte'];
+            const south = ['Paraná', 'Santa Catarina', 'Rio Grande do Sul'];
+            const centralWest = ['Mato Grosso', 'Mato Grosso do Sul', 'Goiás', 'Distrito Federal'];
+            const north = ['Amazonas', 'Pará', 'Acre', 'Rondônia', 'Roraima', 'Amapá', 'Tocantins'];
+            
+            if (southeast.includes(stateName)) return 'Southeast';
+            if (northeast.includes(stateName)) return 'Northeast';
+            if (south.includes(stateName)) return 'South';
+            if (centralWest.includes(stateName)) return 'Central-West';
+            if (north.includes(stateName)) return 'North';
+            return 'Southeast';
+        }
+        
+        function showEnhancedTooltip(event, stateName, region, data) {
+            const viewMode = document.getElementById('view-mode').value;
+            
+            let tooltipContent = `<h4>${stateName} (${region})</h4>`;
+            
+            if (viewMode === 'demand') {
+                tooltipContent += `
+                    <div class="tooltip-row"><span class="tooltip-label">Towers:</span><span class="tooltip-value">${data.towers}</span></div>
+                    <div class="tooltip-row"><span class="tooltip-label">Subscribers:</span><span class="tooltip-value">${data.subscribers.toLocaleString()}</span></div>
+                `;
+            } else if (viewMode === 'climate') {
+                tooltipContent += `
+                    <div class="tooltip-row"><span class="tooltip-label">Avg Temp:</span><span class="tooltip-value">${data.avg_temp}°C</span></div>
+                    <div class="tooltip-row"><span class="tooltip-label">Avg Humidity:</span><span class="tooltip-value">${data.avg_humidity}%</span></div>
+                    <div class="tooltip-row"><span class="tooltip-label">Corrosion Risk:</span><span class="tooltip-value">${data.corrosion_risk}%</span></div>
+                `;
+            } else if (viewMode === '5g') {
+                tooltipContent += `
+                    <div class="tooltip-row"><span class="tooltip-label">5G Coverage:</span><span class="tooltip-value">${data.coverage}%</span></div>
+                    <div class="tooltip-row"><span class="tooltip-label">5G Towers:</span><span class="tooltip-value">${data.tech['5g']}</span></div>
+                `;
+            }
+            
+            tooltipContent += `
+                <div class="tooltip-row"><span class="tooltip-label">5G Penetration:</span><span class="tooltip-value">${data.penetration}%</span></div>
+                <div class="tooltip-row"><span class="tooltip-label">Clients:</span><span class="tooltip-value">Vivo/Claro/TIM/IHS</span></div>
+            `;
+            
+            tooltip
+                .html(tooltipContent)
+                .style('left', (event.pageX + 10) + 'px')
+                .style('top', (event.pageY - 10) + 'px')
+                .style('opacity', 1);
+        }
+        
+        function hideTooltip() {
+            tooltip.style('opacity', 0);
+        }
+        
+        function updateEnhancedLegend() {
+            const legend = document.getElementById('legend');
+            const viewMode = document.getElementById('view-mode').value;
+            
+            const legends = {
+                demand: [
+                    {color: '#0a192f', label: '0 towers'},
+                    {color: '#1e3a5f', label: '500'},
+                    {color: '#3d5a80', label: '1,000'},
+                    {color: '#64a3d1', label: '2,000'},
+                    {color: '#64ffda', label: '5,000+'}
+                ],
+                climate: [
+                    {color: '#238443', label: 'Low (0-20%)'},
+                    {color: '#78c679', label: 'Moderate (20-40%)'},
+                    {color: '#c2e699', label: 'Medium (40-60%)'},
+                    {color: '#fee08b', label: 'High (60-80%)'},
+                    {color: '#e6550d', label: 'Very High (80-100%)'}
+                ],
+                "5g": [
+                    {color: '#0a192f', label: '0%'},
+                    {color: '#1e3a5f', label: '30%'},
+                    {color: '#3d5a80', label: '50%'},
+                    {color: '#64a3d1', label: '70%'},
+                    {color: '#64ffda', label: '85%+'}
+                ],
+                corrosion: [
+                    {color: '#238443', label: 'Very Low'},
+                    {color: '#78c679', label: 'Low'},
+                    {color: '#c2e699', label: 'Medium'},
+                    {color: '#fee08b', label: 'High'},
+                    {color: '#fdae6b', label: 'Very High'},
+                    {color: '#f46d43', label: 'Critical'}
+                ]
+            };
+            
+            const legendData = legends[viewMode] || legends.demand;
+            
+            legend.innerHTML = `
+                <h4>${viewMode.charAt(0).toUpperCase() + viewMode.slice(1)} Legend</h4>
+                ${legendData.map(item => `
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: ${item.color}"></div>
+                        <span>${item.label}</span>
+                    </div>
+                `).join('')}
+            `;
+        }
+        
+        function updateStatsPanel(stateName, region, data) {
+            const statsBar = document.getElementById('stats-bar');
+            statsBar.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-value">${stateName}</div>
+                    <div class="stat-label">Selected State</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${data.towers}</div>
+                    <div class="stat-label">Towers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${data.coverage}%</div>
+                    <div class="stat-label">5G Coverage</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${data.avg_humidity}%</div>
+                    <div class="stat-label">Avg Humidity</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${data.corrosion_risk}%</div>
+                    <div class="stat-label">Corrosion Risk</div>
+                </div>
+            `;
+        }
+        
+        function updateOverallStatsPanel() {
+            const totals = Object.values(enhancedTelecomData).reduce((acc, data) => ({
+                towers: acc.towers + data.towers,
+                subscribers: acc.subscribers + data.subscribers,
+                avg_coverage: acc.avg_coverage + (data.coverage / Object.keys(enhancedTelecomData).length)
+            }), {towers: 0, subscribers: 0, avg_coverage: 0});
+            
+            const statsBar = document.getElementById('stats-bar');
+            statsBar.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-value">${totals.towers.toLocaleString()}</div>
+                    <div class="stat-label">Total Towers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${totals.subscribers.toLocaleString()}</div>
+                    <div class="stat-label">Total Subscribers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${Math.round(totals.avg_coverage)}%</div>
+                    <div class="stat-label">Avg 5G Coverage</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">5</div>
+                    <div class="stat-label">Regions</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">18,000+</div>
+                    <div class="stat-label">Nova Corrente Towers</div>
+                </div>
+            `;
+        }
+        
+        function getFallbackGeoJSON() {
+            return {type: "Topology", objects: {states: {type: "GeometryCollection", geometries: []}}};
+        }
+        
+        // Event listeners
+        document.getElementById('view-mode').addEventListener('change', loadEnhancedMap);
+        document.getElementById('show-towers').addEventListener('change', loadEnhancedMap);
+        document.getElementById('show-salvador').addEventListener('change', loadEnhancedMap);
+        
+        // Initialize
+        loadEnhancedMap();
+        
+        // Window resize handler
+        window.addEventListener('resize', function() {
+            config.width = window.innerWidth - 300;
+            config.height = window.innerHeight - 120;
+            d3.select('#map-svg').attr('width', config.width).attr('height', config.height);
+            loadEnhancedMap();
+        });
+    </script>
+</body>
+</html>
+

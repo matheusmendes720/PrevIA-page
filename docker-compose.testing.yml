@@ -1,0 +1,62 @@
+# docker-compose.testing.yml
+# Override for active testing builds - keeps containers running for continuous testing
+version: '3.8'
+
+services:
+  frontend-testing:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: testing
+    container_name: nova-corrente-frontend-testing
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:5000}
+      - TEST_MODE=${TEST_MODE:-watch}
+      # Options: watch, 5g, 5g:watch, validation, dev, all
+    ports:
+      - "3003:3003"  # Dev server port
+      - "3000:3000"  # Production port (if needed)
+    volumes:
+      # Mount source for hot reload and test watching
+      - ./frontend/src:/app/src:ro
+      - ./frontend/__tests__:/app/__tests__:ro
+      - ./frontend/scripts:/app/scripts:ro
+      - ./frontend/package.json:/app/package.json:ro
+      - ./frontend/jest.config.js:/app/jest.config.js:ro
+      - ./frontend/jest.setup.js:/app/jest.setup.js:ro
+      - ./frontend/tsconfig.json:/app/tsconfig.json:ro
+    networks:
+      - nova-corrente-network
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    # Keep container active
+    command: >
+      sh -c "
+        echo '🧪 Starting Active Testing Build...' &&
+        echo '📦 Test Mode: ${TEST_MODE:-watch}' &&
+        if [ \"$$TEST_MODE\" = \"5g\" ]; then
+          echo '🚀 Running 5G tests...' &&
+          npm run test:5g;
+        elif [ \"$$TEST_MODE\" = \"5g:watch\" ]; then
+          echo '👀 Watching 5G tests...' &&
+          npm run test:5g:watch;
+        elif [ \"$$TEST_MODE\" = \"validation\" ]; then
+          echo '✅ Running validation tests...' &&
+          npm run test:validation;
+        elif [ \"$$TEST_MODE\" = \"dev\" ]; then
+          echo '💻 Starting dev server...' &&
+          npm run dev;
+        elif [ \"$$TEST_MODE\" = \"all\" ]; then
+          echo '🧪 Running all tests...' &&
+          npm test;
+        else
+          echo '👀 Watching all tests...' &&
+          npm run test:watch;
+        fi
+      "
+
+networks:
+  nova-corrente-network:
+    driver: bridge
+

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brazilian Integration Flow - Nova Corrente</title>
+    
+    <!-- Material Design Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    
+    <!-- Material Design CSS -->
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    
+    <!-- Mermaid.js -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+            color: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #2d2d2d;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: white;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .description {
+            background: #3d3d3d;
+            border-left: 4px solid #4A90E2;
+            padding: 20px;
+            margin-bottom: 40px;
+            border-radius: 8px;
+        }
+        
+        .diagram-container {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 40px;
+            overflow-x: auto;
+            margin-bottom: 40px;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+        
+        .mermaid {
+            text-align: center;
+        }
+        
+        /* Mermaid overrides for dark theme */
+        .mermaid svg {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .footer {
+            background: #1a1a1a;
+            padding: 30px 40px;
+            text-align: center;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        .nav-links {
+            margin-top: 20px;
+        }
+        
+        .nav-links a {
+            color: #4A90E2;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 8px 16px;
+            border: 1px solid #4A90E2;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        .nav-links a:hover {
+            background: #4A90E2;
+            color: white;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .diagram-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Brazilian Integration Flow</h1>
+            <p>Nova Corrente - Demand Forecasting System</p>
+        </div>
+        
+        <div class="content">
+            <div class="description"><p>Brazilian dataset integration pipeline showing download, parsing, enrichment, and integration phases with 22 new features.</p></div>
+            
+            <div class="diagram-container">
+                <div class="mermaid">
+%%{init: {'theme':'dark', 'themeVariables': {
+    'primaryColor':'#1e1e1e',
+    'primaryTextColor':'#fff',
+    'lineColor':'#888'
+}}}%%
+flowchart TD
+    subgraph Download["📥 Download Phase"]
+        D1[Download Script<br/>download_brazilian_datasets.py]
+        D2[BGSMT Mobility<br/>Zenodo]
+        D3[Anatel Municipal<br/>API/JSON]
+        D4[IoT Market<br/>Summary JSON]
+        D5[Fiber Expansion<br/>Market Data]
+        D6[Operator Market<br/>Share Data]
+    end
+    
+    subgraph Parse["⚙️ Parse Phase"]
+        P1[Load JSON Files]
+        P2[Convert to CSV]
+        P3[Validate Schema]
+        P4[Extract Features]
+    end
+    
+    subgraph Enrich["🔧 Enrichment Phase"]
+        E1[IoT Features<br/>9 features]
+        E2[Fiber Features<br/>3 features]
+        E3[Operator Features<br/>10 features]
+    end
+    
+    subgraph Integration["📊 Integration Phase"]
+        I1[Load Unified Dataset<br/>117,705 rows × 31 cols]
+        I2[Merge IoT Data<br/>iot_timeline.csv]
+        I3[Merge Fiber Data<br/>fiber_expansion.json]
+        I4[Merge Operator Data<br/>operators_market.json]
+        I5[Forward Fill<br/>Temporal Alignment]
+    end
+    
+    subgraph Output["✅ Output"]
+        O1[Enhanced Dataset<br/>117,705 rows × 56 cols]
+        O2[22 Brazilian Features<br/>Added]
+        O3[Ready for ML<br/>Training]
+    end
+    
+    %% Data Flow
+    D1 --> D2 & D3 & D4 & D5 & D6
+    
+    D2 -.Failed.-> D2
+    D3 --> P1
+    D4 --> P1
+    D5 --> P1
+    D6 --> P1
+    
+    P1 --> P2 --> P3 --> P4
+    
+    P4 --> E1 & E2 & E3
+    
+    E1 --> I2
+    E2 --> I3
+    E3 --> I4
+    
+    I1 --> I2 --> I3 --> I4 --> I5
+    
+    I5 --> O1 --> O2 --> O3
+    
+    %% State Evolution
+    I1 -.31 cols.-> I2
+    I2 -.31→40 cols.-> I3
+    I3 -.40→43 cols.-> I4
+    I4 -.43→53 cols.-> I5
+    I5 -.53→56 cols.-> O1
+    
+    %% Styling
+    classDef downloadStyle fill:#4A90E2,stroke:#357ABD,stroke-width:2px,color:#fff
+    classDef parseStyle fill:#FFA07A,stroke:#EE9066,stroke-width:2px,color:#000
+    classDef enrichStyle fill:#9370DB,stroke:#8A69D8,stroke-width:2px,color:#fff
+    classDef integrationStyle fill:#7FBC7F,stroke:#6FA56F,stroke-width:2px,color:#000
+    classDef outputStyle fill:#66C2A5,stroke:#52A88A,stroke-width:2px,color:#fff
+    classDef errorStyle fill:#FB8072,stroke:#E06660,stroke-width:2px,color:#000
+    
+    class Download,D1,D2,D3,D4,D5,D6 downloadStyle
+    class Parse,P1,P2,P3,P4 parseStyle
+    class Enrich,E1,E2,E3 enrichStyle
+    class Integration,I1,I2,I3,I4,I5 integrationStyle
+    class Output,O1,O2,O3 outputStyle
+    class D2 errorStyle
+
+
+
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Generated by Nova Corrente Documentation System</p>
+            <div class="nav-links">
+                <a href="index.html">← Back to Index</a>
+                <a href="../docs/COMPLETE_DATASET_MASTER_INDEX.md">📚 Documentation</a>
+                <a href=".." onclick="window.history.back(); return false;">🔙 Previous</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            securityLevel: 'loose',
+            themeVariables: {
+                primaryColor: '#1e1e1e',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#444',
+                lineColor: '#888',
+                secondaryColor: '#2d2d2d',
+                tertiaryColor: '#1a1a1a'
+            },
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+</body>
+</html>

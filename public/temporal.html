@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Features Temporais - ML Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --color-primary: #20A084;
+            --color-primary-hover: #1a8a70;
+            --color-secondary: rgba(32, 160, 132, 0.1);
+            --color-surface: #0f2438;
+            --color-surface-alt: #1a3a52;
+            --color-text: #e0e8f0;
+            --color-text-secondary: #a0aab8;
+            --color-success: #10b981;
+            --color-warning: #f97316;
+            --color-error: #ef4444;
+            --color-bg: #0a1628;
+            --color-border: rgba(255, 255, 255, 0.1);
+            --space-8: 8px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-24: 24px;
+            --space-32: 32px;
+            --radius-base: 8px;
+            --radius-lg: 12px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-24);
+        }
+
+        /* Header */
+        .header {
+            margin-bottom: var(--space-32);
+            border-bottom: 1px solid var(--color-border);
+            padding-bottom: var(--space-24);
+        }
+
+        .header h1 {
+            margin: 0 0 var(--space-8) 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .header p {
+            margin: 0;
+            color: var(--color-text-secondary);
+            font-size: 14px;
+        }
+
+        /* Controls Bar */
+        .controls-bar {
+            display: flex;
+            gap: var(--space-16);
+            margin-bottom: var(--space-24);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .date-range {
+            display: flex;
+            gap: var(--space-12);
+            align-items: center;
+        }
+
+        .date-range label {
+            font-size: 13px;
+            color: var(--color-text-secondary);
+        }
+
+        .date-input {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-text);
+            padding: var(--space-8) var(--space-12);
+            border-radius: var(--radius-base);
+            font-size: 13px;
+        }
+
+        .filter-toggle {
+            display: flex;
+            gap: var(--space-8);
+            margin-left: auto;
+        }
+
+        .filter-btn {
+            padding: var(--space-8) var(--space-16);
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-text);
+            border-radius: var(--radius-base);
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            background: var(--color-surface-alt);
+            border-color: var(--color-primary);
+        }
+
+        .filter-btn.active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: white;
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-24);
+            margin-bottom: var(--space-32);
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        }
+
+        /* Card Component */
+        .card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-24);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: var(--color-primary);
+            box-shadow: 0 8px 24px rgba(32, 160, 132, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-12);
+            margin-bottom: var(--space-16);
+            padding-bottom: var(--space-16);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .card-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--color-secondary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+            flex: 1;
+        }
+
+        .card-subtitle {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin: 0;
+        }
+
+        /* Hero Summary Badges */
+        .hero-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--space-16);
+        }
+
+        .metric-badge {
+            background: linear-gradient(135deg, rgba(32, 160, 132, 0.1), rgba(32, 160, 132, 0.05));
+            border: 1px solid var(--color-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--space-16);
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: var(--space-8);
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: var(--space-4);
+        }
+
+        .metric-detail {
+            font-size: 11px;
+            color: var(--color-text-secondary);
+        }
+
+        /* Timeline */
+        .timeline-container {
+            overflow-x: auto;
+            padding: var(--space-16) 0;
+        }
+
+        .timeline {
+            display: flex;
+            gap: var(--space-8);
+            min-width: min-content;
+        }
+
+        .timeline-marker {
+            flex-shrink: 0;
+            width: 80px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            margin: 0 auto var(--space-8);
+            border-radius: 50%;
+            background: var(--color-surface-alt);
+            border: 2px solid var(--color-border);
+            transition: all 0.2s;
+        }
+
+        .timeline-marker:hover .timeline-dot,
+        .timeline-marker.active .timeline-dot {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 12px rgba(32, 160, 132, 0.6);
+        }
+
+        .timeline-label {
+            font-size: 11px;
+            color: var(--color-text-secondary);
+            word-break: break-word;
+        }
+
+        .timeline-marker:hover .timeline-label,
+        .timeline-marker.active .timeline-label {
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+
+        .timeline-impact {
+            font-size: 10px;
+            margin-top: var(--space-4);
+            color: var(--color-warning);
+        }
+
+        /* Tooltip */
+        .tooltip-content {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--color-surface-alt);
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-base);
+            padding: var(--space-12);
+            font-size: 12px;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s, transform 0.2s;
+            box-shadow: 0 8px 24px rgba(32, 160, 132, 0.3);
+            max-width: 220px;
+            white-space: normal;
+        }
+
+        .timeline-marker:hover .tooltip-content {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-8px);
+        }
+
+        /* Rich Tooltip Text */
+        .tooltip-label {
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 4px;
+        }
+
+        .tooltip-date {
+            font-size: 11px;
+            color: var(--color-text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .tooltip-impact {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .tooltip-impact-positive {
+            color: var(--color-error);
+        }
+
+        .tooltip-impact-negative {
+            color: var(--color-success);
+        }
+
+        .tooltip-action {
+            font-size: 11px;
+            color: var(--color-text-secondary);
+            line-height: 1.4;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 6px;
+            margin-top: 6px;
+        }
+
+        .tooltip-action strong {
+            color: var(--color-warning);
+        }
+
+        /* Heatmap */
+        .heatmap-container {
+            overflow-x: auto;
+            margin-bottom: var(--space-16);
+        }
+
+        .heatmap {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            width: 100%;
+            min-width: 300px;
+        }
+
+        .heatmap-header {
+            display: grid;
+            grid-template-columns: 60px repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: var(--space-12);
+            font-size: 11px;
+            color: var(--color-text-secondary);
+            font-weight: 600;
+        }
+
+        .heatmap-row-label {
+            font-size: 11px;
+            color: var(--color-text-secondary);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            cursor: help;
+        }
+
+        .heatmap-cell {
+            min-width: 40px;
+            height: 40px;
+            border-radius: var(--radius-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 11px;
+            font-weight: 600;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .heatmap-cell:hover {
+            transform: scale(1.15);
+            box-shadow: 0 8px 20px rgba(32, 160, 132, 0.4);
+            border-color: var(--color-primary);
+            z-index: 5;
+        }
+
+        .heatmap-cell-tooltip {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--color-surface-alt);
+            border: 2px solid var(--color-primary);
+            border-radius: var(--radius-base);
+            padding: var(--space-12);
+            font-size: 12px;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s, transform 0.2s;
+            box-shadow: 0 8px 24px rgba(32, 160, 132, 0.3);
+            white-space: normal;
+            max-width: 200px;
+        }
+
+        .heatmap-cell:hover .heatmap-cell-tooltip {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-8px);
+        }
+
+        .heatmap-cell-tooltip-title {
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 6px;
+        }
+
+        .heatmap-cell-tooltip-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 6px;
+        }
+
+        .heatmap-cell-tooltip-interpretation {
+            font-size: 11px;
+            color: var(--color-text-secondary);
+            line-height: 1.4;
+            margin-bottom: 6px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 6px;
+        }
+
+        .heatmap-cell-tooltip-recommendation {
+            font-size: 11px;
+            color: var(--color-warning);
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        /* Chart Container */
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+            margin-top: var(--space-16);
+        }
+
+        /* Action Cards */
+        .action-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-16);
+        }
+
+        .action-card {
+            background: linear-gradient(135deg, var(--color-surface-alt), var(--color-surface));
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-16);
+        }
+
+        .action-card-date {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            margin-bottom: var(--space-8);
+        }
+
+        .action-card-event {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: var(--space-12);
+        }
+
+        .action-card-impact {
+            display: inline-block;
+            padding: var(--space-4) var(--space-12);
+            background: rgba(249, 115, 22, 0.1);
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            color: var(--color-warning);
+            border-radius: var(--radius-base);
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: var(--space-12);
+        }
+
+        .action-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .action-list li {
+            padding-left: var(--space-16);
+            position: relative;
+            font-size: 13px;
+            margin-bottom: var(--space-8);
+            color: var(--color-text-secondary);
+        }
+
+        .action-list li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--color-success);
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--space-16);
+            margin-top: var(--space-16);
+            padding-top: var(--space-16);
+            border-top: 1px solid var(--color-border);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: var(--space-4);
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: var(--space-16);
+            flex-wrap: wrap;
+            margin-top: var(--space-16);
+            font-size: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        /* Sin/Cos Explanation */
+        .explanation-box {
+            background: linear-gradient(135deg, var(--color-secondary), rgba(32, 160, 132, 0.05));
+            border: 1px solid var(--color-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--space-16);
+            margin-top: var(--space-16);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .explanation-box code {
+            background: var(--color-surface);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', monospace;
+            font-size: 12px;
+            color: var(--color-success);
+        }
+
+        /* Enhanced Explanation Sections */
+        .explanation-section {
+            margin-bottom: var(--space-16);
+        }
+
+        .explanation-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .explanation-title {
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: var(--space-8);
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+        }
+
+        .explanation-content {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+        }
+
+        .explanation-example {
+            background: var(--color-surface);
+            border-left: 3px solid var(--color-primary);
+            padding: var(--space-12);
+            border-radius: 4px;
+            margin-top: var(--space-8);
+            font-family: 'Monaco', monospace;
+            font-size: 11px;
+            color: var(--color-success);
+            overflow-x: auto;
+        }
+
+        /* Stock Management Context */
+        .stock-context {
+            background: linear-gradient(90deg, rgba(249, 115, 22, 0.1), transparent);
+            border-left: 4px solid var(--color-warning);
+            padding: var(--space-12);
+            border-radius: 4px;
+            margin-top: var(--space-12);
+            font-size: 12px;
+            color: var(--color-warning);
+        }
+
+        .stock-context strong {
+            color: var(--color-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .controls-bar { flex-direction: column; }
+            .filter-toggle { margin-left: 0; width: 100%; }
+            .filter-btn { flex: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📊 Features Temporais</h1>
+            <p>Visualização de features de machine learning para previsão de demanda</p>
+        </div>
+
+        <!-- Controls Bar -->
+        <div class="controls-bar">
+            <div class="date-range">
+                <label>De:</label>
+                <input type="date" id="dateFrom" class="date-input" value="2025-10-19">
+                <label>Até:</label>
+                <input type="date" id="dateTo" class="date-input" value="2025-11-18">
+            </div>
+            <div class="filter-toggle">
+                <button class="filter-btn active" data-filter="all">Todos</button>
+                <button class="filter-btn" data-filter="high">Alto Impacto</button>
+                <button class="filter-btn" data-filter="seasonal">Sazonalidade</button>
+            </div>
+        </div>
+
+        <!-- Hero Summary -->
+        <div class="card" style="margin-bottom: var(--space-24);">
+            <div class="card-header">
+                <div class="card-icon">⚡</div>
+                <div>
+                    <h3 class="card-title">Resumo Executivo</h3>
+                    <p class="card-subtitle">Próximos 30 dias - Principais drivers temporais</p>
+                </div>
+            </div>
+            <div class="hero-grid">
+                <div class="metric-badge">
+                    <div class="metric-label">Próximo Evento</div>
+                    <div class="metric-value" id="nextEventName">Carnaval</div>
+                    <div class="metric-detail" id="nextEventDate">15 Fev 2025</div>
+                </div>
+                <div class="metric-badge">
+                    <div class="metric-label">Impacto Previsto</div>
+                    <div class="metric-value" id="impactScore">+45%</div>
+                    <div class="metric-detail">Variação de demanda</div>
+                </div>
+                <div class="metric-badge">
+                    <div class="metric-label">Confiança</div>
+                    <div class="metric-value" id="confidence">94%</div>
+                    <div class="metric-detail">Acurácia do modelo</div>
+                </div>
+                <div class="metric-badge">
+                    <div class="metric-label">Nível de Risco</div>
+                    <div class="metric-value" style="color: var(--color-warning);">MÉDIO</div>
+                    <div class="metric-detail">SLA em risco</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Timeline -->
+        <div class="card" style="margin-bottom: var(--space-24);">
+            <div class="card-header">
+                <div class="card-icon">📅</div>
+                <div>
+                    <h3 class="card-title">Cronograma de Eventos</h3>
+                    <p class="card-subtitle">Eventos brasileiros + ciclos de manutenção</p>
+                </div>
+            </div>
+            <div class="timeline-container">
+                <div class="timeline" id="eventTimeline"></div>
+            </div>
+            <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: var(--space-16); padding: var(--space-12); background: rgba(32, 160, 132, 0.05); border-radius: var(--radius-base); border-left: 3px solid var(--color-primary);">
+                <strong style="color: var(--color-primary);">💡 Dica:</strong> Passe o mouse sobre cada evento para ver impacto detalhado, data precisa e ações recomendadas para otimizar estoque.
+            </div>
+        </div>
+
+        <!-- Seasonality & Cyclical Encoding (2-column grid) -->
+        <div class="grid grid-2" style="margin-bottom: var(--space-24);">
+            <!-- Seasonality Heatmap -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🔥</div>
+                    <div>
+                        <h3 class="card-title">Sazonalidade</h3>
+                        <p class="card-subtitle">Semana × Mês (demanda normalizada)</p>
+                    </div>
+                </div>
+                <div class="heatmap-container">
+                    <div class="heatmap-header">
+                        <div style="grid-column: 1;"></div>
+                        <div>Seg</div>
+                        <div>Ter</div>
+                        <div>Qua</div>
+                        <div>Qui</div>
+                        <div>Sex</div>
+                        <div>Sáb</div>
+                        <div>Dom</div>
+                    </div>
+                    <div id="seasonalHeatmap" class="heatmap"></div>
+                </div>
+            </div>
+
+            <!-- Cyclical Encoding -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">〰️</div>
+                    <div>
+                        <h3 class="card-title">Codificação Cíclica</h3>
+                        <p class="card-subtitle">Sin/Cos para features temporais</p>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="cyclicalChart"></canvas>
+                </div>
+                <div class="explanation-box">
+                    <div class="explanation-section">
+                        <div class="explanation-title">💡 Por que Sin/Cos para Features Temporais?</div>
+                        <div class="explanation-content">
+                            Features cíclicas (hora, dia do mês, mês do ano) precisam ser codificadas para o ML entender que Dezembro → Janeiro é <strong>próximo</strong>, não distante. A codificação numérica simples (1-12 para meses) criaria um "cliff" artificial.
+                        </div>
+                        <div class="explanation-example">
+                            Exemplo: Mês = 12 (Dez) vs Mês = 1 (Jan)<br/>
+                            ❌ Numérico: Distância = |12-1| = 11 (muito longe!)<br/>
+                            ✅ Sin/Cos: Distância circular = ~0.1 (próximo!)
+                        </div>
+                    </div>
+                    
+                    <div class="explanation-section">
+                        <div class="explanation-title">📊 Como Funciona?</div>
+                        <div class="explanation-content">
+                            Para cada ciclo (24h, 7 dias, 12 meses), calculamos dois componentes:
+                        </div>
+                        <div class="explanation-example">
+                            sin_component = sin(2π × hora / 24)<br/>
+                            cos_component = cos(2π × hora / 24)<br/><br/>
+                            Estes pares (sin, cos) formam um ponto no círculo unitário, preservando a geometria cíclica!
+                        </div>
+                    </div>
+                    
+                    <div class="stock-context">
+                        <strong>🎯 Impacto na Previsão:</strong> Essa transformação melhora a precisão em períodos sazonais em até 35%, capturando padrões que modelos simples perdem. Resultado: <strong>Previsões 20% mais acuradas = Estoque otimizado = Economia de R$ 50-150K/ano</strong>.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Forecast Comparison -->
+        <div class="card" style="margin-bottom: var(--space-24);">
+            <div class="card-header">
+                <div class="card-icon">📈</div>
+                <div>
+                    <h3 class="card-title">Comparação Forecast vs. Realizado</h3>
+                    <p class="card-subtitle">Acurácia do modelo em períodos com eventos</p>
+                </div>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="forecastChart"></canvas>
+            </div>
+            <div class="stats-row">
+                <div class="stat">
+                    <div class="stat-label">MAPE (Período)</div>
+                    <div class="stat-value">8.2%</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">MAE</div>
+                    <div class="stat-value">124 un</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">RMSE</div>
+                    <div class="stat-value">156 un</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">R² Score</div>
+                    <div class="stat-value">0.92</div>
+                </div>
+            </div>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: rgba(16, 185, 129, 0.3); border: 1px solid #10b981;"></div>
+                    <span>Previsto (95% CI)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #10b981;"></div>
+                    <span>Previsto (Média)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #3b82f6;"></div>
+                    <span>Realizado</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: rgba(249, 115, 22, 0.4);"></div>
+                    <span>Evento Identificado</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Playbook -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">✅</div>
+                <div>
+                    <h3 class="card-title">Playbook de Ações</h3>
+                    <p class="card-subtitle">Recomendações operacionais para próximos 30 dias</p>
+                </div>
+            </div>
+            <div class="action-cards" id="actionPlaybook"></div>
+        </div>
+    </div>
+
+    <script>
+        // ============= MOCK DATA =============
+        const mockPayload = {
+            events: [
+                {
+                    id: 'carnival',
+                    date: '2025-02-15',
+                    label: 'Carnaval',
+                    impactScore: -0.5,
+                    demandDelta: -30,
+                    narrative: 'Períodos festivos reduzem atividades operacionais, seguidos de recuperação forte',
+                    recommendedActions: ['Aumentar estoque preventivo 30%', 'Reduzir expedições', 'Preparar para pico pós-feriado']
+                },
+                {
+                    id: 'rainy-season',
+                    date: '2025-11-01',
+                    label: 'Estação Chuvosa',
+                    impactScore: 0.4,
+                    demandDelta: 40,
+                    narrative: 'Chuvas aumentam corrosão, multiplicando demanda por manutenção preventiva',
+                    recommendedActions: ['Aumentar itens de corrosão 40%', 'Reforçar equipes de campo', 'SLA crítico']
+                },
+                {
+                    id: 'new-year',
+                    date: '2025-01-01',
+                    label: 'Ano Novo',
+                    impactScore: -0.3,
+                    demandDelta: -20,
+                    narrative: 'Redução típica de atividades no início de ano',
+                    recommendedActions: ['Manutenção preventiva de equipamentos', 'Planejamento orçamentário', 'Revisão de contratos']
+                },
+                {
+                    id: 'easter',
+                    date: '2025-04-20',
+                    label: 'Páscoa',
+                    impactScore: -0.4,
+                    demandDelta: -25,
+                    narrative: 'Períodos de feriado com redução de operações',
+                    recommendedActions: ['Planejar paradas para manutenção', 'Revisar pipeline', 'Análise de seasonal trends']
+                }
+            ],
+            seasonalityMatrix: Array(12).fill(0).map(() => Array(7).fill(0).map(() => 0.5 + Math.random() * 0.4)),
+            cyclicalSamples: Array(24).fill(0).map((_, i) => ({
+                label: `${i}h`,
+                value: i,
+                sin: Math.sin((i / 24) * 2 * Math.PI),
+                cos: Math.cos((i / 24) * 2 * Math.PI)
+            })),
+            forecastSlices: Array(60).fill(0).map((_, i) => {
+                const base = 500 + Math.sin((i / 60) * Math.PI) * 200;
+                return {
+                    date: new Date(2025, 9, 19 + i).toISOString().split('T')[0],
+                    actual: base + (Math.random() - 0.5) * 100,
+                    predicted: base + (Math.random() - 0.5) * 50
+                };
+            }),
+            summary: {
+                nextEvent: { id: 'carnival', label: 'Carnaval', date: '2025-02-15', impactScore: -0.5 },
+                confidence: 0.94,
+                riskLevel: 'medium'
+            }
+        };
+
+        // ============= STATE =============
+        let state = {
+            activeFilter: 'all',
+            selectedTimelineItem: null,
+            dateFrom: '2025-10-19',
+            dateTo: '2025-11-18'
+        };
+
+        // ============= TOOLTIPS HELPER =============
+        function createTooltip(title, content, recommendation) {
+            return `
+                <div style="font-weight: 600; color: var(--color-primary); margin-bottom: 4px;">${title}</div>
+                <div style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 6px;">${content}</div>
+                ${recommendation ? `<div style="font-size: 11px; color: var(--color-warning); border-top: 1px solid rgba(255,255,255,0.1); padding-top: 6px; margin-top: 6px;"><strong>⚡ Ação:</strong> ${recommendation}</div>` : ''}
+            `;
+        }
+
+        // ============= INIT =============
+        function init() {
+            renderEventTimeline();
+            renderSeasonalityHeatmap();
+            renderCyclicalChart();
+            renderForecastChart();
+            renderActionPlaybook();
+            attachEventListeners();
+        }
+
+        // ============= EVENT TIMELINE =============
+        function renderEventTimeline() {
+            const timeline = document.getElementById('eventTimeline');
+            timeline.innerHTML = '';
+            
+            mockPayload.events.forEach((event, idx) => {
+                const marker = document.createElement('div');
+                marker.className = 'timeline-marker';
+                const impactType = event.demandDelta > 0 ? 'ALTA' : 'REDUÇÃO';
+                const impactColor = event.demandDelta > 0 ? 'tooltip-impact-positive' : 'tooltip-impact-negative';
+                
+                marker.innerHTML = `
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-label">${event.label}</div>
+                    <div class="timeline-impact">${event.demandDelta > 0 ? '+' : ''}${event.demandDelta}%</div>
+                    <div class="tooltip-content">
+                        <div class="tooltip-label">${event.label}</div>
+                        <div class="tooltip-date">📅 ${event.date}</div>
+                        <div class="tooltip-impact ${impactColor}">
+                            ${impactType}: ${event.demandDelta > 0 ? '+' : ''}${event.demandDelta}% de demanda
+                        </div>
+                        <div class="tooltip-action">
+                            <strong>📊 Contexto:</strong> ${event.narrative}
+                        </div>
+                    </div>
+                `;
+                marker.addEventListener('click', () => selectTimelineItem(idx, marker));
+                timeline.appendChild(marker);
+            });
+        }
+
+        function selectTimelineItem(idx, element) {
+            document.querySelectorAll('.timeline-marker').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            state.selectedTimelineItem = idx;
+        }
+
+        // ============= SEASONALITY HEATMAP =============
+        function renderSeasonalityHeatmap() {
+            const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            const weekDays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+            const heatmap = document.getElementById('seasonalHeatmap');
+            heatmap.innerHTML = '';
+            
+            mockPayload.seasonalityMatrix.forEach((week, monthIdx) => {
+                const monthLabel = document.createElement('div');
+                monthLabel.className = 'heatmap-row-label';
+                monthLabel.textContent = months[monthIdx];
+                heatmap.appendChild(monthLabel);
+                
+                week.forEach((intensity, dayIdx) => {
+                    const cell = document.createElement('div');
+                    cell.className = 'heatmap-cell';
+                    const hue = intensity > 0.7 ? 0 : intensity > 0.5 ? 30 : 120;
+                    const saturation = intensity * 100;
+                    cell.style.background = `hsl(${hue}, ${saturation}%, ${60 - intensity * 20}%)`;
+                    cell.textContent = (intensity * 100).toFixed(0);
+                    
+                    const intensityLevel = intensity > 0.7 ? 'MUITO ALTO' : intensity > 0.5 ? 'ALTO' : 'NORMAL';
+                    const stockRecommendation = intensity > 0.7 ? 'Aumentar estoque em 35-50%' : intensity > 0.5 ? 'Aumentar estoque em 15-25%' : 'Manter níveis normais';
+                    const actionContext = intensity > 0.7 ? 'Período crítico de demanda. Prepare equipe de distribuição.' : intensity > 0.5 ? 'Demanda elevada esperada. Revisar SLA.' : 'Demanda previsível. Oportunidade para manutenção preventiva.';
+                    
+                    cell.innerHTML += `
+                        <div class="heatmap-cell-tooltip">
+                            <div class="heatmap-cell-tooltip-title">${months[monthIdx]} - ${weekDays[dayIdx]}</div>
+                            <div class="heatmap-cell-tooltip-value">${(intensity * 100).toFixed(0)}%</div>
+                            <div class="heatmap-cell-tooltip-interpretation">
+                                <strong>Nível:</strong> ${intensityLevel}<br/>
+                                Demanda relativa à média anual
+                            </div>
+                            <div class="heatmap-cell-tooltip-recommendation">
+                                📦 <strong>${stockRecommendation}</strong><br/>
+                                ${actionContext}
+                            </div>
+                        </div>
+                    `;
+                    heatmap.appendChild(cell);
+                });
+            });
+        }
+
+        // ============= CYCLICAL CHART =============
+        function renderCyclicalChart() {
+            const ctx = document.getElementById('cyclicalChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: mockPayload.cyclicalSamples.map(s => s.label),
+                    datasets: [
+                        {
+                            label: 'Sin Component',
+                            data: mockPayload.cyclicalSamples.map(s => s.sin),
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Cos Component',
+                            data: mockPayload.cyclicalSamples.map(s => s.cos),
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#a0aab8', font: { size: 12 } } }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: '#a0aab8' },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                        },
+                        x: {
+                            ticks: { color: '#a0aab8' },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============= FORECAST CHART =============
+        function renderForecastChart() {
+            const ctx = document.getElementById('forecastChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: mockPayload.forecastSlices.map(f => f.date),
+                    datasets: [
+                        {
+                            label: 'Previsto (95% CI)',
+                            data: mockPayload.forecastSlices.map(f => f.predicted + 100),
+                            borderColor: 'transparent',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Previsto (Média)',
+                            data: mockPayload.forecastSlices.map(f => f.predicted),
+                            borderColor: '#10b981',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            pointRadius: 1,
+                            pointBackgroundColor: '#10b981'
+                        },
+                        {
+                            label: 'Realizado',
+                            data: mockPayload.forecastSlices.map(f => f.actual),
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            pointRadius: 1,
+                            pointBackgroundColor: '#3b82f6'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#a0aab8', font: { size: 12 } } }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: '#a0aab8' },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                        },
+                        x: {
+                            ticks: { color: '#a0aab8' },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============= ACTION PLAYBOOK =============
+        function renderActionPlaybook() {
+            const playbook = document.getElementById('actionPlaybook');
+            playbook.innerHTML = '';
+            
+            mockPayload.events.forEach(event => {
+                const card = document.createElement('div');
+                card.className = 'action-card';
+                
+                const impact = event.demandDelta > 0 ? 'Alto' : 'Moderado';
+                const impactColor = event.demandDelta > 0 ? 'var(--color-error)' : 'var(--color-warning)';
+                
+                card.innerHTML = `
+                    <div class="action-card-date">${event.date}</div>
+                    <div class="action-card-event">${event.label}</div>
+                    <div class="action-card-impact" style="background: rgba(249, 115, 22, 0.15); color: ${impactColor}; border-color: ${impactColor}80;">
+                        ${impact} - ${event.demandDelta > 0 ? '+' : ''}${event.demandDelta}%
+                    </div>
+                    <p style="font-size: 12px; color: var(--color-text-secondary); margin: 0 0 var(--space-12) 0;">${event.narrative}</p>
+                    <ul class="action-list">
+                        ${event.recommendedActions.map(action => `<li>${action}</li>`).join('')}
+                    </ul>
+                `;
+                playbook.appendChild(card);
+            });
+        }
+
+        // ============= EVENT LISTENERS =============
+        function attachEventListeners() {
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.activeFilter = btn.dataset.filter;
+                });
+            });
+
+            // Date inputs
+            document.getElementById('dateFrom').addEventListener('change', (e) => {
+                state.dateFrom = e.target.value;
+            });
+            document.getElementById('dateTo').addEventListener('change', (e) => {
+                state.dateTo = e.target.value;
+            });
+        }
+
+        // ============= BOOTSTRAP =============
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

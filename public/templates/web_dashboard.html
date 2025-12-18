@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Corrente - Demand Forecasting Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .chart-container { width: 100%; height: 400px; }
+        .metric-card { @apply bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow; }
+        .loading { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(0,0,0,.1); border-radius: 50%; border-top-color: #3B82F6; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg p-6 mb-8">
+            <h1 class="text-3xl font-bold mb-2">Nova Corrente Telecom</h1>
+            <p class="text-lg">Demand Forecasting Dashboard</p>
+            <p class="text-sm opacity-90 mt-2">Real-time forecasting and inventory management</p>
+        </header>
+
+        <!-- Metrics Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="metric-card">
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Total Items</h3>
+                <p class="text-2xl font-bold text-blue-600" id="totalItems">-</p>
+                <p class="text-xs text-gray-500 mt-1">Available for forecasting</p>
+            </div>
+            <div class="metric-card">
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Data Points</h3>
+                <p class="text-2xl font-bold text-purple-600" id="totalRecords">-</p>
+                <p class="text-xs text-gray-500 mt-1">Historical records</p>
+            </div>
+            <div class="metric-card">
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Trained Models</h3>
+                <p class="text-2xl font-bold text-green-600" id="trainedModels">-</p>
+                <p class="text-xs text-gray-500 mt-1">Ready for forecasts</p>
+            </div>
+            <div class="metric-card">
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Status</h3>
+                <p class="text-2xl font-bold text-green-600" id="status">-</p>
+                <p class="text-xs text-gray-500 mt-1">System status</p>
+            </div>
+        </div>
+
+        <!-- Item Selection -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Select Item</h2>
+            <div class="flex gap-4">
+                <select id="itemSelect" class="flex-1 border border-gray-300 rounded-lg px-4 py-2">
+                    <option value="">Loading items...</option>
+                </select>
+                <button onclick="loadForecast()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                    Generate Forecast
+                </button>
+                <button onclick="refreshData()" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">
+                    Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Forecast Chart -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8" id="forecastSection" style="display: none;">
+            <h2 class="text-xl font-semibold mb-4">Demand Forecast</h2>
+            <div id="forecastChart" class="chart-container"></div>
+        </div>
+
+        <!-- Inventory Metrics -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8" id="inventorySection" style="display: none;">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">Inventory Metrics</h2>
+                <div id="inventoryMetrics" class="space-y-4">
+                    <!-- Metrics loaded dynamically -->
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">Alert Status</h2>
+                <div id="alertStatus" class="space-y-4">
+                    <!-- Alerts loaded dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">Available Items</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Item ID</th>
+                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Records</th>
+                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Date Range</th>
+                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Model Status</th>
+                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsTable">
+                        <tr><td colspan="5" class="px-4 py-2 text-center">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin + '/api';
+        
+        // Load initial data
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMetrics();
+            loadItems();
+        });
+        
+        async function loadMetrics() {
+            try {
+                const response = await fetch(`${API_BASE}/metrics`);
+                const data = await response.json();
+                
+                document.getElementById('totalItems').textContent = data.datasets || '-';
+                document.getElementById('totalRecords').textContent = data.total_records ? 
+                    (data.total_records > 1000000 ? (data.total_records / 1000000).toFixed(1) + 'M' : 
+                     data.total_records > 1000 ? (data.total_records / 1000).toFixed(1) + 'K' : 
+                     data.total_records) : '-';
+                document.getElementById('trainedModels').textContent = data.trained_models || '-';
+                document.getElementById('status').textContent = data.status === 'online' ? 'Online' : 'Offline';
+            } catch (error) {
+                console.error('Error loading metrics:', error);
+            }
+        }
+        
+        async function loadItems() {
+            try {
+                const response = await fetch(`${API_BASE}/items`);
+                const data = await response.json();
+                
+                // Populate select
+                const select = document.getElementById('itemSelect');
+                select.innerHTML = '<option value="">Select an item...</option>';
+                
+                data.items.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    option.textContent = `${item.id} (${item.records} records)`;
+                    select.appendChild(option);
+                });
+                
+                // Populate table
+                const tbody = document.getElementById('itemsTable');
+                tbody.innerHTML = '';
+                
+                data.items.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-t';
+                    row.innerHTML = `
+                        <td class="px-4 py-2 text-sm font-medium">${item.id}</td>
+                        <td class="px-4 py-2 text-sm">${item.records}</td>
+                        <td class="px-4 py-2 text-sm">${item.date_range.start} to ${item.date_range.end}</td>
+                        <td class="px-4 py-2 text-sm">
+                            <span class="${item.has_model ? 'text-green-600' : 'text-gray-400'}">
+                                ${item.has_model ? 'Trained' : 'Not Trained'}
+                            </span>
+                        </td>
+                        <td class="px-4 py-2 text-sm">
+                            <button onclick="loadForecastForItem('${item.id}')" 
+                                    class="text-blue-600 hover:text-blue-800">
+                                Forecast
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading items:', error);
+                document.getElementById('itemsTable').innerHTML = 
+                    '<tr><td colspan="5" class="px-4 py-2 text-center text-red-600">Error loading items</td></tr>';
+            }
+        }
+        
+        async function loadForecast() {
+            const itemId = document.getElementById('itemSelect').value;
+            if (!itemId) {
+                alert('Please select an item first');
+                return;
+            }
+            await loadForecastForItem(itemId);
+        }
+        
+        async function loadForecastForItem(itemId) {
+            try {
+                // Show loading
+                document.getElementById('forecastSection').style.display = 'block';
+                document.getElementById('forecastChart').innerHTML = '<div class="loading"></div> Loading forecast...';
+                
+                // Load forecast
+                const forecastResponse = await fetch(`${API_BASE}/forecast/${itemId}`);
+                const forecastData = await forecastResponse.json();
+                
+                // Load inventory
+                const inventoryResponse = await fetch(`${API_BASE}/inventory/${itemId}`);
+                const inventoryData = await inventoryResponse.json();
+                
+                // Update chart
+                const historicalTrace = {
+                    x: forecastData.historical.map(d => d.date),
+                    y: forecastData.historical.map(d => d.value),
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    name: 'Historical',
+                    line: {color: '#3B82F6'}
+                };
+                
+                const forecastTrace = {
+                    x: forecastData.forecast.map(d => d.date),
+                    y: forecastData.forecast.map(d => d.value),
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    name: 'Forecast',
+                    line: {color: '#10B981', dash: 'dash'}
+                };
+                
+                Plotly.newPlot('forecastChart', [historicalTrace, forecastTrace], {
+                    title: `Demand Forecast - ${itemId}`,
+                    xaxis: {title: 'Date'},
+                    yaxis: {title: 'Demand'},
+                    hovermode: 'x unified',
+                    showlegend: true
+                });
+                
+                // Update inventory metrics
+                const metrics = inventoryData.inventory_metrics;
+                document.getElementById('inventoryMetrics').innerHTML = `
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-500">Current Stock</p>
+                            <p class="text-2xl font-bold">${Math.round(metrics.current_stock)}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Reorder Point</p>
+                            <p class="text-2xl font-bold text-orange-600">${Math.round(metrics.reorder_point)}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Safety Stock</p>
+                            <p class="text-2xl font-bold">${Math.round(metrics.safety_stock)}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Avg Daily Demand</p>
+                            <p class="text-2xl font-bold">${metrics.avg_daily_demand.toFixed(2)}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Days to Rupture</p>
+                            <p class="text-2xl font-bold">${metrics.days_to_rupture === Infinity ? 'N/A' : metrics.days_to_rupture.toFixed(1)}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Lead Time</p>
+                            <p class="text-2xl font-bold">${metrics.lead_time} days</p>
+                        </div>
+                    </div>
+                `;
+                
+                // Update alerts
+                const alert = inventoryData.alert;
+                const alertClass = alert.triggered ? 
+                    (alert.urgency === 'critical' ? 'bg-red-100 text-red-800' :
+                     alert.urgency === 'high' ? 'bg-orange-100 text-orange-800' :
+                     'bg-yellow-100 text-yellow-800') : 
+                    'bg-green-100 text-green-800';
+                
+                document.getElementById('alertStatus').innerHTML = `
+                    <div class="${alertClass} rounded-lg p-4">
+                        <p class="font-bold text-lg mb-2">
+                            ${alert.triggered ? 'ALERT' : 'OK'}
+                        </p>
+                        <p class="text-sm mb-2">
+                            Status: ${alert.triggered ? alert.urgency.toUpperCase() : 'No alerts'}
+                        </p>
+                        ${alert.triggered ? `
+                            <p class="text-sm">
+                                Recommended order: <strong>${alert.units_needed} units</strong>
+                            </p>
+                        ` : ''}
+                    </div>
+                `;
+                
+                document.getElementById('inventorySection').style.display = 'grid';
+                
+            } catch (error) {
+                console.error('Error loading forecast:', error);
+                document.getElementById('forecastChart').innerHTML = 
+                    '<div class="text-red-600">Error loading forecast. Please try again.</div>';
+            }
+        }
+        
+        function refreshData() {
+            loadMetrics();
+            loadItems();
+        }
+    </script>
+</body>
+</html>
+
