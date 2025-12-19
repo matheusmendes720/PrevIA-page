@@ -110,8 +110,8 @@ export async function runAgent(req: AgentRequest): Promise<AgentResponse> {
     return {
       response: result.completion || '',
       conversationId: threadId,
-      tokensUsed: result.usage?.totalTokens || 0,
-      sources: (result.sources || []).map((s) => ({
+      tokensUsed: result.usage?.totalTokens,
+      sources: result.sources?.map((s: any) => ({
         title: s.title || 'Untitled',
         content: s.content || '',
         score: s.score || 0,
@@ -166,10 +166,10 @@ export async function getConversationHistory(
       threadId: conversationId,
       messages: (thread.messages || []).map((msg: LangbaseMessage) => ({
         id: msg.id,
-        role: msg.role,
+        role: (msg.role === 'user' || msg.role === 'assistant' ? msg.role : 'user') as 'user' | 'assistant',
         content: msg.content,
         timestamp: msg.timestamp,
-        sources: msg.sources,
+        sources: msg.sources as any,
       })),
       createdAt: thread.createdAt || new Date().toISOString(),
       updatedAt: thread.updatedAt || new Date().toISOString(),
@@ -334,4 +334,5 @@ export default {
   streamAgent,
   runAgentBatch,
 }
+
 

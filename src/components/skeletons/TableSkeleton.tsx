@@ -41,3 +41,4 @@ const TableSkeleton: React.FC<TableSkeletonProps> = ({
 };
 
 export default TableSkeleton;
+

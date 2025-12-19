@@ -9,3 +9,4 @@ export { generateClimateMetrics, climateAlerts, climateCorrelations, climateSumm
 export { generateBusinessMetrics, businessKPIs, categoryPerformance, regionPerformance } from './business-metrics';
 export { generateHourlyPatterns, generateWeeklyPatterns, generateMonthlyPatterns, generateTimeSeries, seasonalTrends, leadTimeMetrics } from './temporal-features';
 export { fiveGCoverageData, fiveGInventoryData, fiveGProjections, networkMetrics } from './5g-expansion';
+

@@ -5,9 +5,6 @@
 
 import type { PipeContext, PipeConfig, LangbaseConfig } from './types'
 
-// Re-export types for consumers
-export type { PipeContext, PipeConfig, LangbaseConfig } from './types'
-
 // ============================================================================
 // Langbase SDK Wrapper (placeholder until SDK is installed)
 // ============================================================================
@@ -168,8 +165,15 @@ export function getConfigStatus() {
 }
 
 // ============================================================================
+// Re-export types for consumers
+// ============================================================================
+
+export type { PipeContext, PipeConfig, LangbaseConfig } from './types'
+
+// ============================================================================
 // Export default client
 // ============================================================================
 
 export default langbaseClient
+
 

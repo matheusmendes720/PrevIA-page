@@ -188,3 +188,4 @@ export const WEATHER_DATA = {
   'SE': { temp: 27.7, precip: 83, humidity: 80, wind: 8 },
   'TO': { temp: 26.9, precip: 190, humidity: 80, wind: 7 }
 } as const;
+

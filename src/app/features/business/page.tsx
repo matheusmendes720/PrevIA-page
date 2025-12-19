@@ -1238,7 +1238,7 @@ export default function BusinessFeaturesPage() {
             labels: ['Economia de Inventário', 'Redução de Stockout', 'Eficiência Operacional'],
             datasets: [{
               label: 'Economia Anual (R$)',
-              data: [Math.abs(businessMetrics?.inventory_savings || 0), Math.abs(businessMetrics?.stockout_reduction || 0), Math.abs(businessMetrics?.operational_efficiency || 0)],
+              data: [Math.abs(businessMetrics.inventory_savings), Math.abs(businessMetrics.stockout_reduction), Math.abs(businessMetrics.operational_efficiency)],
               backgroundColor: ['rgba(50, 184, 198, 0.6)', 'rgba(230, 129, 97, 0.6)', 'rgba(34, 197, 94, 0.6)'],
               borderColor: ['rgba(50, 184, 198, 1)', 'rgba(230, 129, 97, 1)', 'rgba(34, 197, 94, 1)'],
               borderWidth: 2,
@@ -1308,7 +1308,7 @@ export default function BusinessFeaturesPage() {
 
         // Predictive Analytics Charts (disabled for new structure)
         if (false && predictiveAnalysis) {
-          const historical = predictiveAnalysis?.historical || [];
+          const historical = predictiveAnalysis.historical || [];
           const labels = [...historical.map(h => h.phase.replace('phase_', 'Phase ').toUpperCase()), 'Phase 4 (Predicted)'];
           createOrUpdateChart('predictiveChart', {
           type: 'line',
@@ -1326,7 +1326,7 @@ export default function BusinessFeaturesPage() {
               },
               {
                 label: 'MAPE Previsto',
-                data: [...historical.map(() => null), predictiveAnalysis?.predictedMAPE || 0],
+                data: [...historical.map(() => null), predictiveAnalysis.predictedMAPE],
                 backgroundColor: 'rgba(230, 129, 97, 0.2)',
                 borderColor: 'rgba(230, 129, 97, 1)',
                 borderWidth: 3,
@@ -3683,4 +3683,5 @@ export default function BusinessFeaturesPage() {
     </>
   );
 }
+
 

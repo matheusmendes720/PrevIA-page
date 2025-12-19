@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "bun --bun next dev -p 3003 --turbo",
+    "dev": "bun --bun next dev -p 3003",
     "dev:npm": "next dev -p 3003",
     "dev:fast": "bun --bun next dev -p 3003 --turbo",
     "build": "bun --bun next build",

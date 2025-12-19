@@ -14,8 +14,19 @@ import type {
 } from '../types/temporal.types';
 import type { SupplierMetrics } from '../types/leadTime.types';
 
-// Simplified Supplier type for data generation
-type Supplier = Omit<SupplierMetrics, 'cost' | 'history'>;
+// Simplified Supplier type for data generation (with local properties)
+type Supplier = {
+  id: string;
+  name: string;
+  leadTime: number;
+  leadTimeVariance: number;
+  reliability: number;
+  riskScore: number;
+  materials: string[];
+  category?: string;
+  performanceScore?: number;
+  slaCompliance?: number;
+};
 
 // ==================== REAL NOVA CORRENTE CONFIGURATION ====================
 
@@ -37,8 +48,8 @@ const NOVA_CORRENTE_SUPPLIERS: Supplier[] = [
   {
     id: 'furukawa',
     name: 'Furukawa Electric Brasil',
-    avgLeadTime: 45,
-    leadTimeStd: 8.5,
+    leadTime: 45,
+    leadTimeVariance: 8.5,
     reliability: 92.3,
     riskScore: 0.45,
     category: 'Cabos e Fibra Óptica',
@@ -49,8 +60,8 @@ const NOVA_CORRENTE_SUPPLIERS: Supplier[] = [
   {
     id: 'prysmian',
     name: 'Prysmian Telecom Cables',
-    avgLeadTime: 38,
-    leadTimeStd: 5.2,
+    leadTime: 38,
+    leadTimeVariance: 5.2,
     reliability: 95.8,
     riskScore: 0.28,
     category: 'Infraestrutura',
@@ -61,8 +72,8 @@ const NOVA_CORRENTE_SUPPLIERS: Supplier[] = [
   {
     id: 'commscope',
     name: 'CommScope Brasil',
-    avgLeadTime: 52,
-    leadTimeStd: 11.3,
+    leadTime: 52,
+    leadTimeVariance: 11.3,
     reliability: 89.2,
     riskScore: 0.62,
     category: 'Equipamentos Rede',
@@ -73,8 +84,8 @@ const NOVA_CORRENTE_SUPPLIERS: Supplier[] = [
   {
     id: 'huawei-brasil',
     name: 'Huawei Technologies Brasil',
-    avgLeadTime: 60,
-    leadTimeStd: 14.7,
+    leadTime: 60,
+    leadTimeVariance: 14.7,
     reliability: 87.1,
     riskScore: 0.73,
     category: '5G Equipment',
@@ -85,8 +96,8 @@ const NOVA_CORRENTE_SUPPLIERS: Supplier[] = [
   {
     id: 'ericsson-brasil',
     name: 'Ericsson do Brasil',
-    avgLeadTime: 42,
-    leadTimeStd: 4.8,
+    leadTime: 42,
+    leadTimeVariance: 4.8,
     reliability: 96.4,
     riskScore: 0.22,
     category: 'Core Network',
@@ -97,8 +108,8 @@ const NOVA_CORRENTE_SUPPLIERS: Supplier[] = [
   {
     id: 'nokia-brasil',
     name: 'Nokia Solutions Brasil',
-    avgLeadTime: 48,
-    leadTimeStd: 7.1,
+    leadTime: 48,
+    leadTimeVariance: 7.1,
     reliability: 94.2,
     riskScore: 0.35,
     category: 'RAN & Transport',
@@ -612,7 +623,7 @@ export function generateNovaCorrenteDataset(): GeneratedDataset {
   }));
   
   // Generate lead time data
-  const leadTimeData: { timestamp: string; supplierId: string; avgLeadTime: number; material: string; }[] = [];
+  const leadTimeData: { timestamp: string; supplierId: string; leadTime: number; material: string; }[] = [];
   NOVA_CORRENTE_SUPPLIERS.forEach(supplier => {
     supplier.materials.forEach(material => {
       for (let i = 0; i < config.duration; i += 7) { // Weekly sampling
@@ -621,11 +632,11 @@ export function generateNovaCorrenteDataset(): GeneratedDataset {
         const dateStr = date.toISOString().split('T')[0];
         
         // Add variance to lead time
-        const leadTimeVariation = (Math.random() - 0.5) * 2 * supplier.leadTimeStd;
+        const leadTimeVariation = (Math.random() - 0.5) * 2 * supplier.leadTimeVariance;
         leadTimeData.push({
           timestamp: dateStr,
           supplierId: supplier.id,
-          leadTime: Math.max(1, supplier.avgLeadTime + leadTimeVariation),
+          leadTime: Math.max(1, supplier.leadTime + leadTimeVariation),
           material
         });
       }
@@ -654,11 +665,11 @@ export function generateNovaCorrenteDataset(): GeneratedDataset {
   const transformedSuppliers = NOVA_CORRENTE_SUPPLIERS.map(supplier => ({
     id: supplier.id,
     name: supplier.name,
-    avgLeadTime: supplier.avgLeadTime,
-    leadTimeStd: supplier.leadTimeStd,
+    avgLeadTime: supplier.leadTime,
+    leadTimeStd: supplier.leadTimeVariance,
     trend: Math.random() > 0.5 ? Math.floor(Math.random() * 5) : -Math.floor(Math.random() * 3), // Random trend for demo
     reliability: supplier.reliability / 100, // Convert to 0-1 range
-    variance: (supplier.leadTimeStd / supplier.avgLeadTime) * 100,
+    variance: supplier.leadTime > 0 ? (supplier.leadTimeVariance / supplier.leadTime) * 100 : 0,
     backlog: Math.floor(Math.random() * 50),
     materials: supplier.materials,
     riskScore: supplier.riskScore,
@@ -691,4 +702,5 @@ export {
   REAL_ANOMALIES,
   REAL_CHANGE_POINTS
 };
+
 

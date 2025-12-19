@@ -51,7 +51,8 @@ const BusinessMetricsChart: React.FC<BusinessMetricsChartProps> = memo(({ materi
     fetchData();
   }, [materialId, addToast]);
 
-  // Memoize chart data BEFORE any early returns (Rules of Hooks)
+  // Memoize chart data to avoid recalculation on every render
+  // MUST be before any early returns to comply with React Hooks rules
   const top5ChartData = useMemo(() => {
     const validData = (top5Families || []).filter(item => item && (item.family_id || item.family_name));
     return validData.map((item) => ({
@@ -63,6 +64,7 @@ const BusinessMetricsChart: React.FC<BusinessMetricsChartProps> = memo(({ materi
     }));
   }, [top5Families]);
 
+  // Memoize tier chart data
   const tierChartData = useMemo(() => {
     const validData = (tierAnalytics || []).filter(item => item && item.tier_nivel);
     return validData.map((item) => ({

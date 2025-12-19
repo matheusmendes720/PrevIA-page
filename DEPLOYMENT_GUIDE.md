@@ -229,3 +229,4 @@ For issues:
 3. Set up monitoring (Sentry, etc.)
 4. Configure CI/CD for automatic deploys
 5. Switch mock data to real API when ready
+

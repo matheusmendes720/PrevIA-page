@@ -36,3 +36,4 @@ const ChartSkeleton: React.FC<ChartSkeletonProps> = ({
 };
 
 export default ChartSkeleton;
+

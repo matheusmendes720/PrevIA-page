@@ -330,3 +330,4 @@ After deployment, monitor:
 - **>90** Lighthouse score (expected)
 
 Ready for production deployment! 🚀
+

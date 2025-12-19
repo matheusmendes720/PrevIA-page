@@ -32,13 +32,13 @@ export default function LagFeaturesTab() {
   
   // Calculate momentum (rate of change)
   const momentum7 = filteredData.values.map((val, i) => {
-    if (i < 7 || !filteredData.values[i - 7]) return 0;
+    if (i < 7 || !filteredData.values[i - 7]) return null;
     return ((val - filteredData.values[i - 7]) / filteredData.values[i - 7]) * 100;
   });
   
   // Bollinger Bands (SMA ± 2*std)
-  const upperBand = sma7.map((ma, i) => ma && rstd7[i] ? ma + 2 * rstd7[i] : 0);
-  const lowerBand = sma7.map((ma, i) => ma && rstd7[i] ? ma - 2 * rstd7[i] : 0);
+  const upperBand = sma7.map((ma, i) => ma && rstd7[i] ? ma + 2 * rstd7[i] : null);
+  const lowerBand = sma7.map((ma, i) => ma && rstd7[i] ? ma - 2 * rstd7[i] : null);
   
   // Current values (last non-NaN)
   const currentSMA7 = sma7.filter(v => !isNaN(v)).slice(-1)[0] || 0;
@@ -491,4 +491,5 @@ export default function LagFeaturesTab() {
     </div>
   );
 }
+
 

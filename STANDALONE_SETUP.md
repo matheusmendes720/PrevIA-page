@@ -251,3 +251,4 @@ This gives you both options! Let me know if you want this setup.
 ---
 
 Would you like me to help you set up the standalone repository now? 🚀
+

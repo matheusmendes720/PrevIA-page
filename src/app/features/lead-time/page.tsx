@@ -49,7 +49,7 @@ export default function LeadTimeFeaturesPage() {
         // Log to verify we're getting real supplier names
         if (suppliers.length > 0) {
           console.log('✅ Fetched suppliers from API:', suppliers.length);
-          console.log('Sample supplier names:', suppliers.slice(0, 5).map((s: any) => s.fornecedor_nome || s.supplier_name || 'N/A'));
+          console.log('Sample supplier names:', suppliers.slice(0, 5).map(s => s.fornecedor_nome || s.supplier_name || 'N/A'));
         }
 
         // Fetch materials
@@ -2096,9 +2096,8 @@ export default function LeadTimeFeaturesPage() {
               {apiData.suppliers.map((s) => {
                 // Use REAL supplier name from NOME FORNEC. column (fornecedor_nome from API)
                 const supplierName = s.fornecedor_nome || s.supplier_name || 'Fornecedor';
-                const supplierId = s.fornecedor_id || s.supplier_id || 0;
                 return (
-                  <option key={supplierId} value={supplierId.toString()}>
+                  <option key={s.fornecedor_id || s.supplier_id} value={(s.fornecedor_id || s.supplier_id).toString()}>
                     {supplierName}
                   </option>
                 );

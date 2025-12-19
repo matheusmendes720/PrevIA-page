@@ -125,3 +125,4 @@ export const regionPerformance: RegionPerformance[] = [
   { region: 'Centro-Oeste', state: 'DF', revenue: 28400, growth: 16.3, marketShare: 15.5 },
   { region: 'Norte', state: 'PA', revenue: 19100, growth: 21.7, marketShare: 10.3 }
 ];
+

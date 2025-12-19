@@ -322,3 +322,4 @@ export const DEFAULT_LAYER_CONFIG: LayerConfig = {
   gridCells: { enabled: false, opacity: 0.6, cellSize: 50 }
 };
 
+

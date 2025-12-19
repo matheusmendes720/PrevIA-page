@@ -263,9 +263,7 @@ export class CanvasOptimizer {
     (ctx as any).imageSmoothingEnabled = false;
     
     // Use willReadFrequently hint
-    if (ctx.getContextAttributes) {
-      (ctx as any).willReadFrequently = true;
-    }
+    ctx.getContextAttributes && (ctx as any).willReadFrequently;
   }
 
   /**
@@ -402,4 +400,5 @@ export const lodManager = new LODManager();
 export const canvasOptimizer = new CanvasOptimizer();
 export const workerPool = new WorkerPool(4);
 export const perfMonitor = new PerformanceMonitor();
+
 
