@@ -65,5 +65,8 @@
     "ts-jest": "^29.1.1",
     "typescript": "^5.3.3",
     "whatwg-fetch": "^3.6.20"
+  },
+  "optionalDependencies": {
+    "@netlify/plugin-nextjs": "^4.39.0"
   }
 }

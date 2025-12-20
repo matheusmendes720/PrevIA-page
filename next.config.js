@@ -32,7 +32,20 @@ const nextConfig = {
   },
   images: {
     domains: ['localhost'],
+    // Add Netlify domain for images
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.netlify.app',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.netlify.com',
+      },
+    ],
   },
+  // Output configuration for Netlify
+  output: 'standalone',
   // Webpack optimizations for better code splitting
   webpack: (config, { dev, isServer }) => {
     // Optimize chunk splitting for better loading performance

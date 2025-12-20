@@ -1,31 +1,38 @@
+# Netlify configuration for Next.js 14
+# The @netlify/plugin-nextjs handles most routing and optimization automatically
+
 [build]
-  command = "curl -fsSL https://bun.sh/install | bash && export BUN_INSTALL=\"$HOME/.bun\" && export PATH=\"$BUN_INSTALL/bin:$PATH\" && bun install && bun run build"
+  # Use npm instead of Bun for Netlify (Bun support is experimental)
+  command = "npm install && npm run build:npm"
   publish = ".next"
   
 [build.environment]
   NODE_VERSION = "20"
   NEXT_TELEMETRY_DISABLED = "1"
-  # Bun optimizations
-  BUN_RUNTIME = "true"
   NODE_ENV = "production"
 
 # Production context
 [context.production]
-  command = "curl -fsSL https://bun.sh/install | bash && export BUN_INSTALL=\"$HOME/.bun\" && export PATH=\"$BUN_INSTALL/bin:$PATH\" && bun install && bun run build"
+  command = "npm install && npm run build:npm"
   
 [context.production.environment]
   NODE_ENV = "production"
   NEXT_PUBLIC_API_URL = "https://gran-prix-api.netlify.app"
-  BUN_RUNTIME = "true"
 
 # Deploy preview context
 [context.deploy-preview]
-  command = "curl -fsSL https://bun.sh/install | bash && export BUN_INSTALL=\"$HOME/.bun\" && export PATH=\"$BUN_INSTALL/bin:$PATH\" && bun install && bun run build"
+  command = "npm install && npm run build:npm"
+  
+[context.deploy-preview.environment]
+  NODE_ENV = "production"
   
 [context.branch-deploy]
-  command = "curl -fsSL https://bun.sh/install | bash && export BUN_INSTALL=\"$HOME/.bun\" && export PATH=\"$BUN_INSTALL/bin:$PATH\" && bun install && bun run build"
+  command = "npm install && npm run build:npm"
+  
+[context.branch-deploy.environment]
+  NODE_ENV = "production"
 
-# Headers for better performance
+# Security headers
 [[headers]]
   for = "/*"
   [headers.values]
@@ -33,35 +40,26 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
     
+# Cache static assets
 [[headers]]
-  for = "/*.js"
+  for = "/_next/static/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
     
 [[headers]]
-  for = "/*.css"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-    
-[[headers]]
-  for = "/*.woff2"
+  for = "/static/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Redirects
+# Next.js plugin - handles routing, ISR, and serverless functions automatically
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Optional: Redirect root to main page
 [[redirects]]
   from = "/"
   to = "/main"
   status = 200
   force = false
-
-# SPA fallback for client-side routing
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-# Plugin for faster builds
-[[plugins]]
-  package = "@netlify/plugin-nextjs"

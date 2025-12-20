@@ -1,4 +1,6 @@
 # Netlify redirects for Next.js
+# Note: @netlify/plugin-nextjs handles most routing automatically
+# Only add custom redirects here if needed
+
+# Redirect root to main dashboard
 / /main 200
-/features/* /features/:splat 200
-/* /index.html 200
