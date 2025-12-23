@@ -494,6 +494,62 @@ export default function CategoricalFeaturesPage() {
     };
   }, [isChartLoaded]);
 
+  // Apply inline styles to all oversized elements after render
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    const applyStyles = () => {
+      // Header h1
+      document.querySelectorAll('.categorical-header h1').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '18px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      
+      // Metric cards
+      document.querySelectorAll('.metric-card .label').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '500', 'important');
+      });
+      document.querySelectorAll('.metric-card .value').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '24px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      document.querySelectorAll('.metric-card .unit').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+      });
+      
+      // Section titles
+      document.querySelectorAll('.section-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '15px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      
+      // Chart titles
+      document.querySelectorAll('.chart-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      
+      // Narrative box
+      document.querySelectorAll('.narrative-box h3').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '16px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      document.querySelectorAll('.narrative-box p').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '15px', 'important');
+      });
+      
+      // Tab buttons
+      document.querySelectorAll('.tab-button').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '15px', 'important');
+      });
+    };
+    
+    applyStyles();
+    const interval = setInterval(applyStyles, 100);
+    return () => clearInterval(interval);
+  }, [isInitialized]);
+
   // Re-initialize charts when activeCategoryType or data changes
   useEffect(() => {
     if (!isInitialized || !isChartLoaded) return;

@@ -659,6 +659,59 @@ export default function ClimateFeaturesPage() {
     initPage();
   }, [isChartLoaded]);
 
+  // Apply inline styles to all oversized elements after render
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    const applyStyles = () => {
+      // Header h1
+      document.querySelectorAll('.climate-header h1').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '18px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      
+      // Card titles
+      document.querySelectorAll('.card-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '18px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      
+      // Card subtitles
+      document.querySelectorAll('.card-subtitle').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '12px', 'important');
+      });
+      
+      // Metric badges
+      document.querySelectorAll('.metric-badge strong').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '11px', 'important');
+      });
+      
+      // Metric values
+      document.querySelectorAll('.metric-value').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '20px', 'important');
+      });
+      
+      // Metric details
+      document.querySelectorAll('.metric-detail').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '12px', 'important');
+      });
+      
+      // Date range labels
+      document.querySelectorAll('.date-range label').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      
+      // Date inputs
+      document.querySelectorAll('.date-input').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+    };
+    
+    applyStyles();
+    const interval = setInterval(applyStyles, 100);
+    return () => clearInterval(interval);
+  }, [isInitialized]);
+
   // Effect to check for Chart.js on mount
   useEffect(() => {
     if (typeof window === 'undefined') return;

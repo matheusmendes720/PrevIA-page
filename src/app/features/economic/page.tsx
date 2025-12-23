@@ -341,6 +341,87 @@ export default function EconomicFeaturesPage() {
     };
   }, []);
 
+  // Apply inline styles to all oversized elements after render
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    const applyStyles = () => {
+      // Header h1
+      document.querySelectorAll('.economic-header h1').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '18px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      
+      // Section titles
+      document.querySelectorAll('.economic-section-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      
+      // Card labels
+      document.querySelectorAll('.economic-card-label').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      
+      // Card values
+      document.querySelectorAll('.economic-card-value').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '24px', 'important');
+      });
+      
+      // Chart titles
+      document.querySelectorAll('.economic-chart-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+      });
+      
+      // Storytelling content
+      document.querySelectorAll('.economic-storytelling-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+      });
+      document.querySelectorAll('.economic-storytelling-content').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      
+      // Waterfall and impact titles
+      document.querySelectorAll('.economic-waterfall-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+      });
+      document.querySelectorAll('.economic-impact-segment').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '12px', 'important');
+      });
+      
+      // Drawback cards
+      document.querySelectorAll('.economic-drawback-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+      });
+      document.querySelectorAll('.economic-drawback-label').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      document.querySelectorAll('.economic-drawback-value').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '24px', 'important');
+      });
+      
+      // Recommendation cards
+      document.querySelectorAll('.economic-recom-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+      });
+      document.querySelectorAll('.economic-recom-owner, .economic-recom-desc').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      
+      // Gauge titles and values
+      document.querySelectorAll('.economic-gauge-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '15px', 'important');
+      });
+      document.querySelectorAll('.economic-gauge-value').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '24px', 'important');
+      });
+    };
+    
+    applyStyles();
+    const interval = setInterval(applyStyles, 100);
+    return () => clearInterval(interval);
+  }, [isInitialized]);
+
   return (
     <>
       <Script
@@ -408,8 +489,8 @@ export default function EconomicFeaturesPage() {
 
           .economic-header h1 {
             margin: 0 0 var(--space-8) 0;
-            font-size: 20px;
-            font-weight: 600;
+            font-size: 18px !important;
+            font-weight: 600 !important;
             color: var(--color-text);
           }
 
