@@ -6,18 +6,26 @@ export function lazyWithRetry<T extends ComponentType<any>>(
   componentName: string = 'Component'
 ): React.LazyExoticComponent<T> {
   return lazy(async () => {
-    const pageHasAlreadyBeenForceRefreshed = JSON.parse(
-      window.sessionStorage.getItem('page-has-been-force-refreshed') || 'false'
-    );
+    // Only access window/sessionStorage in browser environment
+    const isBrowser = typeof window !== 'undefined' && window.sessionStorage;
+    const pageHasAlreadyBeenForceRefreshed = isBrowser
+      ? JSON.parse(
+          window.sessionStorage.getItem('page-has-been-force-refreshed') || 'false'
+        )
+      : false;
 
     try {
       const component = await componentImport();
-      window.sessionStorage.setItem('page-has-been-force-refreshed', 'false');
+      if (isBrowser) {
+        window.sessionStorage.setItem('page-has-been-force-refreshed', 'false');
+      }
       return component;
     } catch (error) {
-      if (!pageHasAlreadyBeenForceRefreshed) {
+      if (!pageHasAlreadyBeenForceRefreshed && isBrowser) {
         window.sessionStorage.setItem('page-has-been-force-refreshed', 'true');
-        return window.location.reload() as any;
+        window.location.reload();
+        // Return a dummy component to satisfy the type
+        return { default: (() => null) as unknown as T };
       }
       throw error;
     }
