@@ -25,13 +25,18 @@ export default function MainPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [analyticsTargetState, setAnalyticsTargetState] = useState<string | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   // Check for target page from sessionStorage when component mounts
   useEffect(() => {
-    const targetPage = sessionStorage.getItem('targetPage');
-    if (targetPage && pageDetails[targetPage as keyof typeof pageDetails]) {
-      setActivePage(targetPage);
-      sessionStorage.removeItem('targetPage'); // Clear after use
+    // Only access sessionStorage in browser environment
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      const targetPage = sessionStorage.getItem('targetPage');
+      if (targetPage && pageDetails[targetPage as keyof typeof pageDetails]) {
+        setActivePage(targetPage);
+        sessionStorage.removeItem('targetPage'); // Clear after use
+      }
     }
   }, []);
 
@@ -44,6 +49,41 @@ export default function MainPage() {
     setAnalyticsTargetState(stateId);
     setActivePage('Análises');
   }, []);
+
+  const handleMobileMenuToggle = useCallback(() => {
+    setIsMobileMenuOpen(prev => !prev);
+  }, []);
+
+  // Swipe from left edge to open sidebar on mobile
+  useEffect(() => {
+    const handleTouchStart = (e: TouchEvent) => {
+      // Only trigger from left edge (first 20px)
+      if (e.touches[0].clientX < 20 && window.innerWidth < 1024) {
+        setTouchStartX(e.touches[0].clientX);
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (touchStartX !== null && e.touches[0].clientX > touchStartX + 50 && !isMobileMenuOpen) {
+        setIsMobileMenuOpen(true);
+        setTouchStartX(null);
+      }
+    };
+
+    const handleTouchEnd = () => {
+      setTouchStartX(null);
+    };
+
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [touchStartX, isMobileMenuOpen]);
 
   const renderContent = useMemo(() => {
     switch (activePage) {
@@ -71,16 +111,20 @@ export default function MainPage() {
             setActivePage={handlePageChange}
             isCollapsed={isSidebarCollapsed}
             onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            isMobileOpen={isMobileMenuOpen}
+            onMobileToggle={handleMobileMenuToggle}
           />
-          <main className="flex-1 p-4 sm:p-5 lg:p-6">
+          <main className="flex-1 min-w-0 p-3 sm:p-4 md:p-5 lg:p-6">
             <Header
               title={currentPageDetails.title}
               subtitle={currentPageDetails.subtitle}
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
+              onMobileMenuToggle={handleMobileMenuToggle}
+              isMobileMenuOpen={isMobileMenuOpen}
             />
             <Suspense fallback={<div className="animate-pulse space-y-4 p-6"><div className="h-64 bg-brand-navy/50 rounded-lg"></div></div>}>
-              <div className="mt-5 animate-fade-in-up" key={activePage}>
+              <div className="mt-4 sm:mt-5 animate-fade-in-up" key={activePage}>
                 {renderContent}
               </div>
             </Suspense>
