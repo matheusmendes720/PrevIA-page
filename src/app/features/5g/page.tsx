@@ -126,28 +126,28 @@ export default function FiveGFeaturesPage() {
       <div className="min-h-screen bg-brand-blue text-brand-lightest-slate p-8">
         {/* Header */}
         <header className="mb-8">
-          <h1 className="text-4xl font-bold text-brand-lightest-slate mb-2">
+          <h1 className="text-2xl font-bold text-brand-lightest-slate mb-2">
             Features 5G
           </h1>
-          <p className="text-lg text-brand-slate">
+          <p className="text-base text-brand-slate">
             Monitoramento da expansão 5G e impacto na demanda de materiais
           </p>
         </header>
 
         {/* Hero Section - Always visible */}
         <Suspense fallback={
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {[1, 2, 3, 4].map(i => <SkeletonKPI key={i} />)}
           </div>
         }>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {kpis.map((kpi, idx) => (
               <div
                 key={idx}
                 className="bg-brand-navy/70 backdrop-blur-xl rounded-xl border border-brand-cyan/40 p-6 animate-subtle-glow"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl">{kpi.icon}</span>
+                  <span className="text-xl">{kpi.icon}</span>
                   <span className="text-xs text-brand-slate">{kpi.label}</span>
                 </div>
                 <div className="text-3xl font-bold text-brand-lightest-slate mb-1">
@@ -190,16 +190,16 @@ export default function FiveGFeaturesPage() {
               {subTab === 'regional' && (
                 <Suspense fallback={<SkeletonCard />}>
                   <div className="bg-brand-navy/70 backdrop-blur-xl rounded-xl border border-brand-cyan/40 p-6 animate-subtle-glow">
-                    <h2 className="text-xl font-bold text-brand-lightest-slate mb-4">
+                    <h2 className="text-lg font-bold text-brand-lightest-slate mb-4">
                       Impacto Regional
                     </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {regionDemand.map((region, idx) => (
                         <div
                           key={idx}
                           className="p-4 rounded-lg border border-brand-cyan/20 bg-brand-light-navy/30"
                         >
-                          <div className="text-lg font-semibold text-brand-lightest-slate mb-2">
+                          <div className="text-base font-semibold text-brand-lightest-slate mb-2">
                             {region.region}
                           </div>
                           <div className="text-sm text-brand-slate mb-2">
@@ -225,7 +225,7 @@ export default function FiveGFeaturesPage() {
               {subTab === 'timeline' && (
                 <Suspense fallback={<SkeletonCard />}>
                   <div className="bg-brand-navy/70 backdrop-blur-xl rounded-xl border border-brand-cyan/40 p-6 animate-subtle-glow">
-                    <h2 className="text-xl font-bold text-brand-lightest-slate mb-4">
+                    <h2 className="text-lg font-bold text-brand-lightest-slate mb-4">
                       Timeline de Eventos
                     </h2>
                     <div className="space-y-4">
@@ -242,7 +242,7 @@ export default function FiveGFeaturesPage() {
                         >
                           <div className="flex items-start justify-between mb-2">
                             <div>
-                              <div className="text-lg font-semibold text-brand-lightest-slate">
+                              <div className="text-base font-semibold text-brand-lightest-slate">
                                 {event.title}
                               </div>
                               <div className="text-sm text-brand-slate">
@@ -273,7 +273,7 @@ export default function FiveGFeaturesPage() {
               {subTab === 'projections' && (
                 <Suspense fallback={<SkeletonCard />}>
                   <div className="space-y-6">
-                    <div className="flex gap-4 mb-6">
+                    <div className="flex gap-6 mb-6">
                       {(['base', 'optimistic', 'adverse'] as Scenario[]).map((scen) => (
                         <button
                           key={scen}
@@ -309,7 +309,7 @@ export default function FiveGFeaturesPage() {
               {subTab === 'actions' && (
                 <Suspense fallback={<SkeletonCard />}>
                   <div className="bg-brand-navy/70 backdrop-blur-xl rounded-xl border border-brand-cyan/40 p-6 animate-subtle-glow">
-                    <h2 className="text-xl font-bold text-brand-lightest-slate mb-4">
+                    <h2 className="text-lg font-bold text-brand-lightest-slate mb-4">
                       Checklist de Ações
                     </h2>
                     <div className="space-y-4">
@@ -337,7 +337,7 @@ export default function FiveGFeaturesPage() {
               {subTab === 'sales' && (
                 <Suspense fallback={<SkeletonCard />}>
                   <div className="bg-brand-navy/70 backdrop-blur-xl rounded-xl border border-brand-cyan/40 p-6 animate-subtle-glow">
-                    <h2 className="text-xl font-bold text-brand-lightest-slate mb-4">
+                    <h2 className="text-lg font-bold text-brand-lightest-slate mb-4">
                       Oportunidades de Vendas
                     </h2>
                     <div className="space-y-4">
@@ -346,7 +346,7 @@ export default function FiveGFeaturesPage() {
                           key={idx}
                           className="p-4 rounded-lg border border-brand-cyan/20 bg-brand-light-navy/30"
                         >
-                          <div className="text-lg font-semibold text-brand-lightest-slate mb-2">
+                          <div className="text-base font-semibold text-brand-lightest-slate mb-2">
                             {event.title}
                           </div>
                           <div className="text-sm text-brand-slate mb-2">

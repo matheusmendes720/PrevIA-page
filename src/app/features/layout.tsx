@@ -35,6 +35,7 @@ export default function FeaturesLayout({
   const [activePage, setActivePage] = useState('Features');
   const [searchTerm, setSearchTerm] = useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const handleSetActivePage = useCallback((page: string) => {
     setActivePage(page);
@@ -44,6 +45,9 @@ export default function FeaturesLayout({
     setIsSidebarCollapsed(prev => !prev);
   }, []);
 
+  const handleMobileMenuToggle = useCallback(() => {
+    setIsMobileMenuOpen(prev => !prev);
+  }, []);
 
   return (
     <ToastProvider>
@@ -55,15 +59,19 @@ export default function FeaturesLayout({
               setActivePage={handleSetActivePage}
               isCollapsed={isSidebarCollapsed}
               onToggleCollapse={handleToggleCollapse}
+              isMobileOpen={isMobileMenuOpen}
+              onMobileToggle={handleMobileMenuToggle}
             />
-            <main className="flex-1 p-4 sm:p-6 lg:p-8">
+            <main className="flex-1 min-w-0 p-3 sm:p-4 md:p-6 lg:p-8">
               <Header
                 title="ML Features Dashboard"
                 subtitle="Visualização de features de machine learning para previsão de demanda"
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
+                onMobileMenuToggle={handleMobileMenuToggle}
+                isMobileMenuOpen={isMobileMenuOpen}
               />
-              <div className="mt-6 animate-fade-in-up">
+              <div className="mt-4 sm:mt-6 animate-fade-in-up">
                 <ErrorBoundary>
                   <Suspense fallback={<PageLoadingSkeleton />}>
                     {children}

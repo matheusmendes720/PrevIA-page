@@ -754,7 +754,7 @@ export default function CategoricalFeaturesPage() {
 
           .categorical-header h1 {
             margin: 0 0 var(--space-8) 0;
-            font-size: 28px;
+            font-size: 20px;
             font-weight: 600;
             color: var(--color-text);
           }
@@ -762,7 +762,7 @@ export default function CategoricalFeaturesPage() {
           .categorical-header p {
             margin: 0;
             color: var(--color-text-secondary);
-            font-size: 18px;
+            font-size: 15px;
             line-height: 1.6;
           }
 
@@ -770,7 +770,7 @@ export default function CategoricalFeaturesPage() {
             background: rgba(50, 184, 198, 0.08);
             border-left: 4px solid var(--color-primary);
             border-radius: var(--radius-lg);
-            padding: var(--space-20);
+            padding: var(--space-24);
             margin-bottom: var(--space-32);
             line-height: 1.8;
           }
@@ -778,14 +778,14 @@ export default function CategoricalFeaturesPage() {
           .narrative-box h3 {
             margin: 0 0 var(--space-12) 0;
             color: var(--color-primary);
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
           }
 
           .narrative-box p {
             margin: 0 0 var(--space-12) 0;
             color: var(--color-text);
-            font-size: 18px;
+            font-size: 15px;
           }
 
           .narrative-box p:last-child {
@@ -817,7 +817,7 @@ export default function CategoricalFeaturesPage() {
             border-bottom: 2px solid transparent;
             color: var(--color-text-secondary);
             cursor: pointer;
-            font-size: 18px;
+            font-size: 15px;
             font-weight: 500;
             transition: all 0.3s ease;
             position: relative;
@@ -836,7 +836,7 @@ export default function CategoricalFeaturesPage() {
           .summary-banner {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: var(--space-20);
+            gap: var(--space-24);
             margin-bottom: var(--space-32);
           }
 
@@ -844,7 +844,7 @@ export default function CategoricalFeaturesPage() {
             background: var(--color-surface);
             border: 1px solid var(--color-border);
             border-radius: var(--radius-lg);
-            padding: var(--space-20);
+            padding: var(--space-24);
             position: relative;
             cursor: help;
             transition: all 0.3s ease;
@@ -860,7 +860,7 @@ export default function CategoricalFeaturesPage() {
           }
 
           .metric-card .label {
-            font-size: 18px;
+            font-size: 13px;
             font-weight: 500;
             text-transform: uppercase;
             color: var(--color-text-secondary);
@@ -869,14 +869,14 @@ export default function CategoricalFeaturesPage() {
           }
 
           .metric-card .value {
-            font-size: 28px;
+            font-size: 30px;
             font-weight: 600;
             color: var(--color-primary);
             margin-bottom: var(--space-4);
           }
 
           .metric-card .unit {
-            font-size: 18px;
+            font-size: 14px;
             color: var(--color-text-secondary);
           }
 

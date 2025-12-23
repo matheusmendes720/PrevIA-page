@@ -757,7 +757,7 @@ export default function ClimateFeaturesPage() {
 
           .climate-header h1 {
             margin: 0 0 var(--space-8) 0;
-            font-size: 28px;
+            font-size: 20px;
             font-weight: 600;
           }
 
@@ -830,7 +830,7 @@ export default function ClimateFeaturesPage() {
           }
 
           .card-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
             margin: 0;
             flex: 1;
@@ -865,7 +865,7 @@ export default function ClimateFeaturesPage() {
           }
 
           .metric-value {
-            font-size: 24px;
+            font-size: 30px;
             font-weight: 700;
             color: var(--color-primary);
             margin-bottom: var(--space-4);

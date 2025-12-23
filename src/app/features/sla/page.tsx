@@ -7,6 +7,7 @@ import { SLAFeatures, SLAPenalty, SLAViolation } from '../../../types/features';
 
 export default function SLAFeaturesPage() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [containerReady, setContainerReady] = useState(false);
   const [isChartLoaded, setIsChartLoaded] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const initRef = useRef(false);
@@ -103,9 +104,17 @@ export default function SLAFeaturesPage() {
     fetchData();
   }, [selectedTier]);
 
+  // Check if Chart.js is already loaded (e.g., from previous navigation)
+  useEffect(() => {
+    const chartJsAvailable = typeof (window as any).Chart !== 'undefined';
+    if (chartJsAvailable && !isChartLoaded) {
+      setIsChartLoaded(true);
+    }
+  }, [isChartLoaded]);
+
   // Effect to initialize when Chart.js is loaded
   useEffect(() => {
-    if (!isChartLoaded || !containerRef.current) return;
+    if (!isChartLoaded || !containerReady) return;
 
     const initPage = () => {
       if (typeof (window as any).Chart === 'undefined') {
@@ -113,9 +122,8 @@ export default function SLAFeaturesPage() {
         return;
       }
 
-      // Small delay to ensure DOM is ready
-      setTimeout(() => {
-
+      // Use requestAnimationFrame for immediate execution on next frame (faster than setTimeout)
+      requestAnimationFrame(() => {
       // Allow re-initialization when data changes - charts will be destroyed and recreated
 
       // Configure Chart.js defaults
@@ -922,7 +930,7 @@ export default function SLAFeaturesPage() {
       }
 
       setIsInitialized(true);
-      }, 100);
+      }); // requestAnimationFrame already ensures DOM is ready
     };
 
     initPage();
@@ -941,7 +949,7 @@ export default function SLAFeaturesPage() {
         }
       });
     };
-  }, [isChartLoaded, apiData.features, apiData.penalties, apiData.violations, apiData.availability]);
+  }, [isChartLoaded, containerReady, apiData.features, apiData.penalties, apiData.violations, apiData.availability]);
 
   const summary = apiData.features.length > 0
     ? (() => {
@@ -1043,7 +1051,16 @@ export default function SLAFeaturesPage() {
           <p className="text-brand-slate">Carregando dashboard de SLA...</p>
         </div>
       )}
-      <div ref={containerRef} className="sla-features-container" style={{ display: isInitialized ? 'block' : 'none' }}>
+      <div 
+        ref={(node) => {
+          containerRef.current = node;
+          if (node && !containerReady) {
+            setContainerReady(true);
+          }
+        }} 
+        className="sla-features-container" 
+        style={{ display: isInitialized ? 'block' : 'none' }}
+      >
         <style jsx global>{`
           :root {
             --color-primary: #20A084;
@@ -1090,7 +1107,7 @@ export default function SLAFeaturesPage() {
 
           .sla-header h1 {
             margin: 0 0 var(--space-8) 0;
-            font-size: 28px;
+            font-size: 20px;
             font-weight: 600;
             color: var(--color-text);
           }
@@ -1098,7 +1115,7 @@ export default function SLAFeaturesPage() {
           .sla-header p {
             margin: 0;
             color: var(--color-text-secondary);
-            font-size: 18px;
+            font-size: 15px;
             line-height: 1.6;
           }
 
@@ -1115,7 +1132,7 @@ export default function SLAFeaturesPage() {
 
           .filter-group label {
             display: block;
-            font-size: 18px;
+            font-size: 13px;
             font-weight: 500;
             margin-bottom: var(--space-8);
             color: var(--color-primary);
@@ -1131,13 +1148,13 @@ export default function SLAFeaturesPage() {
             border: 1px solid var(--color-border);
             border-radius: var(--radius-base);
             color: var(--color-text);
-            font-size: 18px;
+            font-size: 15px;
           }
 
           .summary-banner {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: var(--space-16);
+            gap: var(--space-24);
             margin-bottom: var(--space-32);
           }
 
@@ -1145,7 +1162,7 @@ export default function SLAFeaturesPage() {
             background: var(--color-surface);
             border: 1px solid var(--color-border);
             border-radius: var(--radius-lg);
-            padding: var(--space-20);
+            padding: var(--space-24);
             position: relative;
             cursor: help;
             transition: all 0.3s ease;
@@ -1158,7 +1175,7 @@ export default function SLAFeaturesPage() {
           }
 
           .metric-card .label {
-            font-size: 18px;
+            font-size: 13px;
             font-weight: 500;
             text-transform: uppercase;
             color: var(--color-text-secondary);
@@ -1167,14 +1184,14 @@ export default function SLAFeaturesPage() {
           }
 
           .metric-card .value {
-            font-size: 28px;
+            font-size: 30px;
             font-weight: 600;
             color: var(--color-primary);
             margin-bottom: var(--space-8);
           }
 
           .metric-card .unit {
-            font-size: 18px;
+            font-size: 14px;
             color: var(--color-text-secondary);
           }
 

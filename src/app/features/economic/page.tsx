@@ -408,7 +408,7 @@ export default function EconomicFeaturesPage() {
 
           .economic-header h1 {
             margin: 0 0 var(--space-8) 0;
-            font-size: 32px;
+            font-size: 20px;
             font-weight: 600;
             color: var(--color-text);
           }
@@ -416,7 +416,7 @@ export default function EconomicFeaturesPage() {
           .economic-header p {
             margin: 0;
             color: var(--color-text-secondary);
-            font-size: 16px;
+            font-size: 15px;
           }
 
           .economic-section-title {
@@ -431,7 +431,7 @@ export default function EconomicFeaturesPage() {
           .economic-summary-tiles {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: var(--space-16);
+            gap: var(--space-24);
             margin-bottom: var(--space-24);
           }
 
@@ -439,7 +439,7 @@ export default function EconomicFeaturesPage() {
             background: var(--color-surface);
             border: 1px solid var(--color-border);
             border-radius: var(--radius-lg);
-            padding: var(--space-16);
+            padding: var(--space-24);
             text-align: center;
             cursor: help;
             transition: all 0.3s;
@@ -452,7 +452,7 @@ export default function EconomicFeaturesPage() {
           }
 
           .economic-card-label {
-            font-size: 15px;
+            font-size: 13px;
             color: var(--color-text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -461,7 +461,7 @@ export default function EconomicFeaturesPage() {
           }
 
           .economic-card-value {
-            font-size: 32px;
+            font-size: 30px;
             font-weight: 700;
             color: var(--color-primary);
             margin-bottom: var(--space-10);

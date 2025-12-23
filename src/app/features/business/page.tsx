@@ -614,7 +614,14 @@ const MOCK_SENSITIVITY_FACTORS = [
 
 export default function BusinessFeaturesPage() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isChartLoaded, setIsChartLoaded] = useState(false);
+  const [containerReady, setContainerReady] = useState(false);
+  const [isChartLoaded, setIsChartLoaded] = useState(() => {
+    // Check if Chart.js is already loaded on mount (e.g., from previous navigation)
+    if (typeof window !== 'undefined') {
+      return typeof (window as any).Chart !== 'undefined';
+    }
+    return false;
+  });
   const [isInitialized, setIsInitialized] = useState(false);
   const initRef = useRef(false);
   const router = useRouter();
@@ -851,11 +858,28 @@ export default function BusinessFeaturesPage() {
     fetchData();
   }, []);
 
-  // Calculate summary metrics
+  // Calculate summary metrics - only when data is loaded
   const summary = useMemo(() => {
+    // Return default values if data is still loading or empty
+    if (apiData.loading || apiData.families.length === 0 || apiData.tiers.length === 0) {
+      return {
+        totalRevenue: 0,
+        growthQoQ: 0,
+        biggestRisk: 'TIER_1',
+        biggestRiskExposure: 0,
+        narrative: 'Carregando dados...',
+      };
+    }
+
     const totalRevenue = apiData.families.reduce((sum, f) => sum + (f.revenue || 0), 0);
-    const previousRevenue = totalRevenue / 1.08;
-    const growthQoQ = ((totalRevenue - previousRevenue) / previousRevenue) * 100;
+    
+    // Only calculate growth if we have revenue
+    let growthQoQ = 0;
+    if (totalRevenue > 0) {
+      const previousRevenue = totalRevenue / 1.08;
+      growthQoQ = ((totalRevenue - previousRevenue) / previousRevenue) * 100;
+    }
+    
     const biggestRisk = apiData.tiers.reduce((max, t) => 
       (t.penaltyExposure || 0) > (max.penaltyExposure || 0) ? t : max,
       apiData.tiers[0] || MOCK_TIERS[0]
@@ -877,7 +901,7 @@ export default function BusinessFeaturesPage() {
     });
 
     return summaryData;
-  }, [apiData.families, apiData.tiers]);
+  }, [apiData.families, apiData.tiers, apiData.loading]);
 
   // Filter insights by category
   const filteredInsights = useMemo(() => {
@@ -888,8 +912,22 @@ export default function BusinessFeaturesPage() {
   const currentInsight = filteredInsights[currentInsightIdx] || filteredInsights[0];
 
   // Initialize charts when Chart.js is loaded
+  // Use a separate effect to watch for container readiness
   useEffect(() => {
-    if (!isChartLoaded || !containerRef.current || initRef.current) return;
+  // Check if Chart.js is available even if isChartLoaded is false (e.g., already loaded from previous page)
+  const chartJsAvailable = typeof (window as any).Chart !== 'undefined';
+  if (chartJsAvailable && !isChartLoaded) {
+    // Chart.js is loaded but state wasn't set - fix it immediately
+    setIsChartLoaded(true);
+    return; // Will re-run after state update
+  }
+}, [isChartLoaded]);
+
+  // Separate effect to initialize when both Chart.js and container are ready
+  useEffect(() => {
+    if (!isChartLoaded || !containerReady || initRef.current) {
+      return;
+    }
 
     const initPage = () => {
       if (typeof (window as any).Chart === 'undefined') {
@@ -897,7 +935,8 @@ export default function BusinessFeaturesPage() {
         return;
       }
 
-      setTimeout(() => {
+      // Use requestAnimationFrame for immediate execution on next frame (faster than setTimeout)
+      requestAnimationFrame(() => {
         // Configure Chart.js defaults
         if (typeof (window as any).Chart !== 'undefined') {
           console.log('📊 Chart.js loaded, initializing business features page');
@@ -929,11 +968,11 @@ export default function BusinessFeaturesPage() {
 
         initRef.current = true;
         setIsInitialized(true);
-      }, 100);
+      });
     };
 
     initPage();
-  }, [isChartLoaded]);
+  }, [isChartLoaded, containerReady]); // Re-run when container becomes ready
 
   // Helper function to safely destroy and create chart
   const createOrUpdateChart = (canvasId: string, config: any) => {
@@ -1004,11 +1043,9 @@ export default function BusinessFeaturesPage() {
       return;
     }
 
-    // Use requestAnimationFrame to ensure DOM is ready
+    // Use requestAnimationFrame to ensure DOM is ready (no additional setTimeout needed)
     requestAnimationFrame(() => {
-      // Additional delay to ensure conditional rendering is complete
-      setTimeout(() => {
-        console.log('📊 Initializing charts for main tab:', mainTab, 'sub-tab:', subTabs[mainTab]);
+      console.log('📊 Initializing charts for main tab:', mainTab, 'sub-tab:', subTabs[mainTab]);
 
         // Top 5 Families Revenue Chart
         if (mainTab === 'visao-geral' && subTabs['visao-geral'] === 'agregacao' && apiData.families.length > 0) {
@@ -1617,16 +1654,26 @@ export default function BusinessFeaturesPage() {
             },
           });
         }
-
-      }, 500); // Delay to ensure DOM is ready
-    });
+      }); // requestAnimationFrame already ensures DOM is ready, no additional delay needed
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInitialized, isChartLoaded, mainTab, subTabs, apiData.loading, apiData.families, apiData.tiers, summary.totalRevenue]);
 
   // Effect to initialize charts when tab or data changes
+  // Use direct dependencies instead of the callback to avoid infinite loops
+  // Use subTabs[mainTab] instead of subTabs object to avoid reference comparison issues
+  const currentSubTab = subTabs[mainTab];
   useEffect(() => {
     initializeChartsForTab();
-  }, [initializeChartsForTab]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isInitialized, isChartLoaded, mainTab, currentSubTab, apiData.loading, apiData.families.length, apiData.tiers.length]);
+
+  // Reset initRef on unmount to allow re-initialization on next mount
+  useEffect(() => {
+    return () => {
+      initRef.current = false;
+      setIsInitialized(false);
+    };
+  }, []);
 
   // Cleanup: destroy all charts on unmount
   useEffect(() => {
@@ -1676,7 +1723,9 @@ export default function BusinessFeaturesPage() {
     <>
       <Script
         src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"
-        onLoad={() => setIsChartLoaded(true)}
+        onLoad={() => {
+          setIsChartLoaded(true);
+        }}
         strategy="lazyOnload"
       />
       {!isInitialized && (
@@ -1684,7 +1733,16 @@ export default function BusinessFeaturesPage() {
           <p className="text-brand-slate">Carregando análise de negócio...</p>
         </div>
       )}
-      <div ref={containerRef} className="business-features-container" style={{ display: isInitialized ? 'block' : 'none' }}>
+      <div 
+        ref={(node) => {
+          containerRef.current = node;
+          if (node && !containerReady) {
+            setContainerReady(true);
+          }
+        }} 
+        className="business-features-container" 
+        style={{ display: isInitialized ? 'block' : 'none' }}
+      >
         <style jsx global>{`
           :root {
             --color-primary: #20A084;
@@ -1731,7 +1789,7 @@ export default function BusinessFeaturesPage() {
 
           .business-header h1 {
             margin: 0 0 var(--space-8) 0;
-            font-size: 26px;
+            font-size: 20px;
             font-weight: 600;
             color: var(--color-text);
           }
@@ -1739,14 +1797,14 @@ export default function BusinessFeaturesPage() {
           .business-header p {
             margin: 0;
             color: var(--color-text-secondary);
-            font-size: 17px;
+            font-size: 15px;
             line-height: 1.6;
           }
 
           .summary-banner {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: var(--space-16);
+            gap: var(--space-24);
             margin-bottom: var(--space-32);
           }
 
@@ -1754,7 +1812,7 @@ export default function BusinessFeaturesPage() {
             background: var(--color-surface);
             border: 1px solid var(--color-border);
             border-radius: var(--radius-lg);
-            padding: var(--space-20);
+            padding: var(--space-24);
             position: relative;
             cursor: help;
             transition: all 0.3s ease;
@@ -1766,7 +1824,7 @@ export default function BusinessFeaturesPage() {
           }
 
           .metric-card .label {
-            font-size: 17px;
+            font-size: 13px;
             font-weight: 500;
             text-transform: uppercase;
             color: var(--color-text-secondary);
@@ -1775,14 +1833,14 @@ export default function BusinessFeaturesPage() {
           }
 
           .metric-card .value {
-            font-size: 26px;
+            font-size: 30px;
             font-weight: 600;
             color: var(--color-primary);
             margin-bottom: var(--space-4);
           }
 
           .metric-card .unit {
-            font-size: 17px;
+            font-size: 14px;
             color: var(--color-text-secondary);
           }
 
@@ -1790,7 +1848,7 @@ export default function BusinessFeaturesPage() {
             background: rgba(50, 184, 198, 0.08);
             border-left: 4px solid var(--color-primary);
             border-radius: var(--radius-lg);
-            padding: var(--space-20);
+            padding: var(--space-24);
             margin-bottom: var(--space-32);
             line-height: 1.8;
           }
@@ -1798,14 +1856,14 @@ export default function BusinessFeaturesPage() {
           .narrative-box h3 {
             margin: 0 0 var(--space-12) 0;
             color: var(--color-primary);
-            font-size: 17px;
+            font-size: 16px;
             font-weight: 600;
           }
 
           .narrative-box p {
             margin: 0;
             color: var(--color-text);
-            font-size: 17px;
+            font-size: 15px;
           }
 
           .tabs-container {
@@ -1823,7 +1881,7 @@ export default function BusinessFeaturesPage() {
             border-bottom: 3px solid transparent;
             color: var(--color-text-secondary);
             cursor: pointer;
-            font-size: 17px;
+            font-size: 15px;
             font-weight: 500;
             transition: all 0.3s ease;
             position: relative;
@@ -1881,7 +1939,7 @@ export default function BusinessFeaturesPage() {
           .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
-            gap: var(--space-32);
+            gap: var(--space-24);
             margin-bottom: var(--space-32);
           }
 
@@ -1899,7 +1957,7 @@ export default function BusinessFeaturesPage() {
           }
 
           .chart-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
             margin-bottom: var(--space-20);
             color: var(--color-text);
@@ -1919,7 +1977,7 @@ export default function BusinessFeaturesPage() {
           }
 
           .section-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
             margin: var(--space-32) 0 var(--space-20) 0;
             color: var(--color-text);
@@ -1967,11 +2025,11 @@ export default function BusinessFeaturesPage() {
             font-weight: 600;
             color: var(--color-primary);
             margin-bottom: var(--space-12);
-            font-size: 17px;
+            font-size: 15px;
           }
 
           .card-value {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 600;
             margin-bottom: var(--space-8);
           }
@@ -1985,7 +2043,7 @@ export default function BusinessFeaturesPage() {
           }
 
           .card-description {
-            font-size: 15px;
+            font-size: 14px;
             color: var(--color-text-secondary);
             margin-top: var(--space-12);
             padding-top: var(--space-12);
