@@ -121,19 +121,19 @@ export default function LeadTimeFeaturesPage() {
         (window as any).Chart.defaults.color = '#e0e8f0';
         (window as any).Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.2)';
         (window as any).Chart.defaults.backgroundColor = 'rgba(32, 160, 132, 0.15)';
-        (window as any).Chart.defaults.font.size = 16;
+        (window as any).Chart.defaults.font.size = 12;
         (window as any).Chart.defaults.font.family = 'system-ui, -apple-system, sans-serif';
         (window as any).Chart.defaults.font.weight = '500';
         (window as any).Chart.defaults.plugins = (window as any).Chart.defaults.plugins || {};
         (window as any).Chart.defaults.plugins.legend = (window as any).Chart.defaults.plugins.legend || {};
         (window as any).Chart.defaults.plugins.legend.labels = (window as any).Chart.defaults.plugins.legend.labels || {};
         (window as any).Chart.defaults.plugins.legend.labels.font = (window as any).Chart.defaults.plugins.legend.labels.font || {};
-        (window as any).Chart.defaults.plugins.legend.labels.font.size = 16;
+        (window as any).Chart.defaults.plugins.legend.labels.font.size = 12;
         (window as any).Chart.defaults.plugins.legend.labels.font.weight = '500';
         (window as any).Chart.defaults.plugins.tooltip = (window as any).Chart.defaults.plugins.tooltip || {};
-        (window as any).Chart.defaults.plugins.tooltip.titleFont = { size: 18, weight: '600' };
-        (window as any).Chart.defaults.plugins.tooltip.bodyFont = { size: 16, weight: '500' };
-        (window as any).Chart.defaults.plugins.tooltip.padding = 16;
+        (window as any).Chart.defaults.plugins.tooltip.titleFont = { size: 14, weight: '600' };
+        (window as any).Chart.defaults.plugins.tooltip.bodyFont = { size: 12, weight: '500' };
+        (window as any).Chart.defaults.plugins.tooltip.padding = 12;
         (window as any).Chart.defaults.elements = (window as any).Chart.defaults.elements || {};
         (window as any).Chart.defaults.elements.bar = (window as any).Chart.defaults.elements.bar || {};
         (window as any).Chart.defaults.elements.bar.borderWidth = 2;
@@ -1226,7 +1226,7 @@ export default function LeadTimeFeaturesPage() {
 
           .leadtime-header h1 {
             margin: 0 0 var(--space-8) 0;
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 600;
             color: var(--color-text);
           }
@@ -1359,7 +1359,7 @@ export default function LeadTimeFeaturesPage() {
           .risk-low { color: var(--color-green-500); }
 
           .section-title {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 600;
             margin: var(--space-32) 0 var(--space-16) 0;
             color: var(--color-text);
@@ -1377,7 +1377,7 @@ export default function LeadTimeFeaturesPage() {
           }
           
           .explainer-card h3 {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 600;
             color: var(--color-primary);
             margin-bottom: var(--space-16);
@@ -1388,11 +1388,11 @@ export default function LeadTimeFeaturesPage() {
           
           .explainer-card h3::before {
             content: "📊";
-            font-size: 22px;
+            font-size: 15px;
           }
           
           .explainer-card p {
-            font-size: 18px;
+            font-size: 15px;
             line-height: 1.8;
             color: var(--color-text);
             margin-bottom: var(--space-16);
@@ -1404,7 +1404,7 @@ export default function LeadTimeFeaturesPage() {
             padding: var(--space-16);
             border-radius: var(--radius-base);
             margin: var(--space-16) 0;
-            font-size: 18px;
+            font-size: 14px;
             font-family: 'Courier New', monospace;
             color: var(--color-primary);
           }
@@ -1414,7 +1414,7 @@ export default function LeadTimeFeaturesPage() {
             padding: var(--space-20);
             border-radius: var(--radius-base);
             margin: var(--space-16) 0;
-            font-size: 18px;
+            font-size: 15px;
             line-height: 2;
           }
           
@@ -1434,7 +1434,7 @@ export default function LeadTimeFeaturesPage() {
           }
           
           .explainer-card .impact-list li {
-            font-size: 18px;
+            font-size: 15px;
             line-height: 1.8;
             padding: var(--space-12) 0;
             padding-left: var(--space-32);
@@ -1447,7 +1447,7 @@ export default function LeadTimeFeaturesPage() {
             left: 0;
             color: var(--color-primary);
             font-weight: bold;
-            font-size: 18px;
+            font-size: 15px;
           }
 
           .alerts-container {
@@ -1517,7 +1517,7 @@ export default function LeadTimeFeaturesPage() {
           }
 
           .alert-message {
-            font-size: 18px;
+            font-size: 15px;
             color: var(--color-text);
             margin: var(--space-12) 0;
             line-height: 1.8;
@@ -1573,7 +1573,7 @@ export default function LeadTimeFeaturesPage() {
           .table td {
             padding: var(--space-16) var(--space-20);
             border-bottom: 1px solid var(--color-border);
-            font-size: 18px;
+            font-size: 15px;
           }
 
           .table tbody tr:hover {
@@ -1628,7 +1628,7 @@ export default function LeadTimeFeaturesPage() {
           }
 
           .chart-title {
-            font-size: 18px;
+            font-size: 15px;
             font-weight: 600;
             margin-bottom: var(--space-20);
             color: var(--color-text);
@@ -1675,14 +1675,14 @@ export default function LeadTimeFeaturesPage() {
             font-weight: 600;
             color: var(--color-primary);
             margin-bottom: var(--space-12);
-            font-size: 18px;
+            font-size: 15px;
           }
 
           .eta-row {
             display: flex;
             justify-content: space-between;
             margin-bottom: var(--space-8);
-            font-size: 18px;
+            font-size: 15px;
           }
 
           .eta-label {
@@ -1749,14 +1749,14 @@ export default function LeadTimeFeaturesPage() {
           .narrative-box h3 {
             margin: 0 0 var(--space-12) 0;
             color: var(--color-primary);
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 600;
           }
 
           .narrative-box p {
             margin: 0 0 var(--space-12) 0;
             color: var(--color-text);
-            font-size: 18px;
+            font-size: 15px;
             line-height: 1.8;
           }
 
@@ -1773,7 +1773,7 @@ export default function LeadTimeFeaturesPage() {
           }
 
           .simulator-title {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 600;
             margin-bottom: var(--space-16);
             color: var(--color-text);
@@ -1786,7 +1786,7 @@ export default function LeadTimeFeaturesPage() {
           .slider-label {
             display: flex;
             justify-content: space-between;
-            font-size: 18px;
+            font-size: 15px;
             margin-bottom: var(--space-8);
             color: var(--color-text-secondary);
           }
@@ -1836,7 +1836,7 @@ export default function LeadTimeFeaturesPage() {
             display: flex;
             justify-content: space-between;
             margin-bottom: var(--space-8);
-            font-size: 18px;
+            font-size: 15px;
           }
 
           .result-row:last-child {
@@ -1853,7 +1853,7 @@ export default function LeadTimeFeaturesPage() {
           }
 
           .prescriptive-card h3 {
-            font-size: 18px;
+            font-size: 15px;
             font-weight: 600;
             margin-bottom: var(--space-16);
             color: var(--color-text);
@@ -1883,11 +1883,11 @@ export default function LeadTimeFeaturesPage() {
             font-weight: 600;
             color: var(--color-primary);
             margin-bottom: var(--space-8);
-            font-size: 18px;
+            font-size: 15px;
           }
 
           .family-metrics {
-            font-size: 18px;
+            font-size: 15px;
             color: var(--color-text-secondary);
             line-height: 1.6;
           }
@@ -1944,7 +1944,7 @@ export default function LeadTimeFeaturesPage() {
 
           .action-text {
             flex: 1;
-            font-size: 18px;
+            font-size: 15px;
             color: var(--color-text);
             line-height: 1.5;
           }
@@ -2004,7 +2004,7 @@ export default function LeadTimeFeaturesPage() {
           }
 
           .recommendation-text {
-            font-size: 18px;
+            font-size: 15px;
             color: var(--color-text);
             line-height: 1.5;
           }
@@ -2029,7 +2029,7 @@ export default function LeadTimeFeaturesPage() {
           }
 
           .impact-value {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 600;
           }
 
@@ -2368,7 +2368,7 @@ export default function LeadTimeFeaturesPage() {
         {/* WHAT-IF SIMULATOR */}
         <div className="simulator-container">
           <div className="simulator-title">🎯 Simulador What-If: Impacto de Variáveis</div>
-          <p style={{ color: 'var(--color-text-secondary)', fontSize: '20px', marginBottom: 'var(--space-16)' }}>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '15px', marginBottom: 'var(--space-16)' }}>
             Ajuste os sliders para simular cenários e visualizar impactos em estoque, SLA e capital bloqueado.
           </p>
 
@@ -2439,7 +2439,7 @@ export default function LeadTimeFeaturesPage() {
             <strong>Fórmula:</strong> Lead Time (dias) = Data da Compra - Data da Solicitação
           </div>
           
-          <h4 style={{ fontSize: '22px', color: 'var(--color-primary)', marginTop: 'var(--space-24)', marginBottom: 'var(--space-16)' }}>
+          <h4 style={{ fontSize: '16px', color: 'var(--color-primary)', marginTop: 'var(--space-24)', marginBottom: 'var(--space-16)' }}>
             🎯 Cálculo do Ponto de Reordenação (PP)
           </h4>
           <p>
@@ -2462,7 +2462,7 @@ export default function LeadTimeFeaturesPage() {
             <div className="step"><strong>6.</strong> Equipe Nova Corrente realiza manutenção nas torres</div>
     </div>
           
-          <h4 style={{ fontSize: '22px', color: 'var(--color-primary)', marginTop: 'var(--space-24)', marginBottom: 'var(--space-16)' }}>
+          <h4 style={{ fontSize: '16px', color: 'var(--color-primary)', marginTop: 'var(--space-24)', marginBottom: 'var(--space-16)' }}>
             📈 Tipos de Lead Time por Fornecedor
           </h4>
           <ul className="impact-list">
@@ -2471,7 +2471,7 @@ export default function LeadTimeFeaturesPage() {
             <li><strong>Fabricantes internacionais:</strong> 21-45 dias</li>
           </ul>
           
-          <h4 style={{ fontSize: '22px', color: 'var(--color-primary)', marginTop: 'var(--space-24)', marginBottom: 'var(--space-16)' }}>
+          <h4 style={{ fontSize: '16px', color: 'var(--color-primary)', marginTop: 'var(--space-24)', marginBottom: 'var(--space-16)' }}>
             💼 Impacto no Negócio
           </h4>
           <ul className="impact-list">
