@@ -5,6 +5,10 @@ import Script from 'next/script';
 import { apiClient } from '../../../lib/api';
 import { FamilyAggregation, SiteAggregation, SupplierAggregation } from '../../../types/features';
 import { useRouter } from 'next/navigation';
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import RiskMatrix from '@/components/RiskMatrix';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { PrescriptiveInsights } from '@/types/prescriptive';
 
 // Prescriptive insights from ML outputs
 const PRESCRIPTIVE_INSIGHTS = {
@@ -86,6 +90,11 @@ export default function HierarchicalFeaturesPage() {
   const [isInitialized, setIsInitialized] = useState(false);
   const initRef = useRef(false);
   const router = useRouter();
+  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveInsights | null>(null);
+  
+  useEffect(() => {
+    prescriptiveDataService.loadPrescriptiveInsights().then(setPrescriptiveData);
+  }, []);
   
   const [activeLevel, setActiveLevel] = useState<'family' | 'site' | 'supplier'>('family');
   const [selectedNode, setSelectedNode] = useState<{ id: string; name: string; level: string } | null>(null);

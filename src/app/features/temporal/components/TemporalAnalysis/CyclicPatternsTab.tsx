@@ -1,13 +1,21 @@
 /** Multi-Scale Cyclical Patterns Tab */
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFilteredData } from '../../context/TemporalDataContext';
 import { LineChart } from '../visualizations/LineChart';
 import { BarChart } from '../visualizations/BarChart';
 import { FormulaDisplay } from '../shared/FormulaDisplay';
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { ComprehensivePrescriptive } from '@/types/prescriptive';
 
 export default function CyclicPatternsTab() {
   const filteredData = useFilteredData();
+  const [comprehensiveData, setComprehensiveData] = useState<ComprehensivePrescriptive | null>(null);
+  
+  useEffect(() => {
+    prescriptiveDataService.loadComprehensivePrescriptive().then(setComprehensiveData);
+  }, []);
   
   // Calculate cyclical components
   const dailyCycle = filteredData.values.map((_, i) => 
@@ -53,8 +61,24 @@ export default function CyclicPatternsTab() {
   
   return (
     <div className="tab-content">
-      <h2>🔄 5G Deployment Cyclical Patterns</h2>
-      <p>Nested cycles: Daily (operator planning), Weekly (Mon-Wed peak orders), Monthly (capex cycles), Quarterly (5G auction phases), Annual (Brazilian seasonality Q4 peak)</p>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2>🔄 5G Deployment Cyclical Patterns</h2>
+          <p>Nested cycles: Daily (operator planning), Weekly (Mon-Wed peak orders), Monthly (capex cycles), Quarterly (5G auction phases), Annual (Brazilian seasonality Q4 peak)</p>
+        </div>
+        {comprehensiveData && (
+          <PrescriptiveTooltip
+            title="Cyclical Patterns Prescriptive Insights"
+            content={
+              <div>
+                <p><strong>Model:</strong> {comprehensiveData.best_model}</p>
+                <p><strong>Confidence:</strong> {(comprehensiveData.model_performance.r2 * 100).toFixed(1)}%</p>
+                <p><strong>Recommendation:</strong> {comprehensiveData.recommendations.frequency?.recommended_action || 'Monitor patterns closely'}</p>
+              </div>
+            }
+          />
+        )}
+      </div>
       
       {/* Summary Metrics */}
       <div className="metric-grid">

@@ -1,15 +1,31 @@
 /** Forecast & Reorder Point Calculator Tab */
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTemporalData, useFilteredData } from '../../context/TemporalDataContext';
 import { mean, standardDeviation } from '../../utils/temporalCalculations';
 import { LineChart } from '../visualizations/LineChart';
 import { BarChart } from '../visualizations/BarChart';
 import { FormulaDisplay } from '../shared/FormulaDisplay';
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import ScenarioComparison from '@/components/ScenarioComparison';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { PrescriptiveInsights, ComprehensivePrescriptive } from '@/types/prescriptive';
 
 export default function ForecastReorderTab() {
   const { dataset } = useTemporalData();
   const filteredData = useFilteredData();
+  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveInsights | null>(null);
+  const [comprehensiveData, setComprehensiveData] = useState<ComprehensivePrescriptive | null>(null);
+  
+  useEffect(() => {
+    Promise.all([
+      prescriptiveDataService.loadPrescriptiveInsights(),
+      prescriptiveDataService.loadComprehensivePrescriptive(),
+    ]).then(([insights, comprehensive]) => {
+      setPrescriptiveData(insights);
+      setComprehensiveData(comprehensive);
+    });
+  }, []);
   
   // Interactive calculator state
   const [serviceLevelTarget, setServiceLevelTarget] = useState(95);
@@ -81,10 +97,38 @@ export default function ForecastReorderTab() {
   const expectedStockouts = (stockoutProbability / 100) * 365; // Per year
   const stockoutCost = expectedStockouts * avgDailyDemand * 200; // Assume R$200 penalty per unit
   
+  // Get prescriptive recommendations for reorder points
+  const prescriptiveReorderPoint = comprehensiveData?.recommendations.frequency?.reorder_point || reorderPoint;
+  const prescriptiveSafetyStock = comprehensiveData?.recommendations.frequency?.safety_stock || safetyStock;
+  
   return (
     <div className="tab-content">
-      <h2>📈 Reorder Point Calculator - Material Families</h2>
-      <p>Real Nova Corrente targets: MATERIAL_ELETRICO (25d safety stock, 2.23x multiplier), FERRO_E_AÇO (26d, 2.27x), EPI (25d, 2.20x) | Calculator uses real demand μ={avgDailyDemand.toFixed(0)} un/d, σ={demandStdDev.toFixed(1)}</p>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2>📈 Reorder Point Calculator - Material Families</h2>
+          <p>Real Nova Corrente targets: MATERIAL_ELETRICO (25d safety stock, 2.23x multiplier), FERRO_E_AÇO (26d, 2.27x), EPI (25d, 2.20x) | Calculator uses real demand μ={avgDailyDemand.toFixed(0)} un/d, σ={demandStdDev.toFixed(1)}</p>
+        </div>
+        {prescriptiveData && (
+          <PrescriptiveTooltip
+            title="Prescriptive Recommendations"
+            content={
+              <div>
+                <p><strong>Recommended Reorder Point:</strong> {prescriptiveReorderPoint.toFixed(0)} units</p>
+                <p><strong>Recommended Safety Stock:</strong> {prescriptiveSafetyStock.toFixed(0)} units</p>
+                <p><strong>Priority:</strong> {comprehensiveData?.recommendations.frequency?.priority || 'MEDIUM'}</p>
+                <p><strong>Action:</strong> {comprehensiveData?.recommendations.frequency?.recommended_action || 'Monitor closely'}</p>
+              </div>
+            }
+          />
+        )}
+      </div>
+      
+      {/* Scenario Comparison */}
+      {comprehensiveData && (
+        <div className="mb-6">
+          <ScenarioComparison />
+        </div>
+      )}
       
       {/* Interactive Calculator */}
       <div className="calculator-section">

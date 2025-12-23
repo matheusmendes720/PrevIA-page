@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ResponsiveContainer, BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ComposedChart } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ComposedChart, ReferenceLine } from 'recharts';
 import Card from '../Card';
 import { apiClient } from '../../lib/api';
 import { SLAFeatures, SLAPenalty, SLAViolation } from '../../types/features';
 import { useToast } from '../../hooks/useToast';
+import { prescriptiveDataService } from '../../services/prescriptiveDataService';
 
 interface SLAMetricsChartProps {
   materialId?: number;
@@ -18,6 +19,7 @@ const SLAMetricsChart: React.FC<SLAMetricsChartProps> = ({ materialId, startDate
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'metrics' | 'penalties' | 'violations'>('metrics');
+  const [slaTarget, setSlaTarget] = useState<number>(98.0); // Default SLA target
   const { addToast } = useToast();
 
   useEffect(() => {
@@ -54,6 +56,15 @@ const SLAMetricsChart: React.FC<SLAMetricsChartProps> = ({ materialId, startDate
     };
 
     fetchData();
+    
+    // Load prescriptive data for SLA targets
+    prescriptiveDataService.loadPrescriptiveInsights().then(insights => {
+      // Set SLA target based on business impact improvement
+      const slaImprovement = insights.business_impact.sla_improvement;
+      if (slaImprovement.includes('5-10%')) {
+        setSlaTarget(98.0 + 5); // Add 5% improvement
+      }
+    });
   }, [materialId, startDate, endDate, addToast]);
 
   if (loading) {
@@ -190,6 +201,25 @@ const SLAMetricsChart: React.FC<SLAMetricsChartProps> = ({ materialId, startDate
             }}
           />
           <Legend wrapperStyle={{ color: '#a8b2d1' }} />
+          {/* Prescriptive SLA Target Reference Line */}
+          <ReferenceLine
+            yAxisId="left"
+            y={slaTarget}
+            stroke="#22c55e"
+            strokeDasharray="5 5"
+            strokeWidth={2}
+            label={{ value: `Meta Prescritiva: ${slaTarget}%`, position: 'right', fill: '#22c55e', fontSize: 11 }}
+          />
+          {/* Action Threshold - Below this requires immediate action */}
+          <ReferenceLine
+            yAxisId="left"
+            y={95}
+            stroke="#ef4444"
+            strokeDasharray="3 3"
+            strokeWidth={1}
+            strokeOpacity={0.7}
+            label={{ value: 'Ação Urgente < 95%', position: 'right', fill: '#ef4444', fontSize: 10 }}
+          />
           <Bar yAxisId="left" dataKey="availability" fill="#64ffda" name="Disponibilidade Atual (%)" />
           <Line yAxisId="left" type="monotone" dataKey="target" stroke="#60a5fa" strokeWidth={2} name="Meta (%)" />
           <Area yAxisId="right" type="monotone" dataKey="penalty" stroke="#f87171" fill="#f87171" fillOpacity={0.3} name="Penalidade (R$)" />

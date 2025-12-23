@@ -5,6 +5,9 @@ import Script from 'next/script';
 import { apiClient } from '../../../lib/api';
 import { FamilyEncoding, SiteEncoding, SupplierEncoding } from '../../../types/features';
 import { useRouter } from 'next/navigation';
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { PrescriptiveInsights } from '@/types/prescriptive';
 
 // Prescriptive insights from ML outputs for categorical encodings
 const PRESCRIPTIVE_INSIGHTS = {
@@ -80,6 +83,11 @@ export default function CategoricalFeaturesPage() {
   const [isInitialized, setIsInitialized] = useState(false);
   const initRef = useRef(false);
   const router = useRouter();
+  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveInsights | null>(null);
+  
+  useEffect(() => {
+    prescriptiveDataService.loadPrescriptiveInsights().then(setPrescriptiveData);
+  }, []);
   
   const [activeCategoryType, setActiveCategoryType] = useState<'family' | 'site' | 'supplier'>('family');
   const [selectedCategory, setSelectedCategory] = useState<{ id: string; name: string; type: string } | null>(null);
@@ -1799,7 +1807,21 @@ export default function CategoricalFeaturesPage() {
             </div>
             {currentInsight && (
               <div className="insight-card">
-                <div className="insight-title">{currentInsight.title}</div>
+                <div className="insight-title">
+                  {currentInsight.title}
+                  {prescriptiveData && (
+                    <PrescriptiveTooltip
+                      title="Insight Prescritivo"
+                      content={
+                        <div>
+                          <p><strong>Categoria:</strong> {currentInsight.title}</p>
+                          <p><strong>Recomendação:</strong> {currentInsight.recommendation}</p>
+                          <p><strong>Famílias de Alto Risco:</strong> {Object.values(prescriptiveData.risk_assessments).filter(r => r.stockout_risk === 'HIGH' || r.stockout_risk === 'CRITICAL').length}</p>
+                        </div>
+                      }
+                    />
+                  )}
+                </div>
                 <div className="insight-description">{currentInsight.description}</div>
                 <div className="insight-recommendation">
                   <strong>💡 Recomendação:</strong> {currentInsight.recommendation}

@@ -1,13 +1,21 @@
 /** Supplier Performance Tab */
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTemporalData } from '../../context/TemporalDataContext';
 import { BarChart } from '../visualizations/BarChart';
 import { mean } from '../../utils/temporalCalculations';
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { PrescriptiveInsights } from '@/types/prescriptive';
 
 export default function SupplierPerformanceTab() {
   const { dataset } = useTemporalData();
+  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveInsights | null>(null);
+  
+  useEffect(() => {
+    prescriptiveDataService.loadPrescriptiveInsights().then(setPrescriptiveData);
+  }, []);
   
   // Check if we have suppliers
   if (!dataset.suppliers || dataset.suppliers.length === 0) {
@@ -44,8 +52,24 @@ export default function SupplierPerformanceTab() {
   
   return (
     <div className="tab-content">
-      <h2>🤝 Supplier Performance Benchmarking & Analysis</h2>
-      <p>Comprehensive multi-dimensional supplier comparison with performance scoring and ROI analysis</p>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2>🤝 Supplier Performance Benchmarking & Analysis</h2>
+          <p>Comprehensive multi-dimensional supplier comparison with performance scoring and ROI analysis</p>
+        </div>
+        {prescriptiveData && (
+          <PrescriptiveTooltip
+            title="Prescriptive Supplier Insights"
+            content={
+              <div>
+                <p><strong>High Risk Suppliers:</strong> {dataset.suppliers.filter(s => (s.riskScore ?? 0) > 7).length}</p>
+                <p><strong>Recommended Actions:</strong> {prescriptiveData.recommendations.filter(r => r.includes('supplier') || r.includes('fornecedor')).length}</p>
+                <p><strong>Key Recommendation:</strong> {prescriptiveData.recommendations.find(r => r.includes('supplier') || r.includes('fornecedor')) || 'Monitor supplier performance closely'}</p>
+              </div>
+            }
+          />
+        )}
+      </div>
       
       <div className="metric-grid">
         <div className="metric-card">

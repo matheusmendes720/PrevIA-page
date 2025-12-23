@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Prescriptive Color System */
+@import './prescriptive-colors.css';
+
 /* Shimmer animation for skeleton screens */
 @keyframes shimmer {
   0% {

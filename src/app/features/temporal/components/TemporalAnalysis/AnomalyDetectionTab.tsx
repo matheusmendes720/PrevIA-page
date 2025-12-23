@@ -1,15 +1,24 @@
 /** Anomaly Detection Tab */
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTemporalData, useFilteredData } from '../../context/TemporalDataContext';
 import { detectAnomaliesCombined } from '../../utils/anomalyDetection';
 import { LineChart } from '../visualizations/LineChart';
 import { FormulaDisplay } from '../shared/FormulaDisplay';
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import ActionBoard from '@/components/ActionBoard';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { PrescriptiveInsights } from '@/types/prescriptive';
 
 export default function AnomalyDetectionTab() {
   const { dataset } = useTemporalData();
   const filteredData = useFilteredData();
   const result = detectAnomaliesCombined(filteredData.values, filteredData.timestamps);
+  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveInsights | null>(null);
+  
+  useEffect(() => {
+    prescriptiveDataService.loadPrescriptiveInsights().then(setPrescriptiveData);
+  }, []);
   
   // Create anomaly markers dataset
   const anomalyMarkers = filteredData.values.map((val, i) => {
@@ -27,8 +36,31 @@ export default function AnomalyDetectionTab() {
   
   return (
     <div className="tab-content">
-      <h2>🚨 Real Supply Chain Disruptions - Nova Corrente</h2>
-      <p>Actual events: Huawei Customs (-35%, R$ 145K penalty) | 5G Auction (+145% demand) | USD R$ 5.80 Spike (-22% demand) | Black Friday (+110%, R$ 2.1M emergency PO)</p>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2>🚨 Real Supply Chain Disruptions - Nova Corrente</h2>
+          <p>Actual events: Huawei Customs (-35%, R$ 145K penalty) | 5G Auction (+145% demand) | USD R$ 5.80 Spike (-22% demand) | Black Friday (+110%, R$ 2.1M emergency PO)</p>
+        </div>
+        {prescriptiveData && (
+          <PrescriptiveTooltip
+            title="Anomaly Prescriptive Insights"
+            content={
+              <div>
+                <p><strong>Critical Anomalies:</strong> {result.summary.criticalCount}</p>
+                <p><strong>Recommended Actions:</strong> {prescriptiveData.action_items.length}</p>
+                <p><strong>Risk Reduction:</strong> {prescriptiveData.business_impact.potential_stockout_reduction}</p>
+              </div>
+            }
+          />
+        )}
+      </div>
+      
+      {/* Action Board for Anomaly-Related Actions */}
+      {prescriptiveData && result.summary.criticalCount > 0 && (
+        <div className="mb-6">
+          <ActionBoard />
+        </div>
+      )}
       
       {/* Summary Metrics */}
       <div className="metric-grid">

@@ -1,13 +1,21 @@
 /** Time Series Decomposition Tab */
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFilteredData } from '../../context/TemporalDataContext';
 import { stlDecomposition } from '../../utils/decomposition';
 import { LineChart } from '../visualizations/LineChart';
 import { FormulaDisplay } from '../shared/FormulaDisplay';
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { ComprehensivePrescriptive } from '@/types/prescriptive';
 
 export default function DecompositionTab() {
   const filteredData = useFilteredData();
+  const [comprehensiveData, setComprehensiveData] = useState<ComprehensivePrescriptive | null>(null);
+  
+  useEffect(() => {
+    prescriptiveDataService.loadComprehensivePrescriptive().then(setComprehensiveData);
+  }, []);
   
   // Check if we have enough data
   if (!filteredData.values || filteredData.values.length < 14) {
@@ -37,8 +45,25 @@ export default function DecompositionTab() {
   
   return (
     <div className="tab-content">
-      <h2>🔬 MATERIAL_ELETRICO Decomposition (STL) - Nova Corrente</h2>
-      <p>Trend: 5G rollout +12.5% YoY (R$ 45M revenue) | Seasonal: Q4 peak +45% (Black Friday, Christmas) | Residuals: Huawei delays, USD shocks, customs issues</p>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2>🔬 MATERIAL_ELETRICO Decomposition (STL) - Nova Corrente</h2>
+          <p>Trend: 5G rollout +12.5% YoY (R$ 45M revenue) | Seasonal: Q4 peak +45% (Black Friday, Christmas) | Residuals: Huawei delays, USD shocks, customs issues</p>
+        </div>
+        {comprehensiveData && (
+          <PrescriptiveTooltip
+            title="Decomposition Prescriptive Insights"
+            content={
+              <div>
+                <p><strong>Model:</strong> {comprehensiveData.best_model}</p>
+                <p><strong>R²:</strong> {(comprehensiveData.model_performance.r2 * 100).toFixed(1)}%</p>
+                <p><strong>MAPE:</strong> {(comprehensiveData.model_performance.mape * 100).toFixed(1)}%</p>
+                <p><strong>Recommendation:</strong> {comprehensiveData.recommendations.frequency?.recommended_action || 'Monitor trends closely'}</p>
+              </div>
+            }
+          />
+        )}
+      </div>
       
       {/* Summary Metrics */}
       <div className="metric-grid">

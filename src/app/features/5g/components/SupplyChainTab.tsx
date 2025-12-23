@@ -1,6 +1,10 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import ExternalFactorsDashboard from '@/components/ExternalFactorsDashboard';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { PrescriptiveInsights } from '@/types/prescriptive';
 
 interface SupplyChainTabProps {
   isChartReady: boolean;
@@ -10,6 +14,11 @@ export default function SupplyChainTab({ isChartReady }: SupplyChainTabProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const initRef = useRef(false);
+  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveInsights | null>(null);
+  
+  useEffect(() => {
+    prescriptiveDataService.loadPrescriptiveInsights().then(setPrescriptiveData);
+  }, []);
 
   // Initialize charts when Chart.js is ready
   const initializeCharts = useCallback(() => {
@@ -83,7 +92,49 @@ export default function SupplyChainTab({ isChartReady }: SupplyChainTabProps) {
 
   return (
     <div ref={containerRef} className="supply-chain-tab-container">
-      <h2 className="text-2xl font-bold mb-6" style={{ color: '#f0f4f8' }}>🔗 Supply Chain & Margem</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold" style={{ color: '#f0f4f8' }}>🔗 Supply Chain & Margem</h2>
+        {prescriptiveData && (
+          <PrescriptiveTooltip
+            title="Análise Prescritiva"
+            content={
+              <div>
+                <p><strong>Recomendações Urgentes:</strong> {prescriptiveData.recommendations.filter(r => r.includes('URGENT')).length}</p>
+                <p><strong>Ações Pendentes:</strong> {prescriptiveData.action_items.length}</p>
+                <p><strong>ROI Estimado:</strong> {prescriptiveData.business_impact.roi_estimate}</p>
+              </div>
+            }
+          />
+        )}
+      </div>
+      
+      {/* External Factors */}
+      <div className="mb-6">
+        <ExternalFactorsDashboard />
+      </div>
+      
+      {/* Prescriptive Insights */}
+      {prescriptiveData && (
+        <div className="bg-brand-navy/70 backdrop-blur-xl rounded-xl border border-brand-cyan/40 p-6 mb-6">
+          <h3 className="text-lg font-bold text-brand-lightest-slate mb-4">Insights Prescritivos da Cadeia de Suprimentos</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-brand-light-navy/30 p-4 rounded-lg">
+              <p className="text-xs text-brand-slate mb-1">Recomendações Urgentes</p>
+              <p className="text-2xl font-bold text-red-400">
+                {prescriptiveData.recommendations.filter(r => r.includes('URGENT')).length}
+              </p>
+            </div>
+            <div className="bg-brand-light-navy/30 p-4 rounded-lg">
+              <p className="text-xs text-brand-slate mb-1">Ações Pendentes</p>
+              <p className="text-2xl font-bold text-yellow-400">{prescriptiveData.action_items.length}</p>
+            </div>
+            <div className="bg-brand-light-navy/30 p-4 rounded-lg">
+              <p className="text-xs text-brand-slate mb-1">ROI Estimado</p>
+              <p className="text-2xl font-bold text-brand-cyan">{prescriptiveData.business_impact.roi_estimate}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
         <div style={{ background: 'rgba(15, 36, 56, 0.5)', padding: '1.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>

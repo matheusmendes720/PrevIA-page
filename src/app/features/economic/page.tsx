@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Script from 'next/script';
+import ExternalFactorsDashboard from '@/components/ExternalFactorsDashboard';
 
 export default function EconomicFeaturesPage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -448,6 +449,10 @@ export default function EconomicFeaturesPage() {
         </div>
       )}
       <div ref={containerRef} className="economic-features-container" style={{ display: isInitialized ? 'block' : 'none' }}>
+        {/* External Factors Dashboard */}
+        <div style={{ marginBottom: '24px' }}>
+          <ExternalFactorsDashboard />
+        </div>
         <style jsx global>{`
           :root {
             --color-primary: #20A084;

@@ -85,6 +85,14 @@ export const LazyComponents = {
   InteractiveMap: lazyWithRetry(() => import('../components/InteractiveMap'), 'InteractiveMap'),
   ModelPerformanceDashboard: lazyWithRetry(() => import('../components/ModelPerformanceDashboard'), 'ModelPerformanceDashboard'),
   ClusteringDashboard: lazyWithRetry(() => import('../components/ClusteringDashboard'), 'ClusteringDashboard'),
+  
+  // Prescriptive Intelligence Components
+  RiskMatrix: lazyWithRetry(() => import('../components/RiskMatrix'), 'RiskMatrix'),
+  ActionBoard: lazyWithRetry(() => import('../components/ActionBoard'), 'ActionBoard'),
+  ScenarioComparison: lazyWithRetry(() => import('../components/ScenarioComparison'), 'ScenarioComparison'),
+  ExternalFactorsDashboard: lazyWithRetry(() => import('../components/ExternalFactorsDashboard'), 'ExternalFactorsDashboard'),
+  PrescriptiveTooltip: lazyWithRetry(() => import('../components/PrescriptiveTooltip'), 'PrescriptiveTooltip'),
+  PrescriptiveDashboard: lazyWithRetry(() => import('../components/PrescriptiveDashboard'), 'PrescriptiveDashboard'),
 };
 
 // Loading skeleton component

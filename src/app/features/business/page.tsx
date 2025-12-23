@@ -4,6 +4,13 @@ import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import Script from 'next/script';
 import { apiClient } from '../../../lib/api';
 import { useRouter } from 'next/navigation';
+import RiskMatrix from '@/components/RiskMatrix';
+import ActionBoard from '@/components/ActionBoard';
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import ScenarioComparison from '@/components/ScenarioComparison';
+import ExternalFactorsDashboard from '@/components/ExternalFactorsDashboard';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { PrescriptiveInsights, ComprehensivePrescriptive } from '@/types/prescriptive';
 import type { 
   MarketCluster, 
   StrategicRecommendation, 
@@ -2958,20 +2965,80 @@ export default function BusinessFeaturesPage() {
 
         {/* ========== VISÃO GERAL TAB ========== */}
         {mainTab === 'visao-geral' && subTabs['visao-geral'] === 'agregacao' && (
-          <div className="charts-grid">
-            <div className="chart-container">
-              <div className="chart-title" style={{ fontSize: '14px', fontWeight: 600, marginBottom: '20px', color: 'var(--color-text)', width: '100%', flexShrink: 0 }}>📊 Top 5 Famílias - Receita e Crescimento</div>
-              <div className="chart-canvas">
-                <canvas id="familiesRevenueChart"></canvas>
+          <>
+            {/* External Factors */}
+            <div className="mb-6">
+              <ExternalFactorsDashboard />
+            </div>
+            
+            {/* Prescriptive Intelligence Section */}
+            <div className="mb-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
+              <div>
+                <RiskMatrix />
+              </div>
+              <div>
+                <ActionBoard />
               </div>
             </div>
-            <div className="chart-container">
-              <div className="chart-title">🎯 Análise de Tiers - Receita vs. Risco</div>
-              <div className="chart-canvas">
-                <canvas id="tiersMatrixChart"></canvas>
+            
+            {/* Scenario Comparison */}
+            {comprehensiveData && (
+              <div className="mb-6">
+                <ScenarioComparison />
+              </div>
+            )}
+            
+            {/* Charts Grid */}
+            <div className="charts-grid">
+              <div className="chart-container">
+                <div className="chart-title" style={{ fontSize: '14px', fontWeight: 600, marginBottom: '20px', color: 'var(--color-text)', width: '100%', flexShrink: 0 }}>
+                  <div className="flex items-center justify-between">
+                    <span>📊 Top 5 Famílias - Receita e Crescimento</span>
+                    {prescriptiveData && (
+                      <PrescriptiveTooltip
+                        title="Insights Prescritivos"
+                        content={
+                          <div>
+                            <p><strong>Famílias de Alto Risco:</strong> {Object.values(prescriptiveData.risk_assessments).filter(r => r.stockout_risk === 'HIGH' || r.stockout_risk === 'CRITICAL').length}</p>
+                            <p><strong>ROI Estimado:</strong> {prescriptiveData.business_impact.roi_estimate}</p>
+                            <p><strong>Economia Potencial:</strong> {prescriptiveData.business_impact.inventory_cost_savings}</p>
+                          </div>
+                        }
+                      />
+                    )}
+                  </div>
+                </div>
+                <div className="chart-canvas">
+                  <canvas id="familiesRevenueChart"></canvas>
+                </div>
+              </div>
+              <div className="chart-container">
+                <div className="chart-title">
+                  <div className="flex items-center justify-between">
+                    <span>🎯 Análise de Tiers - Receita vs. Risco</span>
+                    {prescriptiveData && (
+                      <PrescriptiveTooltip
+                        title="Análise de Risco por Tier"
+                        content={
+                          <div>
+                            <p><strong>Recomendações:</strong></p>
+                            <ul className="list-disc list-inside">
+                              {prescriptiveData.recommendations.slice(0, 3).map((rec, i) => (
+                                <li key={i}>{rec}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        }
+                      />
+                    )}
+                  </div>
+                </div>
+                <div className="chart-canvas">
+                  <canvas id="tiersMatrixChart"></canvas>
+                </div>
               </div>
             </div>
-          </div>
+          </>
         )}
 
         {mainTab === 'visao-geral' && subTabs['visao-geral'] === 'variancia' && (
@@ -3461,7 +3528,23 @@ export default function BusinessFeaturesPage() {
         {/* ========== PREVISÕES 2026 TAB ========== */}
         {mainTab === 'previsoes' && subTabs['previsoes'] === 'demanda' && (
           <div>
-            <div className="section-title">📦 Previsão de Demanda - 90 Dias</div>
+            <div className="section-title">
+              <div className="flex items-center justify-between">
+                <span>📦 Previsão de Demanda - 90 Dias</span>
+                {prescriptiveData && (
+                  <PrescriptiveTooltip
+                    title="Previsão Prescritiva"
+                    content={
+                      <div>
+                        <p><strong>Modelo:</strong> {comprehensiveData?.best_model || 'N/A'}</p>
+                        <p><strong>Confiança:</strong> {comprehensiveData ? (comprehensiveData.model_performance.r2 * 100).toFixed(1) + '%' : 'N/A'}</p>
+                        <p><strong>Recomendação:</strong> {comprehensiveData?.recommendations.frequency?.recommended_action || 'Monitorar de perto'}</p>
+                      </div>
+                    }
+                  />
+                )}
+              </div>
+            </div>
             <div className="chart-container">
               <div className="chart-canvas">
                 <canvas id="demandForecastChart"></canvas>
@@ -3586,6 +3669,14 @@ export default function BusinessFeaturesPage() {
         {mainTab === 'cenarios' && subTabs['cenarios'] === 'preconfigurados' && (
           <div>
             <div className="section-title">📋 Cenários Pré-Configurados</div>
+            
+            {/* Scenario Comparison Component */}
+            {comprehensiveData && (
+              <div className="mb-6">
+                <ScenarioComparison />
+              </div>
+            )}
+            
             <div className="summary-banner">
               <div className="metric-card" style={{ cursor: 'pointer' }} onClick={() => setScenarioConfig({ demandGrowth: 12, usdRate: 5.20, leadTimeIncrease: 0 })}>
                 <div className="label">Base</div>

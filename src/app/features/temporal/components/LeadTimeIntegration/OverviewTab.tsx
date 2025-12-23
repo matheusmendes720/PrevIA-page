@@ -5,15 +5,24 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTemporalData, useFilteredData } from '../../context/TemporalDataContext';
 import { mean, standardDeviation } from '../../utils/temporalCalculations';
 import { BarChart } from '../visualizations/BarChart';
 import { LineChart } from '../visualizations/LineChart';
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import ExternalFactorsDashboard from '@/components/ExternalFactorsDashboard';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { PrescriptiveInsights } from '@/types/prescriptive';
 
 export default function OverviewTab() {
   const { dataset } = useTemporalData();
   const filteredData = useFilteredData();
+  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveInsights | null>(null);
+  
+  useEffect(() => {
+    prescriptiveDataService.loadPrescriptiveInsights().then(setPrescriptiveData);
+  }, []);
   
   // Calculate key metrics with safety checks
   const avgLeadTime = mean(dataset.suppliers.map(s => s.avgLeadTime ?? 0)) || 0;
@@ -27,8 +36,29 @@ export default function OverviewTab() {
   return (
     <div className="overview-tab">
       <div className="tab-header">
-        <h2>📊 Lead Time Performance Overview - Nova Corrente</h2>
-        <p>Real-time monitoring: MATERIAL_ELETRICO (R$ 45M), FERRO_E_AÇO (R$ 38M), EPI (R$ 32M) | Suppliers: Furukawa, Prysmian, Huawei, Ericsson, Nokia, CommScope</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2>📊 Lead Time Performance Overview - Nova Corrente</h2>
+            <p>Real-time monitoring: MATERIAL_ELETRICO (R$ 45M), FERRO_E_AÇO (R$ 38M), EPI (R$ 32M) | Suppliers: Furukawa, Prysmian, Huawei, Ericsson, Nokia, CommScope</p>
+          </div>
+          {prescriptiveData && (
+            <PrescriptiveTooltip
+              title="Prescriptive Insights"
+              content={
+                <div>
+                  <p><strong>Business Impact:</strong> {prescriptiveData.business_impact.sla_improvement} SLA improvement potential</p>
+                  <p><strong>ROI Estimate:</strong> {prescriptiveData.business_impact.roi_estimate}</p>
+                  <p><strong>Key Recommendation:</strong> {prescriptiveData.recommendations[0] || 'Monitor lead times closely'}</p>
+                </div>
+              }
+            />
+          )}
+        </div>
+      </div>
+      
+      {/* External Factors */}
+      <div className="mb-6">
+        <ExternalFactorsDashboard />
       </div>
       
       {/* Summary Metrics */}

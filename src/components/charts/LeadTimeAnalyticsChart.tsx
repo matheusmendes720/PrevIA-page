@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ResponsiveContainer, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Area, AreaChart, PieChart, Pie, Cell } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Area, AreaChart, PieChart, Pie, Cell, ReferenceLine } from 'recharts';
 import Card from '../Card';
 import { apiClient } from '../../lib/api';
 import { LeadTimeFeatures, SupplierLeadTime } from '../../types/features';
 import { useToast } from '../../hooks/useToast';
+import { prescriptiveDataService } from '../../services/prescriptiveDataService';
 
 interface LeadTimeAnalyticsChartProps {
   materialId?: number;
@@ -19,6 +20,7 @@ const LeadTimeAnalyticsChart: React.FC<LeadTimeAnalyticsChartProps> = ({ materia
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'suppliers' | 'risks'>('overview');
+  const [criticalLeadTime, setCriticalLeadTime] = useState<number>(45); // Days
   const { addToast } = useToast();
 
   useEffect(() => {
@@ -51,6 +53,19 @@ const LeadTimeAnalyticsChart: React.FC<LeadTimeAnalyticsChartProps> = ({ materia
     };
 
     fetchData();
+    
+    // Load prescriptive data for lead time thresholds
+    prescriptiveDataService.loadPrescriptiveInsights().then(insights => {
+      // Set critical lead time based on risk assessments
+      const highRiskFamilies = Object.entries(insights.risk_assessments)
+        .filter(([_, risk]) => risk.stockout_risk === 'HIGH');
+      if (highRiskFamilies.length > 0) {
+        // Use average recommended safety stock days as critical threshold
+        const avgSafetyStock = highRiskFamilies.reduce((sum, [_, risk]) => 
+          sum + risk.recommended_safety_stock_days, 0) / highRiskFamilies.length;
+        setCriticalLeadTime(Math.round(avgSafetyStock));
+      }
+    });
   }, [materialId, startDate, endDate, addToast]);
 
   if (loading) {
@@ -222,6 +237,14 @@ const LeadTimeAnalyticsChart: React.FC<LeadTimeAnalyticsChartProps> = ({ materia
                 }}
               />
               <Legend wrapperStyle={{ color: '#a8b2d1' }} />
+              {/* Prescriptive Critical Lead Time Threshold */}
+              <ReferenceLine
+                y={criticalLeadTime}
+                stroke="#ef4444"
+                strokeDasharray="5 5"
+                strokeWidth={2}
+                label={{ value: `Crítico: ${criticalLeadTime} dias`, position: 'right', fill: '#ef4444', fontSize: 11 }}
+              />
               <Bar dataKey="lead_time" fill="#64ffda" name="Lead Time" />
               <Line type="monotone" dataKey="base_lead_time" stroke="#60a5fa" strokeWidth={2} name="Base Lead Time" />
               <Line type="monotone" dataKey="total_lead_time" stroke="#f87171" strokeWidth={2} name="Total Lead Time" />

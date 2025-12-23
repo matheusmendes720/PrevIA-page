@@ -5,7 +5,18 @@ import Script from 'next/script';
 import { apiClient } from '../../../lib/api';
 import { SupplierLeadTime } from '../../../types/features';
 
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import RiskMatrix from '@/components/RiskMatrix';
+import ActionBoard from '@/components/ActionBoard';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { PrescriptiveInsights } from '@/types/prescriptive';
+
 export default function LeadTimeFeaturesPage() {
+  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveInsights | null>(null);
+  
+  useEffect(() => {
+    prescriptiveDataService.loadPrescriptiveInsights().then(setPrescriptiveData);
+  }, []);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerReady, setContainerReady] = useState(false);
   const [isChartLoaded, setIsChartLoaded] = useState(false);
@@ -2236,7 +2247,19 @@ export default function LeadTimeFeaturesPage() {
         {/* SUMMARY METRICS */}
         <div id="summaryMetrics" className="summary-banner"></div>
 
-        {/* NEW PRESCRIPTIVE CARDS */}
+        {/* PRESCRIPTIVE INTELLIGENCE SECTION */}
+        {prescriptiveData && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 'var(--space-24)', marginBottom: 'var(--space-32)' }}>
+            <div>
+              <RiskMatrix />
+            </div>
+            <div>
+              <ActionBoard />
+            </div>
+          </div>
+        )}
+
+        {/* Legacy prescriptive cards (kept for backward compatibility) */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 'var(--space-24)', marginBottom: 'var(--space-32)' }}>
           <div id="familyRiskMetrics"></div>
           <div id="immediateActionItems"></div>

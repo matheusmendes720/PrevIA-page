@@ -2,12 +2,21 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Script from 'next/script';
+import ExternalFactorsDashboard from '@/components/ExternalFactorsDashboard';
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { PrescriptiveData } from '@/types/prescriptive';
 
 export default function ClimateFeaturesPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isChartLoaded, setIsChartLoaded] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const initRef = useRef(false);
+  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveData | null>(null);
+  
+  useEffect(() => {
+    prescriptiveDataService.loadPrescriptiveInsights().then(setPrescriptiveData);
+  }, []);
 
   // Effect to initialize when Chart.js is loaded
   useEffect(() => {
@@ -769,6 +778,10 @@ export default function ClimateFeaturesPage() {
         </div>
       )}
       <div ref={containerRef} className="climate-features-container" style={{ display: isInitialized ? 'block' : 'none' }}>
+        {/* External Factors Dashboard */}
+        <div style={{ marginBottom: '24px' }}>
+          <ExternalFactorsDashboard />
+        </div>
         <style jsx global>{`
           :root {
             --color-primary: #20A084;

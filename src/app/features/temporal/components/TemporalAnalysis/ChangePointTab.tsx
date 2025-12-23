@@ -1,16 +1,25 @@
 /** Change Point Detection Tab */
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTemporalData, useFilteredData } from '../../context/TemporalDataContext';
 import { detectChangePointsCombined } from '../../utils/changePointDetection';
 import { LineChart } from '../visualizations/LineChart';
 import { BarChart } from '../visualizations/BarChart';
 import { FormulaDisplay } from '../shared/FormulaDisplay';
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import ActionBoard from '@/components/ActionBoard';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { PrescriptiveInsights } from '@/types/prescriptive';
 
 export default function ChangePointTab() {
   const { dataset } = useTemporalData();
   const filteredData = useFilteredData();
   const result = detectChangePointsCombined(filteredData.values, filteredData.timestamps);
+  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveInsights | null>(null);
+  
+  useEffect(() => {
+    prescriptiveDataService.loadPrescriptiveInsights().then(setPrescriptiveData);
+  }, []);
   
   // Create change point markers for visualization
   const changePointMarkers = filteredData.timestamps.map((ts, i) => {
@@ -45,8 +54,31 @@ export default function ChangePointTab() {
   
   return (
     <div className="tab-content">
-      <h2>📍 Regime Shifts: Brazilian 5G Rollout Phases</h2>
-      <p>Real operational regimes: Pre-5G (850 un/d baseline) → Phase 1 Deployment (+42%, 1210 un/d) → ANATEL Auction (+145%, 2080 un/d peak) → Mature Operations (1450 un/d normalized)</p>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2>📍 Regime Shifts: Brazilian 5G Rollout Phases</h2>
+          <p>Real operational regimes: Pre-5G (850 un/d baseline) → Phase 1 Deployment (+42%, 1210 un/d) → ANATEL Auction (+145%, 2080 un/d peak) → Mature Operations (1450 un/d normalized)</p>
+        </div>
+        {prescriptiveData && (
+          <PrescriptiveTooltip
+            title="Change Point Prescriptive Insights"
+            content={
+              <div>
+                <p><strong>Change Points Detected:</strong> {result.changePoints.length}</p>
+                <p><strong>Regimes Identified:</strong> {result.regimes.length}</p>
+                <p><strong>Recommended Actions:</strong> {prescriptiveData.action_items.filter(a => a.includes('regime') || a.includes('fase')).length}</p>
+              </div>
+            }
+          />
+        )}
+      </div>
+      
+      {/* Action Board for Change Point Actions */}
+      {prescriptiveData && result.changePoints.length > 0 && (
+        <div className="mb-6">
+          <ActionBoard />
+        </div>
+      )}
       
       {/* Summary Metrics */}
       <div className="metric-grid">

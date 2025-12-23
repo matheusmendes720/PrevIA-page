@@ -1,13 +1,22 @@
 /** Financial Optimization & ROI Analysis Tab */
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTemporalData } from '../../context/TemporalDataContext';
 import { BarChart } from '../visualizations/BarChart';
 import { LineChart } from '../visualizations/LineChart';
 import { FormulaDisplay } from '../shared/FormulaDisplay';
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import ScenarioComparison from '@/components/ScenarioComparison';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { PrescriptiveInsights } from '@/types/prescriptive';
 
 export default function FinancialOptimizationTab() {
   const { dataset } = useTemporalData();
+  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveInsights | null>(null);
+  
+  useEffect(() => {
+    prescriptiveDataService.loadPrescriptiveInsights().then(setPrescriptiveData);
+  }, []);
   
   // Financial metrics calculations
   const totalInventoryValue = 12400000; // R$ 12.4M

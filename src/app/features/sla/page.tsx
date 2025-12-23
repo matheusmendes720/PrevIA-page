@@ -4,8 +4,16 @@ import { useEffect, useRef, useState } from 'react';
 import Script from 'next/script';
 import { apiClient } from '../../../lib/api';
 import { SLAFeatures, SLAPenalty, SLAViolation } from '../../../types/features';
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { PrescriptiveInsights } from '@/types/prescriptive';
 
 export default function SLAFeaturesPage() {
+  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveInsights | null>(null);
+  
+  useEffect(() => {
+    prescriptiveDataService.loadPrescriptiveInsights().then(setPrescriptiveData);
+  }, []);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerReady, setContainerReady] = useState(false);
   const [isChartLoaded, setIsChartLoaded] = useState(false);

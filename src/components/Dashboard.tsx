@@ -10,6 +10,13 @@ import { TrendingUpIcon, TargetIcon, ChartBarIcon, ServerIcon, RefreshIcon, Down
 import OperationalStatus from './OperationalStatus';
 import InsightModal from './InsightModal';
 import PrescriptiveRecommendationsEnhanced from './PrescriptiveRecommendationsEnhanced';
+import RiskMatrix from './RiskMatrix';
+import ActionBoard from './ActionBoard';
+import ScenarioComparison from './ScenarioComparison';
+import ExternalFactorsDashboard from './ExternalFactorsDashboard';
+import ExportPrescriptiveReport from './ExportPrescriptiveReport';
+import GuidedTour from './GuidedTour';
+import AccessibilityEnhancer from './AccessibilityEnhancer';
 import { useToast } from '../hooks/useToast';
 
 const kpiMetrics: KpiData[] = [
@@ -160,6 +167,8 @@ const Dashboard: React.FC<DashboardProps> = ({ searchTerm, onSelectAlert }) => {
 
     return (
         <div className="w-full space-y-6">
+            <AccessibilityEnhancer />
+            <GuidedTour />
             {/* Dashboard Header with Controls */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 animate-fade-in-up">
                 <div>
@@ -196,7 +205,7 @@ const Dashboard: React.FC<DashboardProps> = ({ searchTerm, onSelectAlert }) => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 animate-fade-in-up" style={{ animationDelay: '400ms' }}>
+                <div className="lg:col-span-2 animate-fade-in-up forecast-chart-container" style={{ animationDelay: '400ms' }}>
                     <DemandForecastChart data={forecastData} />
                 </div>
                 <div className="lg:col-span-1 animate-fade-in-up flex flex-col min-h-0" style={{ animationDelay: '500ms' }}>
@@ -214,6 +223,24 @@ const Dashboard: React.FC<DashboardProps> = ({ searchTerm, onSelectAlert }) => {
                 </div>
                 <div className="lg:col-span-1">
                     <PrescriptiveRecommendationsEnhanced />
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in-up" style={{ animationDelay: '800ms' }}>
+                <div className="risk-matrix-container">
+                    <RiskMatrix />
+                </div>
+                <div className="action-board-container">
+                    <ActionBoard />
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in-up" style={{ animationDelay: '900ms' }}>
+                <div className="lg:col-span-1">
+                    <ScenarioComparison />
+                </div>
+                <div className="lg:col-span-1">
+                    <ExternalFactorsDashboard />
                 </div>
             </div>
             {isInsightModalOpen && insightModalAlert && (
