@@ -4,6 +4,13 @@ import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import Script from 'next/script';
 import { apiClient } from '../../../lib/api';
 import { useRouter } from 'next/navigation';
+import RiskMatrix from '@/components/RiskMatrix';
+import ActionBoard from '@/components/ActionBoard';
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import ScenarioComparison from '@/components/ScenarioComparison';
+import ExternalFactorsDashboard from '@/components/ExternalFactorsDashboard';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { PrescriptiveInsights, ComprehensivePrescriptive } from '@/types/prescriptive';
 import type { 
   MarketCluster, 
   StrategicRecommendation, 
@@ -614,7 +621,14 @@ const MOCK_SENSITIVITY_FACTORS = [
 
 export default function BusinessFeaturesPage() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isChartLoaded, setIsChartLoaded] = useState(false);
+  const [containerReady, setContainerReady] = useState(false);
+  const [isChartLoaded, setIsChartLoaded] = useState(() => {
+    // Check if Chart.js is already loaded on mount (e.g., from previous navigation)
+    if (typeof window !== 'undefined') {
+      return typeof (window as any).Chart !== 'undefined';
+    }
+    return false;
+  });
   const [isInitialized, setIsInitialized] = useState(false);
   const initRef = useRef(false);
   const router = useRouter();
@@ -649,6 +663,16 @@ export default function BusinessFeaturesPage() {
   const [alerts, setAlerts] = useState<MarketIntelligenceAlert[]>([]);
   const [alertsSummary, setAlertsSummary] = useState<AlertsSummary | null>(null);
   const [miLoading, setMiLoading] = useState(false);
+  
+  // Prescriptive data state
+  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveInsights | null>(null);
+  const [comprehensiveData, setComprehensiveData] = useState<ComprehensivePrescriptive | null>(null);
+
+  // Load prescriptive data
+  useEffect(() => {
+    prescriptiveDataService.loadPrescriptiveInsights().then(setPrescriptiveData);
+    prescriptiveDataService.loadComprehensivePrescriptive().then(setComprehensiveData);
+  }, []);
 
   // Log tab changes
   useEffect(() => {
@@ -851,11 +875,28 @@ export default function BusinessFeaturesPage() {
     fetchData();
   }, []);
 
-  // Calculate summary metrics
+  // Calculate summary metrics - only when data is loaded
   const summary = useMemo(() => {
+    // Return default values if data is still loading or empty
+    if (apiData.loading || apiData.families.length === 0 || apiData.tiers.length === 0) {
+      return {
+        totalRevenue: 0,
+        growthQoQ: 0,
+        biggestRisk: 'TIER_1',
+        biggestRiskExposure: 0,
+        narrative: 'Carregando dados...',
+      };
+    }
+
     const totalRevenue = apiData.families.reduce((sum, f) => sum + (f.revenue || 0), 0);
-    const previousRevenue = totalRevenue / 1.08;
-    const growthQoQ = ((totalRevenue - previousRevenue) / previousRevenue) * 100;
+    
+    // Only calculate growth if we have revenue
+    let growthQoQ = 0;
+    if (totalRevenue > 0) {
+      const previousRevenue = totalRevenue / 1.08;
+      growthQoQ = ((totalRevenue - previousRevenue) / previousRevenue) * 100;
+    }
+    
     const biggestRisk = apiData.tiers.reduce((max, t) => 
       (t.penaltyExposure || 0) > (max.penaltyExposure || 0) ? t : max,
       apiData.tiers[0] || MOCK_TIERS[0]
@@ -877,7 +918,7 @@ export default function BusinessFeaturesPage() {
     });
 
     return summaryData;
-  }, [apiData.families, apiData.tiers]);
+  }, [apiData.families, apiData.tiers, apiData.loading]);
 
   // Filter insights by category
   const filteredInsights = useMemo(() => {
@@ -888,8 +929,22 @@ export default function BusinessFeaturesPage() {
   const currentInsight = filteredInsights[currentInsightIdx] || filteredInsights[0];
 
   // Initialize charts when Chart.js is loaded
+  // Use a separate effect to watch for container readiness
   useEffect(() => {
-    if (!isChartLoaded || !containerRef.current || initRef.current) return;
+  // Check if Chart.js is available even if isChartLoaded is false (e.g., already loaded from previous page)
+  const chartJsAvailable = typeof (window as any).Chart !== 'undefined';
+  if (chartJsAvailable && !isChartLoaded) {
+    // Chart.js is loaded but state wasn't set - fix it immediately
+    setIsChartLoaded(true);
+    return; // Will re-run after state update
+  }
+}, [isChartLoaded]);
+
+  // Separate effect to initialize when both Chart.js and container are ready
+  useEffect(() => {
+    if (!isChartLoaded || !containerReady || initRef.current) {
+      return;
+    }
 
     const initPage = () => {
       if (typeof (window as any).Chart === 'undefined') {
@@ -897,26 +952,27 @@ export default function BusinessFeaturesPage() {
         return;
       }
 
-      setTimeout(() => {
+      // Use requestAnimationFrame for immediate execution on next frame (faster than setTimeout)
+      requestAnimationFrame(() => {
         // Configure Chart.js defaults
         if (typeof (window as any).Chart !== 'undefined') {
           console.log('📊 Chart.js loaded, initializing business features page');
           (window as any).Chart.defaults.color = '#e0e8f0';
           (window as any).Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.2)';
           (window as any).Chart.defaults.backgroundColor = 'rgba(32, 160, 132, 0.15)';
-          (window as any).Chart.defaults.font.size = 16;
+          (window as any).Chart.defaults.font.size = 11;
           (window as any).Chart.defaults.font.family = 'system-ui, -apple-system, sans-serif';
           (window as any).Chart.defaults.font.weight = '500';
           (window as any).Chart.defaults.plugins = (window as any).Chart.defaults.plugins || {};
           (window as any).Chart.defaults.plugins.legend = (window as any).Chart.defaults.plugins.legend || {};
           (window as any).Chart.defaults.plugins.legend.labels = (window as any).Chart.defaults.plugins.legend.labels || {};
           (window as any).Chart.defaults.plugins.legend.labels.font = (window as any).Chart.defaults.plugins.legend.labels.font || {};
-          (window as any).Chart.defaults.plugins.legend.labels.font.size = 16;
+          (window as any).Chart.defaults.plugins.legend.labels.font.size = 11;
           (window as any).Chart.defaults.plugins.legend.labels.font.weight = '500';
           (window as any).Chart.defaults.plugins.tooltip = (window as any).Chart.defaults.plugins.tooltip || {};
-          (window as any).Chart.defaults.plugins.tooltip.titleFont = { size: 18, weight: '600' };
-          (window as any).Chart.defaults.plugins.tooltip.bodyFont = { size: 16, weight: '500' };
-          (window as any).Chart.defaults.plugins.tooltip.padding = 16;
+          (window as any).Chart.defaults.plugins.tooltip.titleFont = { size: 12, weight: '600' };
+          (window as any).Chart.defaults.plugins.tooltip.bodyFont = { size: 11, weight: '500' };
+          (window as any).Chart.defaults.plugins.tooltip.padding = 10;
           (window as any).Chart.defaults.elements = (window as any).Chart.defaults.elements || {};
           (window as any).Chart.defaults.elements.bar = (window as any).Chart.defaults.elements.bar || {};
           (window as any).Chart.defaults.elements.bar.borderWidth = 2;
@@ -929,11 +985,11 @@ export default function BusinessFeaturesPage() {
 
         initRef.current = true;
         setIsInitialized(true);
-      }, 100);
+      });
     };
 
     initPage();
-  }, [isChartLoaded]);
+  }, [isChartLoaded, containerReady]); // Re-run when container becomes ready
 
   // Helper function to safely destroy and create chart
   const createOrUpdateChart = (canvasId: string, config: any) => {
@@ -1004,11 +1060,9 @@ export default function BusinessFeaturesPage() {
       return;
     }
 
-    // Use requestAnimationFrame to ensure DOM is ready
+    // Use requestAnimationFrame to ensure DOM is ready (no additional setTimeout needed)
     requestAnimationFrame(() => {
-      // Additional delay to ensure conditional rendering is complete
-      setTimeout(() => {
-        console.log('📊 Initializing charts for main tab:', mainTab, 'sub-tab:', subTabs[mainTab]);
+      console.log('📊 Initializing charts for main tab:', mainTab, 'sub-tab:', subTabs[mainTab]);
 
         // Top 5 Families Revenue Chart
         if (mainTab === 'visao-geral' && subTabs['visao-geral'] === 'agregacao' && apiData.families.length > 0) {
@@ -1063,6 +1117,10 @@ export default function BusinessFeaturesPage() {
                 title: {
                   display: true,
                   text: 'Receita (R$ milhões)',
+                  font: { size: 11, weight: '500' },
+                },
+                ticks: {
+                  font: { size: 11 },
                 },
               },
               y1: {
@@ -1072,9 +1130,18 @@ export default function BusinessFeaturesPage() {
                 title: {
                   display: true,
                   text: 'Crescimento %',
+                  font: { size: 11, weight: '500' },
+                },
+                ticks: {
+                  font: { size: 11 },
                 },
                 grid: {
                   drawOnChartArea: false,
+                },
+              },
+              x: {
+                ticks: {
+                  font: { size: 11 },
                 },
               },
             },
@@ -1617,16 +1684,26 @@ export default function BusinessFeaturesPage() {
             },
           });
         }
-
-      }, 500); // Delay to ensure DOM is ready
-    });
+      }); // requestAnimationFrame already ensures DOM is ready, no additional delay needed
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInitialized, isChartLoaded, mainTab, subTabs, apiData.loading, apiData.families, apiData.tiers, summary.totalRevenue]);
 
   // Effect to initialize charts when tab or data changes
+  // Use direct dependencies instead of the callback to avoid infinite loops
+  // Use subTabs[mainTab] instead of subTabs object to avoid reference comparison issues
+  const currentSubTab = subTabs[mainTab];
   useEffect(() => {
     initializeChartsForTab();
-  }, [initializeChartsForTab]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isInitialized, isChartLoaded, mainTab, currentSubTab, apiData.loading, apiData.families.length, apiData.tiers.length]);
+
+  // Reset initRef on unmount to allow re-initialization on next mount
+  useEffect(() => {
+    return () => {
+      initRef.current = false;
+      setIsInitialized(false);
+    };
+  }, []);
 
   // Cleanup: destroy all charts on unmount
   useEffect(() => {
@@ -1672,11 +1749,108 @@ export default function BusinessFeaturesPage() {
     };
   }, []);
 
+  // Apply inline styles to all oversized elements after render
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    const applyStyles = () => {
+      // Metric cards - force with !important
+      document.querySelectorAll('.metric-card .label').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '11px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '500', 'important');
+      });
+      document.querySelectorAll('.metric-card .value').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '24px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      document.querySelectorAll('.metric-card .unit').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '12px', 'important');
+      });
+      
+      // Chart titles
+      document.querySelectorAll('.chart-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      
+      // Section titles
+      document.querySelectorAll('.section-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '15px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      
+      // Tab buttons
+      document.querySelectorAll('.tab-button').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      
+      // Card titles
+      document.querySelectorAll('.card-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      
+      // Card values
+      document.querySelectorAll('.card-value').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '18px', 'important');
+      });
+      
+      // Card descriptions
+      document.querySelectorAll('.card-description').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '12px', 'important');
+      });
+      
+      // Narrative box h3
+      document.querySelectorAll('.narrative-box h3').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+      });
+      
+      // Narrative box p
+      document.querySelectorAll('.narrative-box p').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      
+      // Table elements
+      document.querySelectorAll('.table td').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      
+      // Educational section elements
+      document.querySelectorAll('.educational-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '15px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      document.querySelectorAll('.educational-card-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      document.querySelectorAll('.educational-text').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      document.querySelectorAll('.educational-list').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      
+      // Force header h1 styles
+      const h1 = document.querySelector('.business-header h1');
+      if (h1) {
+        (h1 as HTMLElement).style.setProperty('font-size', '18px', 'important');
+        (h1 as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      }
+    };
+    
+    applyStyles();
+    // Re-apply after a short delay to catch dynamically rendered elements
+    const timer = setTimeout(applyStyles, 500);
+    return () => clearTimeout(timer);
+  }, [isInitialized, mainTab, currentSubTab]);
+
   return (
     <>
       <Script
         src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"
-        onLoad={() => setIsChartLoaded(true)}
+        onLoad={() => {
+          setIsChartLoaded(true);
+        }}
         strategy="lazyOnload"
       />
       {!isInitialized && (
@@ -1684,7 +1858,16 @@ export default function BusinessFeaturesPage() {
           <p className="text-brand-slate">Carregando análise de negócio...</p>
         </div>
       )}
-      <div ref={containerRef} className="business-features-container" style={{ display: isInitialized ? 'block' : 'none' }}>
+      <div 
+        ref={(node) => {
+          containerRef.current = node;
+          if (node && !containerReady) {
+            setContainerReady(true);
+          }
+        }}
+        className="business-features-container" 
+        style={{ display: isInitialized ? 'block' : 'none' }}
+      >
         <style jsx global>{`
           :root {
             --color-primary: #20A084;
@@ -1730,23 +1913,23 @@ export default function BusinessFeaturesPage() {
           }
 
           .business-header h1 {
-            margin: 0 0 var(--space-8) 0;
-            font-size: 26px;
-            font-weight: 600;
-            color: var(--color-text);
+            margin: 0 0 var(--space-8) 0 !important;
+            font-size: 18px !important;
+            font-weight: 600 !important;
+            color: var(--color-text) !important;
           }
 
           .business-header p {
-            margin: 0;
-            color: var(--color-text-secondary);
-            font-size: 17px;
-            line-height: 1.6;
+            margin: 0 !important;
+            color: var(--color-text-secondary) !important;
+            font-size: 14px !important;
+            line-height: 1.6 !important;
           }
 
           .summary-banner {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: var(--space-16);
+            gap: var(--space-24);
             margin-bottom: var(--space-32);
           }
 
@@ -1754,7 +1937,7 @@ export default function BusinessFeaturesPage() {
             background: var(--color-surface);
             border: 1px solid var(--color-border);
             border-radius: var(--radius-lg);
-            padding: var(--space-20);
+            padding: var(--space-24);
             position: relative;
             cursor: help;
             transition: all 0.3s ease;
@@ -1766,46 +1949,46 @@ export default function BusinessFeaturesPage() {
           }
 
           .metric-card .label {
-            font-size: 17px;
-            font-weight: 500;
-            text-transform: uppercase;
-            color: var(--color-text-secondary);
-            margin-bottom: var(--space-8);
-            letter-spacing: 0.5px;
+            font-size: 11px !important;
+            font-weight: 500 !important;
+            text-transform: uppercase !important;
+            color: var(--color-text-secondary) !important;
+            margin-bottom: var(--space-8) !important;
+            letter-spacing: 0.5px !important;
           }
 
           .metric-card .value {
-            font-size: 26px;
-            font-weight: 600;
-            color: var(--color-primary);
-            margin-bottom: var(--space-4);
+            font-size: 24px !important;
+            font-weight: 600 !important;
+            color: var(--color-primary) !important;
+            margin-bottom: var(--space-4) !important;
           }
 
           .metric-card .unit {
-            font-size: 17px;
-            color: var(--color-text-secondary);
+            font-size: 12px !important;
+            color: var(--color-text-secondary) !important;
           }
 
           .narrative-box {
             background: rgba(50, 184, 198, 0.08);
             border-left: 4px solid var(--color-primary);
             border-radius: var(--radius-lg);
-            padding: var(--space-20);
+            padding: var(--space-24);
             margin-bottom: var(--space-32);
             line-height: 1.8;
           }
 
           .narrative-box h3 {
-            margin: 0 0 var(--space-12) 0;
-            color: var(--color-primary);
-            font-size: 17px;
-            font-weight: 600;
+            margin: 0 0 var(--space-12) 0 !important;
+            color: var(--color-primary) !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
           }
 
           .narrative-box p {
-            margin: 0;
-            color: var(--color-text);
-            font-size: 17px;
+            margin: 0 !important;
+            color: var(--color-text) !important;
+            font-size: 13px !important;
           }
 
           .tabs-container {
@@ -1817,20 +2000,20 @@ export default function BusinessFeaturesPage() {
           }
 
           .tab-button {
-            padding: var(--space-12) var(--space-20);
-            background: transparent;
-            border: none;
-            border-bottom: 3px solid transparent;
-            color: var(--color-text-secondary);
-            cursor: pointer;
-            font-size: 17px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            position: relative;
-            bottom: -1px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            padding: var(--space-12) var(--space-20) !important;
+            background: transparent !important;
+            border: none !important;
+            border-bottom: 3px solid transparent !important;
+            color: var(--color-text-secondary) !important;
+            cursor: pointer !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+            position: relative !important;
+            bottom: -1px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 8px !important;
           }
 
           .tab-button:hover {
@@ -1881,7 +2064,7 @@ export default function BusinessFeaturesPage() {
           .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
-            gap: var(--space-32);
+            gap: var(--space-24);
             margin-bottom: var(--space-32);
           }
 
@@ -1899,12 +2082,12 @@ export default function BusinessFeaturesPage() {
           }
 
           .chart-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: var(--space-20);
-            color: var(--color-text);
-            width: 100%;
-            flex-shrink: 0;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            margin-bottom: var(--space-20) !important;
+            color: var(--color-text) !important;
+            width: 100% !important;
+            flex-shrink: 0 !important;
           }
 
           .chart-canvas {
@@ -1919,14 +2102,14 @@ export default function BusinessFeaturesPage() {
           }
 
           .section-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin: var(--space-32) 0 var(--space-20) 0;
-            color: var(--color-text);
-            border-bottom: 2px solid var(--color-primary);
-            padding-bottom: var(--space-16);
-            width: 100%;
-            display: block;
+            font-size: 15px !important;
+            font-weight: 600 !important;
+            margin: var(--space-32) 0 var(--space-20) 0 !important;
+            color: var(--color-text) !important;
+            border-bottom: 2px solid var(--color-primary) !important;
+            padding-bottom: var(--space-16) !important;
+            width: 100% !important;
+            display: block !important;
           }
 
           .penalty-opportunity-grid {
@@ -1964,16 +2147,16 @@ export default function BusinessFeaturesPage() {
           }
 
           .card-title {
-            font-weight: 600;
-            color: var(--color-primary);
-            margin-bottom: var(--space-12);
-            font-size: 17px;
+            font-weight: 600 !important;
+            color: var(--color-primary) !important;
+            margin-bottom: var(--space-12) !important;
+            font-size: 13px !important;
           }
 
           .card-value {
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: var(--space-8);
+            font-size: 18px !important;
+            font-weight: 600 !important;
+            margin-bottom: var(--space-8) !important;
           }
 
           .penalty-card .card-value {
@@ -1985,12 +2168,12 @@ export default function BusinessFeaturesPage() {
           }
 
           .card-description {
-            font-size: 15px;
-            color: var(--color-text-secondary);
-            margin-top: var(--space-12);
-            padding-top: var(--space-12);
-            border-top: 1px solid var(--color-border);
-            line-height: 1.6;
+            font-size: 12px !important;
+            color: var(--color-text-secondary) !important;
+            margin-top: var(--space-12) !important;
+            padding-top: var(--space-12) !important;
+            border-top: 1px solid var(--color-border) !important;
+            line-height: 1.6 !important;
           }
 
           .insights-carousel {
@@ -2111,7 +2294,7 @@ export default function BusinessFeaturesPage() {
           .table td {
             padding: var(--space-16) var(--space-20);
             border-bottom: 1px solid var(--color-border);
-            font-size: 17px;
+            font-size: 13px !important;
           }
 
           .table tbody tr:hover {
@@ -2223,8 +2406,8 @@ export default function BusinessFeaturesPage() {
           }
 
           .educational-title {
-            font-size: 22px;
-            font-weight: 600;
+            font-size: 15px !important;
+            font-weight: 600 !important;
             color: var(--color-primary);
             margin-bottom: var(--space-24);
             border-bottom: 2px solid var(--color-primary);
@@ -2253,14 +2436,14 @@ export default function BusinessFeaturesPage() {
           }
 
           .educational-card-title {
-            font-size: 19px;
-            font-weight: 600;
+            font-size: 14px !important;
+            font-weight: 600 !important;
             color: var(--color-primary);
             margin-bottom: var(--space-12);
           }
 
           .educational-text {
-            font-size: 17px;
+            font-size: 13px !important;
             color: var(--color-text);
             line-height: 1.7;
             margin-bottom: var(--space-12);
@@ -2271,7 +2454,7 @@ export default function BusinessFeaturesPage() {
           }
 
           .educational-list {
-            font-size: 17px;
+            font-size: 13px !important;
             color: var(--color-text);
             line-height: 1.8;
             margin: var(--space-12) 0;
@@ -2507,17 +2690,21 @@ export default function BusinessFeaturesPage() {
           }
         `}</style>
 
-        <div className="business-header">
-          <h1>💼 Features de Negócio</h1>
-          <p>Inteligência de negócio consolidada: famílias, tiers, penalidades e receita para decisões estratégicas</p>
+        <div className="business-header mb-8 pb-6 border-b border-white/10">
+          <h1 className="text-lg font-semibold text-brand-lightest-slate mb-2" style={{ fontSize: '18px', fontWeight: 600 }}>
+            💼 Features de Negócio
+          </h1>
+          <p className="text-sm text-brand-slate" style={{ fontSize: '14px', lineHeight: 1.6 }}>
+            Inteligência de negócio consolidada: famílias, tiers, penalidades e receita para decisões estratégicas
+          </p>
         </div>
 
         {/* Summary Banner - Enhanced with Hover Details */}
         <div className="summary-banner">
           <div className="metric-card metric-card-hover">
-            <div className="label">Receita Total</div>
-            <div className="value">R$ {(summary.totalRevenue / 1000000).toFixed(1)}M</div>
-            <div className="unit">Consolidada</div>
+            <div className="label" style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--color-text-secondary)', marginBottom: '8px', letterSpacing: '0.5px' }}>Receita Total</div>
+            <div className="value" style={{ fontSize: '24px', fontWeight: 600, color: 'var(--color-primary)', marginBottom: '4px' }}>R$ {(summary.totalRevenue / 1000000).toFixed(1)}M</div>
+            <div className="unit" style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>Consolidada</div>
             <div className="metric-hover-detail">
               <div className="detail-title">📊 Receita Total Consolidada</div>
               <div className="detail-text">
@@ -2534,11 +2721,11 @@ export default function BusinessFeaturesPage() {
             </div>
           </div>
           <div className="metric-card metric-card-hover">
-            <div className="label">Crescimento QoQ</div>
-            <div className="value" style={{ color: summary.growthQoQ > 0 ? 'var(--color-green-500)' : 'var(--color-red-400)' }}>
+            <div className="label" style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--color-text-secondary)', marginBottom: '8px', letterSpacing: '0.5px' }}>Crescimento QoQ</div>
+            <div className="value" style={{ fontSize: '24px', fontWeight: 600, color: summary.growthQoQ > 0 ? 'var(--color-green-500)' : 'var(--color-red-400)', marginBottom: '4px' }}>
               {summary.growthQoQ > 0 ? '+' : ''}{summary.growthQoQ.toFixed(1)}%
             </div>
-            <div className="unit">Quarter-over-Quarter</div>
+            <div className="unit" style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>Quarter-over-Quarter</div>
             <div className="metric-hover-detail">
               <div className="detail-title">📈 Crescimento Trimestral (QoQ)</div>
               <div className="detail-text">
@@ -2555,9 +2742,9 @@ export default function BusinessFeaturesPage() {
             </div>
           </div>
           <div className="metric-card metric-card-hover">
-            <div className="label">Maior Risco</div>
-            <div className="value">{summary.biggestRisk}</div>
-            <div className="unit">R$ {((summary.biggestRiskExposure) / 1000).toFixed(0)}k exposição</div>
+            <div className="label" style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--color-text-secondary)', marginBottom: '8px', letterSpacing: '0.5px' }}>Maior Risco</div>
+            <div className="value" style={{ fontSize: '24px', fontWeight: 600, color: 'var(--color-primary)', marginBottom: '4px' }}>{summary.biggestRisk}</div>
+            <div className="unit" style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>R$ {((summary.biggestRiskExposure) / 1000).toFixed(0)}k exposição</div>
             <div className="metric-hover-detail">
               <div className="detail-title">⚠️ Tier de Maior Risco</div>
               <div className="detail-text">
@@ -2648,7 +2835,7 @@ export default function BusinessFeaturesPage() {
               <strong>Uso:</strong> Use esta visão geral para entender rapidamente o estado do negócio e identificar áreas que requerem atenção imediata.
             </div>
           </h3>
-          <p>{summary.narrative}</p>
+          <p style={{ fontSize: '13px', color: 'var(--color-text)', margin: 0 }}>{summary.narrative}</p>
         </div>
 
         {/* Main Tabs */}
@@ -2788,20 +2975,80 @@ export default function BusinessFeaturesPage() {
 
         {/* ========== VISÃO GERAL TAB ========== */}
         {mainTab === 'visao-geral' && subTabs['visao-geral'] === 'agregacao' && (
-          <div className="charts-grid">
-            <div className="chart-container">
-              <div className="chart-title">📊 Top 5 Famílias - Receita e Crescimento</div>
-              <div className="chart-canvas">
-                <canvas id="familiesRevenueChart"></canvas>
+          <>
+            {/* External Factors */}
+            <div className="mb-6">
+              <ExternalFactorsDashboard />
+            </div>
+            
+            {/* Prescriptive Intelligence Section */}
+            <div className="mb-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
+              <div>
+                <RiskMatrix />
+              </div>
+              <div>
+                <ActionBoard />
               </div>
             </div>
-            <div className="chart-container">
-              <div className="chart-title">🎯 Análise de Tiers - Receita vs. Risco</div>
-              <div className="chart-canvas">
-                <canvas id="tiersMatrixChart"></canvas>
+            
+            {/* Scenario Comparison */}
+            {comprehensiveData && (
+              <div className="mb-6">
+                <ScenarioComparison />
+              </div>
+            )}
+            
+            {/* Charts Grid */}
+            <div className="charts-grid">
+              <div className="chart-container">
+                <div className="chart-title" style={{ fontSize: '14px', fontWeight: 600, marginBottom: '20px', color: 'var(--color-text)', width: '100%', flexShrink: 0 }}>
+                  <div className="flex items-center justify-between">
+                    <span>📊 Top 5 Famílias - Receita e Crescimento</span>
+                    {prescriptiveData && (
+                      <PrescriptiveTooltip
+                        title="Insights Prescritivos"
+                        content={
+                          <div>
+                            <p><strong>Famílias de Alto Risco:</strong> {Object.values(prescriptiveData.risk_assessments).filter(r => r.stockout_risk === 'HIGH' || r.stockout_risk === 'CRITICAL').length}</p>
+                            <p><strong>ROI Estimado:</strong> {prescriptiveData.business_impact.roi_estimate}</p>
+                            <p><strong>Economia Potencial:</strong> {prescriptiveData.business_impact.inventory_cost_savings}</p>
+                          </div>
+                        }
+                      />
+                    )}
+                  </div>
+                </div>
+                <div className="chart-canvas">
+                  <canvas id="familiesRevenueChart"></canvas>
+                </div>
+              </div>
+              <div className="chart-container">
+                <div className="chart-title">
+                  <div className="flex items-center justify-between">
+                    <span>🎯 Análise de Tiers - Receita vs. Risco</span>
+                    {prescriptiveData && (
+                      <PrescriptiveTooltip
+                        title="Análise de Risco por Tier"
+                        content={
+                          <div>
+                            <p><strong>Recomendações:</strong></p>
+                            <ul className="list-disc list-inside">
+                              {prescriptiveData.recommendations.slice(0, 3).map((rec, i) => (
+                                <li key={i}>{rec}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        }
+                      />
+                    )}
+                  </div>
+                </div>
+                <div className="chart-canvas">
+                  <canvas id="tiersMatrixChart"></canvas>
+                </div>
               </div>
             </div>
-          </div>
+          </>
         )}
 
         {mainTab === 'visao-geral' && subTabs['visao-geral'] === 'variancia' && (
@@ -3291,7 +3538,23 @@ export default function BusinessFeaturesPage() {
         {/* ========== PREVISÕES 2026 TAB ========== */}
         {mainTab === 'previsoes' && subTabs['previsoes'] === 'demanda' && (
           <div>
-            <div className="section-title">📦 Previsão de Demanda - 90 Dias</div>
+            <div className="section-title">
+              <div className="flex items-center justify-between">
+                <span>📦 Previsão de Demanda - 90 Dias</span>
+                {prescriptiveData && (
+                  <PrescriptiveTooltip
+                    title="Previsão Prescritiva"
+                    content={
+                      <div>
+                        <p><strong>Modelo:</strong> {comprehensiveData?.best_model || 'N/A'}</p>
+                        <p><strong>Confiança:</strong> {comprehensiveData ? (comprehensiveData.model_performance.r2 * 100).toFixed(1) + '%' : 'N/A'}</p>
+                        <p><strong>Recomendação:</strong> {comprehensiveData?.recommendations.frequency?.recommended_action || 'Monitorar de perto'}</p>
+                      </div>
+                    }
+                  />
+                )}
+              </div>
+            </div>
             <div className="chart-container">
               <div className="chart-canvas">
                 <canvas id="demandForecastChart"></canvas>
@@ -3416,6 +3679,14 @@ export default function BusinessFeaturesPage() {
         {mainTab === 'cenarios' && subTabs['cenarios'] === 'preconfigurados' && (
           <div>
             <div className="section-title">📋 Cenários Pré-Configurados</div>
+            
+            {/* Scenario Comparison Component */}
+            {comprehensiveData && (
+              <div className="mb-6">
+                <ScenarioComparison />
+              </div>
+            )}
+            
             <div className="summary-banner">
               <div className="metric-card" style={{ cursor: 'pointer' }} onClick={() => setScenarioConfig({ demandGrowth: 12, usdRate: 5.20, leadTimeIncrease: 0 })}>
                 <div className="label">Base</div>

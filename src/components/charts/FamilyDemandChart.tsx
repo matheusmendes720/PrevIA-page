@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ResponsiveContainer, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Area } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Area, ReferenceLine, Cell } from 'recharts';
 import Card from '../Card';
 import { apiClient } from '../../lib/api';
 import { FamilyAggregation } from '../../types/features';
 import { useToast } from '../../hooks/useToast';
+import { usePrescriptiveChart } from '../../hooks/usePrescriptiveChart';
+import PrescriptiveTooltip from '../PrescriptiveTooltip';
+import { prescriptiveDataService } from '../../services/prescriptiveDataService';
 
 interface FamilyDemandChartProps {
   familyId?: number;
@@ -14,6 +17,8 @@ const FamilyDemandChart: React.FC<FamilyDemandChartProps> = ({ familyId, onFamil
   const [familyData, setFamilyData] = useState<FamilyAggregation[]>([]);
   const [loading, setLoading] = useState(true);
   const { addToast } = useToast();
+  const [familyName, setFamilyName] = useState<string | undefined>();
+  const { chartData: prescriptiveData } = usePrescriptiveChart(familyName);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,16 +64,24 @@ const FamilyDemandChart: React.FC<FamilyDemandChartProps> = ({ familyId, onFamil
     );
   }
 
-  const chartData = familyData.map(item => ({
-    name: item.family_name || `Família ${item.family_id}`,
-    family_id: item.family_id,
-    total_demand: item.total_demand || 0,
-    avg_demand_7d: item.avg_demand_7d || 0,
-    avg_demand_30d: item.avg_demand_30d || 0,
-    std_demand_7d: item.std_demand_7d || 0,
-    std_demand_30d: item.std_demand_30d || 0,
-    material_count: item.material_count || 0,
-  }));
+  const chartData = familyData.map(item => {
+    const name = item.family_name || `Família ${item.family_id}`;
+    if (!familyName && name) {
+      setFamilyName(name);
+    }
+    return {
+      name,
+      family_id: item.family_id,
+      total_demand: item.total_demand || 0,
+      avg_demand_7d: item.avg_demand_7d || 0,
+      avg_demand_30d: item.avg_demand_30d || 0,
+      std_demand_7d: item.std_demand_7d || 0,
+      std_demand_30d: item.std_demand_30d || 0,
+      material_count: item.material_count || 0,
+      riskLevel: prescriptiveData?.riskOverlay?.riskLevel,
+      riskScore: prescriptiveData?.riskOverlay?.riskScore,
+    };
+  });
 
   const handleBarClick = (data: any) => {
     if (onFamilyClick && data.family_id) {
@@ -95,8 +108,53 @@ const FamilyDemandChart: React.FC<FamilyDemandChartProps> = ({ familyId, onFamil
                 color: '#ccd6f6',
                 borderRadius: '0.5rem'
               }}
+              content={({ active, payload }) => {
+                if (active && payload && payload.length) {
+                  const data = payload[0].payload;
+                  return (
+                    <div className="bg-brand-navy border border-brand-cyan/40 rounded-lg p-3 shadow-xl">
+                      <p className="text-sm font-semibold text-brand-lightest-slate mb-2">{data.name}</p>
+                      {payload.map((entry: any, index: number) => (
+                        <div key={index} className="mb-1">
+                          <span className="text-xs" style={{ color: entry.color }}>
+                            {entry.name}: {entry.value.toFixed(1)}
+                          </span>
+                        </div>
+                      ))}
+                      {data.riskLevel && (
+                        <div className="mt-2 pt-2 border-t border-brand-cyan/20">
+                          <span className={`text-xs px-2 py-1 rounded ${
+                            data.riskLevel === 'HIGH' ? 'bg-red-500/20 text-red-400' :
+                            data.riskLevel === 'MEDIUM' ? 'bg-yellow-500/20 text-yellow-400' :
+                            'bg-green-500/20 text-green-400'
+                          }`}>
+                            Risco: {data.riskLevel}
+                          </span>
+                          {data.riskScore && (
+                            <p className="text-xs text-brand-slate mt-1">
+                              Score: {(data.riskScore * 100).toFixed(1)}%
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                return null;
+              }}
             />
             <Legend wrapperStyle={{ color: '#a8b2d1' }} />
+            {/* Risk overlay reference lines */}
+            {prescriptiveData?.actionThreshold && (
+              <ReferenceLine
+                yAxisId="left"
+                y={prescriptiveData.actionThreshold}
+                stroke="#f59e0b"
+                strokeDasharray="5 5"
+                strokeOpacity={0.6}
+                label={{ value: 'Ponto de Ação', position: 'right', fill: '#f59e0b', fontSize: 10 }}
+              />
+            )}
             <Bar
               yAxisId="left"
               dataKey="total_demand"
@@ -105,7 +163,18 @@ const FamilyDemandChart: React.FC<FamilyDemandChartProps> = ({ familyId, onFamil
               name="Demanda Total"
               onClick={handleBarClick}
               style={{ cursor: 'pointer' }}
-            />
+            >
+              {chartData.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={
+                    entry.riskLevel === 'HIGH' ? '#ef4444' :
+                    entry.riskLevel === 'MEDIUM' ? '#f59e0b' :
+                    '#64ffda'
+                  }
+                />
+              ))}
+            </Bar>
             <Area
               yAxisId="left"
               type="monotone"

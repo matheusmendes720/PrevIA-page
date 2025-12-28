@@ -2,12 +2,21 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Script from 'next/script';
+import ExternalFactorsDashboard from '@/components/ExternalFactorsDashboard';
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { PrescriptiveInsights } from '@/types/prescriptive';
 
 export default function ClimateFeaturesPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isChartLoaded, setIsChartLoaded] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const initRef = useRef(false);
+  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveInsights | null>(null);
+  
+  useEffect(() => {
+    prescriptiveDataService.loadPrescriptiveInsights().then(setPrescriptiveData);
+  }, []);
 
   // Effect to initialize when Chart.js is loaded
   useEffect(() => {
@@ -659,6 +668,59 @@ export default function ClimateFeaturesPage() {
     initPage();
   }, [isChartLoaded]);
 
+  // Apply inline styles to all oversized elements after render
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    const applyStyles = () => {
+      // Header h1
+      document.querySelectorAll('.climate-header h1').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '18px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      
+      // Card titles
+      document.querySelectorAll('.card-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '18px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      
+      // Card subtitles
+      document.querySelectorAll('.card-subtitle').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '12px', 'important');
+      });
+      
+      // Metric badges
+      document.querySelectorAll('.metric-badge strong').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '11px', 'important');
+      });
+      
+      // Metric values
+      document.querySelectorAll('.metric-value').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '20px', 'important');
+      });
+      
+      // Metric details
+      document.querySelectorAll('.metric-detail').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '12px', 'important');
+      });
+      
+      // Date range labels
+      document.querySelectorAll('.date-range label').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      
+      // Date inputs
+      document.querySelectorAll('.date-input').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+    };
+    
+    applyStyles();
+    const interval = setInterval(applyStyles, 100);
+    return () => clearInterval(interval);
+  }, [isInitialized]);
+
   // Effect to check for Chart.js on mount
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -716,6 +778,10 @@ export default function ClimateFeaturesPage() {
         </div>
       )}
       <div ref={containerRef} className="climate-features-container" style={{ display: isInitialized ? 'block' : 'none' }}>
+        {/* External Factors Dashboard */}
+        <div style={{ marginBottom: '24px' }}>
+          <ExternalFactorsDashboard />
+        </div>
         <style jsx global>{`
           :root {
             --color-primary: #20A084;
@@ -757,7 +823,7 @@ export default function ClimateFeaturesPage() {
 
           .climate-header h1 {
             margin: 0 0 var(--space-8) 0;
-            font-size: 28px;
+            font-size: 20px;
             font-weight: 600;
           }
 
@@ -830,7 +896,7 @@ export default function ClimateFeaturesPage() {
           }
 
           .card-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
             margin: 0;
             flex: 1;
@@ -865,7 +931,7 @@ export default function ClimateFeaturesPage() {
           }
 
           .metric-value {
-            font-size: 24px;
+            font-size: 30px;
             font-weight: 700;
             color: var(--color-primary);
             margin-bottom: var(--space-4);

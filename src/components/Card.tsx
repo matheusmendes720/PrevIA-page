@@ -10,9 +10,9 @@ interface CardProps {
 
 const Card: React.FC<CardProps> = ({ children, className = '', onClick, style }) => {
   return (
-    <div 
+    <div
       onClick={onClick}
-      className={`glass-card rounded-xl p-5 animate-subtle-glow ${className}`}
+      className={`glass-panel transition-glow rounded-xl p-5 ${className}`}
       style={style}
     >
       {children}

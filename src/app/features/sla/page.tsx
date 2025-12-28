@@ -4,9 +4,18 @@ import { useEffect, useRef, useState } from 'react';
 import Script from 'next/script';
 import { apiClient } from '../../../lib/api';
 import { SLAFeatures, SLAPenalty, SLAViolation } from '../../../types/features';
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { PrescriptiveInsights } from '@/types/prescriptive';
 
 export default function SLAFeaturesPage() {
+  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveInsights | null>(null);
+  
+  useEffect(() => {
+    prescriptiveDataService.loadPrescriptiveInsights().then(setPrescriptiveData);
+  }, []);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [containerReady, setContainerReady] = useState(false);
   const [isChartLoaded, setIsChartLoaded] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const initRef = useRef(false);
@@ -103,9 +112,17 @@ export default function SLAFeaturesPage() {
     fetchData();
   }, [selectedTier]);
 
+  // Check if Chart.js is already loaded (e.g., from previous navigation)
+  useEffect(() => {
+    const chartJsAvailable = typeof (window as any).Chart !== 'undefined';
+    if (chartJsAvailable && !isChartLoaded) {
+      setIsChartLoaded(true);
+    }
+  }, [isChartLoaded]);
+
   // Effect to initialize when Chart.js is loaded
   useEffect(() => {
-    if (!isChartLoaded || !containerRef.current) return;
+    if (!isChartLoaded || !containerReady) return;
 
     const initPage = () => {
       if (typeof (window as any).Chart === 'undefined') {
@@ -113,9 +130,8 @@ export default function SLAFeaturesPage() {
         return;
       }
 
-      // Small delay to ensure DOM is ready
-      setTimeout(() => {
-
+      // Use requestAnimationFrame for immediate execution on next frame (faster than setTimeout)
+      requestAnimationFrame(() => {
       // Allow re-initialization when data changes - charts will be destroyed and recreated
 
       // Configure Chart.js defaults
@@ -123,19 +139,19 @@ export default function SLAFeaturesPage() {
         (window as any).Chart.defaults.color = '#e0e8f0';
         (window as any).Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.2)';
         (window as any).Chart.defaults.backgroundColor = 'rgba(32, 160, 132, 0.15)';
-        (window as any).Chart.defaults.font.size = 16;
+        (window as any).Chart.defaults.font.size = 11;
         (window as any).Chart.defaults.font.family = 'system-ui, -apple-system, sans-serif';
         (window as any).Chart.defaults.font.weight = '500';
         (window as any).Chart.defaults.plugins = (window as any).Chart.defaults.plugins || {};
         (window as any).Chart.defaults.plugins.legend = (window as any).Chart.defaults.plugins.legend || {};
         (window as any).Chart.defaults.plugins.legend.labels = (window as any).Chart.defaults.plugins.legend.labels || {};
         (window as any).Chart.defaults.plugins.legend.labels.font = (window as any).Chart.defaults.plugins.legend.labels.font || {};
-        (window as any).Chart.defaults.plugins.legend.labels.font.size = 16;
+        (window as any).Chart.defaults.plugins.legend.labels.font.size = 11;
         (window as any).Chart.defaults.plugins.legend.labels.font.weight = '500';
         (window as any).Chart.defaults.plugins.tooltip = (window as any).Chart.defaults.plugins.tooltip || {};
-        (window as any).Chart.defaults.plugins.tooltip.titleFont = { size: 18, weight: '600' };
-        (window as any).Chart.defaults.plugins.tooltip.bodyFont = { size: 16, weight: '500' };
-        (window as any).Chart.defaults.plugins.tooltip.padding = 16;
+        (window as any).Chart.defaults.plugins.tooltip.titleFont = { size: 12, weight: '600' };
+        (window as any).Chart.defaults.plugins.tooltip.bodyFont = { size: 11, weight: '500' };
+        (window as any).Chart.defaults.plugins.tooltip.padding = 10;
         (window as any).Chart.defaults.elements = (window as any).Chart.defaults.elements || {};
         (window as any).Chart.defaults.elements.bar = (window as any).Chart.defaults.elements.bar || {};
         (window as any).Chart.defaults.elements.bar.borderWidth = 2;
@@ -922,7 +938,7 @@ export default function SLAFeaturesPage() {
       }
 
       setIsInitialized(true);
-      }, 100);
+      }); // requestAnimationFrame already ensures DOM is ready
     };
 
     initPage();
@@ -941,7 +957,126 @@ export default function SLAFeaturesPage() {
         }
       });
     };
-  }, [isChartLoaded, apiData.features, apiData.penalties, apiData.violations, apiData.availability]);
+  }, [isChartLoaded, containerReady, apiData.features, apiData.penalties, apiData.violations, apiData.availability]);
+
+  // Apply inline styles to all oversized elements after render
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    const applyStyles = () => {
+      // Metric cards - force with !important
+      document.querySelectorAll('.metric-card .label').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '11px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '500', 'important');
+      });
+      document.querySelectorAll('.metric-card .value').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '24px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      document.querySelectorAll('.metric-card .unit').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '12px', 'important');
+      });
+      
+      // Section titles
+      document.querySelectorAll('.section-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '15px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      
+      // Chart titles
+      document.querySelectorAll('.chart-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      
+      // Narrative box elements
+      document.querySelectorAll('.narrative-box h3').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      document.querySelectorAll('.narrative-box p').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      
+      // Key point cards and explainer cards
+      document.querySelectorAll('.key-point-card h3, .explainer-card h3').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      document.querySelectorAll('.key-point-card p, .explainer-card p').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      
+      // Formula boxes
+      document.querySelectorAll('.formula, .key-point-card .formula').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '12px', 'important');
+      });
+      
+      // Alert cards
+      document.querySelectorAll('.alert-card h3, .alert-card .alert-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      document.querySelectorAll('.alert-card p, .alert-card .alert-description').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      
+      // Violation cards
+      document.querySelectorAll('.violation-material').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      document.querySelectorAll('.violation-probability').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      document.querySelectorAll('.violation-row').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      
+      // Penalty cards
+      document.querySelectorAll('.penalty-client').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      document.querySelectorAll('.penalty-row').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      document.querySelectorAll('.penalty-reason').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      
+      // Action cards
+      document.querySelectorAll('.action-column-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      document.querySelectorAll('.action-card .action-title, .action-card h3, .action-card h4').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      document.querySelectorAll('.action-card p, .action-card .action-description, .action-card .action-owner').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      
+      // Table elements
+      document.querySelectorAll('.table td').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      
+      // Force header h1 styles
+      const h1 = document.querySelector('.sla-header h1');
+      if (h1) {
+        (h1 as HTMLElement).style.setProperty('font-size', '18px', 'important');
+        (h1 as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      }
+    };
+    
+    applyStyles();
+    // Re-apply after a short delay to catch dynamically rendered elements
+    const timer = setTimeout(applyStyles, 500);
+    return () => clearTimeout(timer);
+  }, [isInitialized]);
 
   const summary = apiData.features.length > 0
     ? (() => {
@@ -1043,7 +1178,16 @@ export default function SLAFeaturesPage() {
           <p className="text-brand-slate">Carregando dashboard de SLA...</p>
         </div>
       )}
-      <div ref={containerRef} className="sla-features-container" style={{ display: isInitialized ? 'block' : 'none' }}>
+      <div 
+        ref={(node) => {
+          containerRef.current = node;
+          if (node && !containerReady) {
+            setContainerReady(true);
+          }
+        }} 
+        className="sla-features-container" 
+        style={{ display: isInitialized ? 'block' : 'none' }}
+      >
         <style jsx global>{`
           :root {
             --color-primary: #20A084;
@@ -1089,17 +1233,17 @@ export default function SLAFeaturesPage() {
           }
 
           .sla-header h1 {
-            margin: 0 0 var(--space-8) 0;
-            font-size: 28px;
-            font-weight: 600;
-            color: var(--color-text);
+            margin: 0 0 var(--space-8) 0 !important;
+            font-size: 18px !important;
+            font-weight: 600 !important;
+            color: var(--color-text) !important;
           }
 
           .sla-header p {
-            margin: 0;
-            color: var(--color-text-secondary);
-            font-size: 18px;
-            line-height: 1.6;
+            margin: 0 !important;
+            color: var(--color-text-secondary) !important;
+            font-size: 14px !important;
+            line-height: 1.6 !important;
           }
 
           .filters {
@@ -1115,7 +1259,7 @@ export default function SLAFeaturesPage() {
 
           .filter-group label {
             display: block;
-            font-size: 18px;
+            font-size: 13px;
             font-weight: 500;
             margin-bottom: var(--space-8);
             color: var(--color-primary);
@@ -1131,13 +1275,13 @@ export default function SLAFeaturesPage() {
             border: 1px solid var(--color-border);
             border-radius: var(--radius-base);
             color: var(--color-text);
-            font-size: 18px;
+            font-size: 15px;
           }
 
           .summary-banner {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: var(--space-16);
+            gap: var(--space-24);
             margin-bottom: var(--space-32);
           }
 
@@ -1145,7 +1289,7 @@ export default function SLAFeaturesPage() {
             background: var(--color-surface);
             border: 1px solid var(--color-border);
             border-radius: var(--radius-lg);
-            padding: var(--space-20);
+            padding: var(--space-24);
             position: relative;
             cursor: help;
             transition: all 0.3s ease;
@@ -1158,24 +1302,24 @@ export default function SLAFeaturesPage() {
           }
 
           .metric-card .label {
-            font-size: 18px;
-            font-weight: 500;
-            text-transform: uppercase;
-            color: var(--color-text-secondary);
-            margin-bottom: var(--space-8);
-            letter-spacing: 0.5px;
+            font-size: 11px !important;
+            font-weight: 500 !important;
+            text-transform: uppercase !important;
+            color: var(--color-text-secondary) !important;
+            margin-bottom: var(--space-8) !important;
+            letter-spacing: 0.5px !important;
           }
 
           .metric-card .value {
-            font-size: 28px;
-            font-weight: 600;
-            color: var(--color-primary);
-            margin-bottom: var(--space-8);
+            font-size: 24px !important;
+            font-weight: 600 !important;
+            color: var(--color-primary) !important;
+            margin-bottom: var(--space-8) !important;
           }
 
           .metric-card .unit {
-            font-size: 18px;
-            color: var(--color-text-secondary);
+            font-size: 12px !important;
+            color: var(--color-text-secondary) !important;
           }
 
           .metric-card .tooltip-icon {
@@ -1429,8 +1573,8 @@ export default function SLAFeaturesPage() {
           .risk-low { color: var(--color-green-500); }
 
           .section-title {
-            font-size: 20px;
-            font-weight: 600;
+            font-size: 15px !important;
+            font-weight: 600 !important;
             margin: var(--space-32) 0 var(--space-16) 0;
             color: var(--color-text);
             border-bottom: 2px solid var(--color-primary);
@@ -1515,7 +1659,7 @@ export default function SLAFeaturesPage() {
           .table td {
             padding: var(--space-16) var(--space-20);
             border-bottom: 1px solid var(--color-border);
-            font-size: 18px;
+            font-size: 13px !important;
           }
 
           .table tbody tr:hover {
@@ -1555,14 +1699,14 @@ export default function SLAFeaturesPage() {
             font-weight: 600;
             color: var(--color-primary);
             margin-bottom: var(--space-12);
-            font-size: 18px;
+            font-size: 14px !important;
           }
 
           .penalty-row {
             display: flex;
             justify-content: space-between;
             margin-bottom: var(--space-8);
-            font-size: 18px;
+            font-size: 13px !important;
           }
 
           .penalty-label {
@@ -1575,7 +1719,7 @@ export default function SLAFeaturesPage() {
           }
 
           .penalty-reason {
-            font-size: 16px;
+            font-size: 13px !important;
             color: var(--color-text-secondary);
             margin-top: var(--space-12);
             padding-top: var(--space-12);
@@ -1625,12 +1769,12 @@ export default function SLAFeaturesPage() {
           .violation-material {
             font-weight: 600;
             color: var(--color-primary);
-            font-size: 18px;
+            font-size: 14px !important;
           }
 
           .violation-probability {
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 14px !important;
+            font-weight: 600 !important;
           }
 
           .violation-high { color: var(--color-red-400); }
@@ -1640,7 +1784,7 @@ export default function SLAFeaturesPage() {
           .violation-row {
             display: flex;
             justify-content: space-between;
-            font-size: 18px;
+            font-size: 13px !important;
             margin-bottom: var(--space-8);
             color: var(--color-text-secondary);
           }
@@ -1665,8 +1809,8 @@ export default function SLAFeaturesPage() {
           }
 
           .action-column-title {
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 14px !important;
+            font-weight: 600 !important;
             margin-bottom: var(--space-16);
             color: var(--color-primary);
             text-transform: uppercase;
@@ -1691,7 +1835,7 @@ export default function SLAFeaturesPage() {
             font-weight: 600;
             color: var(--color-primary);
             margin-bottom: var(--space-8);
-            font-size: 18px;
+            font-size: 14px !important;
           }
 
           .action-owner {
@@ -1738,8 +1882,8 @@ export default function SLAFeaturesPage() {
           }
 
           .chart-title {
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 14px !important;
+            font-weight: 600 !important;
             margin-bottom: var(--space-16);
             color: var(--color-text);
             flex-shrink: 0;
@@ -1769,14 +1913,14 @@ export default function SLAFeaturesPage() {
           .narrative-box h3 {
             margin: 0 0 var(--space-12) 0;
             color: var(--color-primary);
-            font-size: 20px;
-            font-weight: 600;
+            font-size: 14px !important;
+            font-weight: 600 !important;
           }
 
           .narrative-box p {
             margin: 0 0 var(--space-12) 0;
             color: var(--color-text);
-            font-size: 18px;
+            font-size: 13px !important;
           }
 
           .narrative-box p:last-child {
@@ -1802,14 +1946,14 @@ export default function SLAFeaturesPage() {
           }
 
           .key-point-card h4 {
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 14px !important;
+            font-weight: 600 !important;
             color: var(--color-primary);
             margin-bottom: var(--space-12);
           }
 
           .key-point-card p {
-            font-size: 18px;
+            font-size: 13px !important;
             color: var(--color-text);
             line-height: 1.6;
             margin-bottom: var(--space-8);
@@ -1821,7 +1965,7 @@ export default function SLAFeaturesPage() {
             padding: var(--space-16);
             border-radius: var(--radius-base);
             margin: var(--space-16) 0;
-            font-size: 18px;
+            font-size: 12px !important;
             font-family: 'Courier New', monospace;
             color: var(--color-primary);
           }
@@ -1883,10 +2027,14 @@ export default function SLAFeaturesPage() {
           }
         `}</style>
 
-        <div className="sla-header">
-          <h1>🎯 Service Level Agreement (SLA) Dashboard</h1>
-          <p>Monitoramento de disponibilidade, penalidades e previsão de violações de SLA para otimização de estoque e gestão de supply chain</p>
-      </div>
+        <div className="sla-header mb-8 pb-6 border-b border-white/10">
+          <h1 className="text-lg font-semibold text-brand-lightest-slate mb-2" style={{ fontSize: '18px', fontWeight: 600 }}>
+            🎯 Service Level Agreement (SLA) Dashboard
+          </h1>
+          <p className="text-sm text-brand-slate" style={{ fontSize: '14px', lineHeight: 1.6 }}>
+            Monitoramento de disponibilidade, penalidades e previsão de violações de SLA para otimização de estoque e gestão de supply chain
+          </p>
+        </div>
 
         {/* FILTERS */}
         <div className="filters">

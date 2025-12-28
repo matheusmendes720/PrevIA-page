@@ -2,11 +2,11 @@ import React from 'react';
 import { StateData } from '../types';
 
 interface BrazilMapProps {
-  hoveredState: string | null;
-  onStateHover: (stateId: string | null) => void;
-  stateData: Record<string, StateData>;
-  selectedState: string | null;
-  onStateClick: (stateId: string) => void;
+    hoveredState: string | null;
+    onStateHover: (stateId: string | null) => void;
+    stateData: Record<string, StateData>;
+    selectedState: string | null;
+    onStateClick: (stateId: string) => void;
 }
 
 const stylizedStatesPaths: Record<string, string> = {
@@ -49,7 +49,7 @@ const stylizedStateLabels: Record<string, { x: number, y: number }> = {
 };
 
 const connectorLines: string[] = [
-    "M325,244 L378,311", 
+    "M325,244 L378,311",
     "M250,315 L281,305",
     "M406,180 L450,214 L484,188",
 ];
@@ -59,7 +59,29 @@ const BrazilMap: React.FC<BrazilMapProps> = ({ hoveredState, onStateHover, state
         <svg viewBox="70 0 550 600" className="w-full h-full">
             <defs>
                 <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="#64ffda" />
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                    <feDropShadow dx="0" dy="0" stdDeviation="6" floodColor="#64ffda" floodOpacity="0.8" />
+                </filter>
+
+                <linearGradient id="grad-consolidated" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#0d4b55" />
+                    <stop offset="100%" stopColor="#052c33" />
+                </linearGradient>
+
+                <linearGradient id="grad-expansion" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#64ffda" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="#149193" />
+                </linearGradient>
+
+                <linearGradient id="grad-default" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#233554" />
+                    <stop offset="100%" stopColor="#112240" />
+                </linearGradient>
+
+                <filter id="inner-glow">
+                    <feGaussianBlur stdDeviation="2" in="SourceAlpha" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="out" result="inner-glow" />
                 </filter>
             </defs>
             <g>
@@ -70,43 +92,45 @@ const BrazilMap: React.FC<BrazilMapProps> = ({ hoveredState, onStateHover, state
                 </g>
                 {Object.entries(stylizedStatesPaths).map(([id, d]) => {
                     const data = stateData[id];
-                    const isHovered = hoveredState === id;
-                    const isSelected = selectedState === id;
                     const category = data?.category || 'default';
-                    
-                    const categoryClasses = {
-                        consolidated: "fill-[#0d4b55]/80 stroke-brand-cyan",
-                        expansion: "fill-[#149193]/80 stroke-brand-cyan",
-                        default: "fill-gray-700 stroke-gray-500"
+
+                    const categoryStyles = {
+                        consolidated: { fill: "url(#grad-consolidated)", stroke: "#64ffda", class: "opacity-90" },
+                        expansion: { fill: "url(#grad-expansion)", stroke: "#64ffda", class: "opacity-95" },
+                        default: { fill: "url(#grad-default)", stroke: "#8892b0", class: "opacity-70" }
                     };
 
-                    const selectedClasses = "stroke-[2.5px] !stroke-brand-cyan opacity-100";
-                    const hoverClasses = !isSelected ? "opacity-90 stroke-[1.5px]" : "";
+                    const s = categoryStyles[category] || categoryStyles.default;
+                    const isSelected = selectedState === id;
+                    const isHovered = hoveredState === id;
 
                     return (
                         <path
                             key={id}
                             id={id}
                             d={d}
-                            className={`transition-all duration-200 cursor-pointer ${categoryClasses[category]} ${isHovered ? hoverClasses : 'stroke-1 opacity-70'} ${isSelected ? selectedClasses : ''}`}
-                            filter={isSelected ? "url(#glow)" : "none"}
+                            fill={s.fill}
+                            stroke={isSelected || isHovered ? "#64ffda" : s.stroke}
+                            strokeWidth={isSelected ? 2.5 : isHovered ? 1.5 : 1}
+                            className={`transition-all duration-300 cursor-pointer ${s.class} ${isHovered ? 'opacity-100' : ''} ${isSelected ? 'opacity-100' : ''}`}
+                            filter={isSelected ? "url(#glow)" : isHovered ? "url(#inner-glow)" : "none"}
                             onMouseEnter={() => onStateHover(id)}
                             onMouseLeave={() => onStateHover(null)}
                             onClick={() => onStateClick(id)}
                         />
                     );
                 })}
-                {Object.entries(stylizedStateLabels).map(([id, {x, y}]) => (
-                     <text
+                {Object.entries(stylizedStateLabels).map(([id, { x, y }]) => (
+                    <text
                         key={`${id}-label`}
                         x={x}
                         y={y}
                         className="text-[11px] font-bold fill-brand-lightest-slate/80 pointer-events-none"
                         textAnchor="middle"
                         dominantBaseline="middle"
-                     >
+                    >
                         {id}
-                     </text>
+                    </text>
                 ))}
             </g>
         </svg>

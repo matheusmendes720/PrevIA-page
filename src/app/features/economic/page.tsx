@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Script from 'next/script';
+import ExternalFactorsDashboard from '@/components/ExternalFactorsDashboard';
 
 export default function EconomicFeaturesPage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -341,6 +342,87 @@ export default function EconomicFeaturesPage() {
     };
   }, []);
 
+  // Apply inline styles to all oversized elements after render
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    const applyStyles = () => {
+      // Header h1
+      document.querySelectorAll('.economic-header h1').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '18px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      
+      // Section titles
+      document.querySelectorAll('.economic-section-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      
+      // Card labels
+      document.querySelectorAll('.economic-card-label').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      
+      // Card values
+      document.querySelectorAll('.economic-card-value').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '24px', 'important');
+      });
+      
+      // Chart titles
+      document.querySelectorAll('.economic-chart-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+      });
+      
+      // Storytelling content
+      document.querySelectorAll('.economic-storytelling-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+      });
+      document.querySelectorAll('.economic-storytelling-content').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      
+      // Waterfall and impact titles
+      document.querySelectorAll('.economic-waterfall-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+      });
+      document.querySelectorAll('.economic-impact-segment').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '12px', 'important');
+      });
+      
+      // Drawback cards
+      document.querySelectorAll('.economic-drawback-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+      });
+      document.querySelectorAll('.economic-drawback-label').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      document.querySelectorAll('.economic-drawback-value').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '24px', 'important');
+      });
+      
+      // Recommendation cards
+      document.querySelectorAll('.economic-recom-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+      });
+      document.querySelectorAll('.economic-recom-owner, .economic-recom-desc').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+      
+      // Gauge titles and values
+      document.querySelectorAll('.economic-gauge-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '15px', 'important');
+      });
+      document.querySelectorAll('.economic-gauge-value').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '24px', 'important');
+      });
+    };
+    
+    applyStyles();
+    const interval = setInterval(applyStyles, 100);
+    return () => clearInterval(interval);
+  }, [isInitialized]);
+
   return (
     <>
       <Script
@@ -367,6 +449,10 @@ export default function EconomicFeaturesPage() {
         </div>
       )}
       <div ref={containerRef} className="economic-features-container" style={{ display: isInitialized ? 'block' : 'none' }}>
+        {/* External Factors Dashboard */}
+        <div style={{ marginBottom: '24px' }}>
+          <ExternalFactorsDashboard />
+        </div>
         <style jsx global>{`
           :root {
             --color-primary: #20A084;
@@ -408,15 +494,15 @@ export default function EconomicFeaturesPage() {
 
           .economic-header h1 {
             margin: 0 0 var(--space-8) 0;
-            font-size: 32px;
-            font-weight: 600;
+            font-size: 18px !important;
+            font-weight: 600 !important;
             color: var(--color-text);
           }
 
           .economic-header p {
             margin: 0;
             color: var(--color-text-secondary);
-            font-size: 16px;
+            font-size: 15px;
           }
 
           .economic-section-title {
@@ -431,7 +517,7 @@ export default function EconomicFeaturesPage() {
           .economic-summary-tiles {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: var(--space-16);
+            gap: var(--space-24);
             margin-bottom: var(--space-24);
           }
 
@@ -439,7 +525,7 @@ export default function EconomicFeaturesPage() {
             background: var(--color-surface);
             border: 1px solid var(--color-border);
             border-radius: var(--radius-lg);
-            padding: var(--space-16);
+            padding: var(--space-24);
             text-align: center;
             cursor: help;
             transition: all 0.3s;
@@ -452,7 +538,7 @@ export default function EconomicFeaturesPage() {
           }
 
           .economic-card-label {
-            font-size: 15px;
+            font-size: 13px;
             color: var(--color-text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -461,7 +547,7 @@ export default function EconomicFeaturesPage() {
           }
 
           .economic-card-value {
-            font-size: 32px;
+            font-size: 30px;
             font-weight: 700;
             color: var(--color-primary);
             margin-bottom: var(--space-10);

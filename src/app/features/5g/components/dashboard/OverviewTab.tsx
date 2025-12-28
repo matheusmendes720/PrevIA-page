@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { 
   events, 
   regionDemand, 
@@ -10,12 +10,24 @@ import {
 } from '../../data';
 import StatusBadge from '../ui/StatusBadge';
 import Tooltip from '../ui/Tooltip';
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import { InfoIcon } from '@/components/icons';
+import ExternalFactorsDashboard from '@/components/ExternalFactorsDashboard';
+import ActionBoard from '@/components/ActionBoard';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { PrescriptiveInsights } from '@/types/prescriptive';
 
 interface OverviewTabProps {
   onNavigateToTab?: (tab: string) => void;
 }
 
 const OverviewTab: React.FC<OverviewTabProps> = ({ onNavigateToTab }) => {
+  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveInsights | null>(null);
+  
+  useEffect(() => {
+    prescriptiveDataService.loadPrescriptiveInsights().then(setPrescriptiveData);
+  }, []);
+  
   // Get top 3 events by impact
   const topEvents = useMemo(() => {
     return [...events]
@@ -75,6 +87,43 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ onNavigateToTab }) => {
 
   return (
     <div className="space-y-6">
+      {/* External Factors */}
+      <ExternalFactorsDashboard />
+      
+      {/* Prescriptive Insights Header */}
+      {prescriptiveData && (
+        <div className="bg-brand-navy/70 backdrop-blur-xl rounded-xl border border-brand-cyan/40 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-brand-lightest-slate">Insights Prescritivos 5G</h3>
+            <PrescriptiveTooltip
+              data={{
+                whatItMeans: `ROI Estimado: ${prescriptiveData.business_impact.roi_estimate}`,
+                whyItMatters: `Economia de Inventário: ${prescriptiveData.business_impact.inventory_cost_savings}`,
+                whatToDoNow: `Recomendações Urgentes: ${prescriptiveData.recommendations.filter(r => r.includes('URGENT')).length}`
+              }}
+            >
+              <InfoIcon className="w-5 h-5 text-brand-cyan cursor-help" />
+            </PrescriptiveTooltip>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-brand-light-navy/30 p-4 rounded-lg">
+              <p className="text-xs text-brand-slate mb-1">Famílias de Alto Risco</p>
+              <p className="text-2xl font-bold text-red-400">
+                {Object.values(prescriptiveData.risk_assessments).filter(r => r.stockout_risk === 'HIGH' || r.stockout_risk === 'CRITICAL').length}
+              </p>
+            </div>
+            <div className="bg-brand-light-navy/30 p-4 rounded-lg">
+              <p className="text-xs text-brand-slate mb-1">Ações Pendentes</p>
+              <p className="text-2xl font-bold text-yellow-400">{prescriptiveData.action_items.length}</p>
+            </div>
+            <div className="bg-brand-light-navy/30 p-4 rounded-lg">
+              <p className="text-xs text-brand-slate mb-1">ROI Estimado</p>
+              <p className="text-2xl font-bold text-brand-cyan">{prescriptiveData.business_impact.roi_estimate}</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Quick Insights Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Recent High-Impact Events */}
@@ -415,6 +464,11 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ onNavigateToTab }) => {
             <div className="text-xs text-brand-slate mt-1">meta atingida</div>
           </div>
         </div>
+      </div>
+      
+      {/* Action Board for 5G Actions */}
+      <div className="mt-6">
+        <ActionBoard />
       </div>
     </div>
   );

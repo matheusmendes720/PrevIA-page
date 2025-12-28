@@ -3,6 +3,8 @@
  * Fetch ML features (climate, temporal, 5G, hierarchical, predictive analytics)
  */
 
+import { generateTimeSeries, generateClimateMetrics } from '../mocks';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 const ML_CACHE_TTL = 15 * 60 * 1000; // 15 minutes
 
@@ -49,13 +51,13 @@ function getCacheKey(endpoint: string, params?: Record<string, any>): string {
 function getCached<T>(key: string): T | null {
   const cached = cache.get(key);
   if (!cached) return null;
-  
+
   const age = Date.now() - cached.timestamp;
   if (age > ML_CACHE_TTL) {
     cache.delete(key);
     return null;
   }
-  
+
   return cached.data as T;
 }
 
@@ -93,13 +95,30 @@ export const mlFeaturesService = {
    * Get temporal features for a date
    */
   async getTemporalFeatures(date: string): Promise<TemporalFeatures> {
+    // USE MOCKS IF CONFIGURED
+    if (process.env.NEXT_PUBLIC_USE_MOCKS === 'true') {
+      const d = new Date(date);
+      return {
+        year: d.getFullYear(),
+        month: d.getMonth() + 1,
+        day: d.getDate(),
+        weekday: d.getDay(),
+        quarter: Math.floor((d.getMonth() + 3) / 3),
+        day_of_year: Math.floor((d.getTime() - new Date(d.getFullYear(), 0, 0).getTime()) / 86400000),
+        is_weekend: d.getDay() === 0 || d.getDay() === 6,
+        is_holiday: false,
+        is_carnaval: false,
+        is_rainy_season: d.getMonth() >= 3 && d.getMonth() <= 5,
+      };
+    }
+
     const cacheKey = getCacheKey('/features/temporal', { date });
     const cached = getCached<TemporalFeatures>(cacheKey);
     if (cached) return cached;
 
     const url = `${API_BASE_URL}/api/v1/features/temporal/calendar?date=${date}`;
     const data = await fetchWithErrorHandling<any>(url);
-    
+
     const features: TemporalFeatures = {
       year: data.year || new Date(date).getFullYear(),
       month: data.month || new Date(date).getMonth() + 1,
@@ -112,7 +131,7 @@ export const mlFeaturesService = {
       is_carnaval: data.is_carnaval || false,
       is_rainy_season: data.is_chuva_sazonal || false,
     };
-    
+
     setCache(cacheKey, features);
     return features;
   },
@@ -121,6 +140,24 @@ export const mlFeaturesService = {
    * Get climate features
    */
   async getClimateFeatures(date?: string): Promise<ClimateFeatures> {
+    // USE MOCKS IF CONFIGURED
+    if (process.env.NEXT_PUBLIC_USE_MOCKS === 'true') {
+      // Get metrics for 1 day
+      const metrics = generateClimateMetrics(1);
+      const metric = metrics[0];
+
+      return {
+        temperature_avg_c: metric.temperature.avg,
+        precipitation_mm: metric.rainfall,
+        humidity_percent: metric.humidity,
+        wind_speed_kmh: metric.wind,
+        extreme_heat: metric.temperature.max > 32,
+        heavy_rain: metric.rainfall > 50,
+        corrosion_risk: metric.humidity > 80 ? 2 : 0,
+        field_work_disruption: metric.rainfall > 20 ? 1 : 0,
+      };
+    }
+
     const params = date ? `?date=${date}` : '';
     const cacheKey = getCacheKey('/features/climate', { date });
     const cached = getCached<ClimateFeatures>(cacheKey);
@@ -128,7 +165,7 @@ export const mlFeaturesService = {
 
     const url = `${API_BASE_URL}/api/v1/features/climate/salvador${params}`;
     const data = await fetchWithErrorHandling<any>(url);
-    
+
     const features: ClimateFeatures = {
       temperature_avg_c: data.temperature_avg_c || 25,
       precipitation_mm: data.precipitation_mm || 0,
@@ -139,7 +176,7 @@ export const mlFeaturesService = {
       corrosion_risk: data.corrosion_risk || 0,
       field_work_disruption: data.field_work_disruption || 0,
     };
-    
+
     setCache(cacheKey, features);
     return features;
   },
@@ -162,7 +199,7 @@ export const mlFeaturesService = {
         weather_risk: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as 'low' | 'medium' | 'high',
         economic_value_score: Math.floor(Math.random() * 100),
       };
-      
+
       setCache(cacheKey, analytics);
       return analytics;
     } catch (error) {

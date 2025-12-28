@@ -1,0 +1,104 @@
+/* Prescriptive Intelligence Color System */
+
+:root {
+  /* Risk-Based Colors */
+  --risk-high: #ef4444;        /* Red */
+  --risk-high-bg: rgba(239, 68, 68, 0.1);
+  --risk-high-border: rgba(239, 68, 68, 0.4);
+  
+  --risk-medium: #f59e0b;      /* Orange */
+  --risk-medium-bg: rgba(245, 158, 11, 0.1);
+  --risk-medium-border: rgba(245, 158, 11, 0.4);
+  
+  --risk-low-medium: #eab308;  /* Yellow */
+  --risk-low-medium-bg: rgba(234, 179, 8, 0.1);
+  --risk-low-medium-border: rgba(234, 179, 8, 0.4);
+  
+  --risk-low: #22c55e;         /* Green */
+  --risk-low-bg: rgba(34, 197, 94, 0.1);
+  --risk-low-border: rgba(34, 197, 94, 0.4);
+
+  /* Confidence-Based Colors */
+  --confidence-high: #3b82f6;      /* Dark Blue */
+  --confidence-high-bg: rgba(59, 130, 246, 0.2);
+  
+  --confidence-medium: #60a5fa;    /* Medium Blue */
+  --confidence-medium-bg: rgba(96, 165, 250, 0.15);
+  
+  --confidence-low: #93c5fd;       /* Light Blue */
+  --confidence-low-bg: rgba(147, 197, 253, 0.1);
+
+  /* Action Badge Colors */
+  --badge-urgent: #ef4444;
+  --badge-urgent-bg: rgba(239, 68, 68, 0.2);
+  --badge-urgent-text: #fca5a5;
+  
+  --badge-review: #f59e0b;
+  --badge-review-bg: rgba(245, 158, 11, 0.2);
+  --badge-review-text: #fcd34d;
+  
+  --badge-ok: #22c55e;
+  --badge-ok-bg: rgba(34, 197, 94, 0.2);
+  --badge-ok-text: #86efac;
+}
+
+/* Risk Level Utility Classes */
+.risk-high {
+  color: var(--risk-high);
+  background-color: var(--risk-high-bg);
+  border-color: var(--risk-high-border);
+}
+
+.risk-medium {
+  color: var(--risk-medium);
+  background-color: var(--risk-medium-bg);
+  border-color: var(--risk-medium-border);
+}
+
+.risk-low-medium {
+  color: var(--risk-low-medium);
+  background-color: var(--risk-low-medium-bg);
+  border-color: var(--risk-low-medium-border);
+}
+
+.risk-low {
+  color: var(--risk-low);
+  background-color: var(--risk-low-bg);
+  border-color: var(--risk-low-border);
+}
+
+/* Confidence Level Utility Classes */
+.confidence-high {
+  color: var(--confidence-high);
+  background-color: var(--confidence-high-bg);
+}
+
+.confidence-medium {
+  color: var(--confidence-medium);
+  background-color: var(--confidence-medium-bg);
+}
+
+.confidence-low {
+  color: var(--confidence-low);
+  background-color: var(--confidence-low-bg);
+}
+
+/* Action Badge Utility Classes */
+.badge-urgent {
+  color: var(--badge-urgent-text);
+  background-color: var(--badge-urgent-bg);
+  border-color: var(--badge-urgent);
+}
+
+.badge-review {
+  color: var(--badge-review-text);
+  background-color: var(--badge-review-bg);
+  border-color: var(--badge-review);
+}
+
+.badge-ok {
+  color: var(--badge-ok-text);
+  background-color: var(--badge-ok-bg);
+  border-color: var(--badge-ok);
+}
+

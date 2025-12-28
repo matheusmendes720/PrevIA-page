@@ -23,6 +23,9 @@ const nextConfig = {
     NEXT_PUBLIC_GEMINI_API_KEY: process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY,
   },
   async rewrites() {
+    if (process.env.NEXT_PUBLIC_USE_MOCKS === 'true') {
+      return [];
+    }
     return [
       {
         source: '/api/:path*',
@@ -43,9 +46,11 @@ const nextConfig = {
         hostname: '**.netlify.com',
       },
     ],
+    // Disable image optimization when using mocks (static export)
+    unoptimized: process.env.NEXT_PUBLIC_USE_MOCKS === 'true',
   },
-  // Output configuration for Netlify
-  output: 'standalone',
+  // Output configuration for Netlify - conditional for static export
+  output: process.env.NEXT_PUBLIC_USE_MOCKS === 'true' ? 'export' : 'standalone',
   // Webpack optimizations for better code splitting
   webpack: (config, { dev, isServer }) => {
     // Optimize chunk splitting for better loading performance

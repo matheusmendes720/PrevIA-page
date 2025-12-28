@@ -2,6 +2,11 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { stockManagement } from '../data';
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import { InfoIcon } from '@/components/icons';
+import RiskMatrix from '@/components/RiskMatrix';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { PrescriptiveInsights } from '@/types/prescriptive';
 
 interface InventoryTabProps {
   isChartReady: boolean;
@@ -11,6 +16,11 @@ export default function InventoryTab({ isChartReady }: InventoryTabProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const initRef = useRef(false);
+  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveInsights | null>(null);
+  
+  useEffect(() => {
+    prescriptiveDataService.loadPrescriptiveInsights().then(setPrescriptiveData);
+  }, []);
 
   // Initialize charts when Chart.js is ready
   const initializeCharts = useCallback(() => {
@@ -87,7 +97,27 @@ export default function InventoryTab({ isChartReady }: InventoryTabProps) {
 
   return (
     <div ref={containerRef} className="inventory-tab-container">
-      <h2 className="text-2xl font-bold mb-6" style={{ color: '#f0f4f8' }}>📦 Gestão de Estoque</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold" style={{ color: '#f0f4f8' }}>📦 Gestão de Estoque</h2>
+        {prescriptiveData && (
+          <PrescriptiveTooltip
+            data={{
+              whatItMeans: `Itens Críticos: ${stockManagement.criticalItems.filter(i => i.status === 'critical').length}`,
+              whyItMatters: `Famílias de Alto Risco: ${Object.values(prescriptiveData.risk_assessments).filter(r => r.stockout_risk === 'HIGH' || r.stockout_risk === 'CRITICAL').length}`,
+              whatToDoNow: `Economia Potencial: ${prescriptiveData.business_impact.inventory_cost_savings}`
+            }}
+          >
+            <InfoIcon className="w-5 h-5 text-brand-cyan cursor-help ml-2" />
+          </PrescriptiveTooltip>
+        )}
+      </div>
+      
+      {/* Risk Matrix */}
+      {prescriptiveData && (
+        <div className="mb-6">
+          <RiskMatrix />
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
         {stockManagement.criticalItems.map((item, idx) => (

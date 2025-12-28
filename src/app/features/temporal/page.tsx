@@ -1,169 +1,90 @@
 /**
- * Temporal Analytics Main Page
- * Comprehensive time series and lead time analytics with 12 integrated tabs
+ * Temporal Features Page - Simple Seasonal Patterns Focus
+ * Built from zero based on HTML baseline
+ * Only 6 core widgets: Hero Summary, Event Timeline, Seasonality Heatmap,
+ * Cyclical Encoding, Forecast Comparison, Action Playbook
  */
 
 'use client';
 
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect } from 'react';
 import Script from 'next/script';
-import { TemporalDataProvider, useTemporalData } from './context/TemporalDataContext';
-import { TabNavigation, type Tab } from './components/shared/TabNavigation';
-import './styles/globals.css';
-
-// Lazy load tab components for better performance
-const OverviewTab = lazy(() => import('./components/LeadTimeIntegration/OverviewTab'));
-const SupplierPerformanceTab = lazy(() => import('./components/LeadTimeIntegration/SupplierPerformanceTab'));
-const ForecastReorderTab = lazy(() => import('./components/LeadTimeIntegration/ForecastReorderTab'));
-const FinancialOptimizationTab = lazy(() => import('./components/LeadTimeIntegration/FinancialOptimizationTab'));
-const DecompositionTab = lazy(() => import('./components/TemporalAnalysis/DecompositionTab'));
-const AutocorrelationTab = lazy(() => import('./components/TemporalAnalysis/AutocorrelationTab'));
-const FourierAnalysisTab = lazy(() => import('./components/TemporalAnalysis/FourierAnalysisTab'));
-const LagFeaturesTab = lazy(() => import('./components/TemporalAnalysis/LagFeaturesTab'));
-const CalendarEffectsTab = lazy(() => import('./components/TemporalAnalysis/CalendarEffectsTab'));
-const CyclicPatternsTab = lazy(() => import('./components/TemporalAnalysis/CyclicPatternsTab'));
-const AnomalyDetectionTab = lazy(() => import('./components/TemporalAnalysis/AnomalyDetectionTab'));
-const ChangePointTab = lazy(() => import('./components/TemporalAnalysis/ChangePointTab'));
-
-// Tab definitions
-const TABS: Tab[] = [
-  // Lead Time & Supply Chain
-  { id: 'overview', label: 'Overview', icon: '📊', category: 'leadtime' },
-  { id: 'suppliers', label: 'Supplier Performance', icon: '🤝', category: 'leadtime' },
-  { id: 'forecast', label: 'Forecast & Reorder', icon: '📈', category: 'leadtime' },
-  { id: 'financial', label: 'Financial Optimization', icon: '💰', category: 'leadtime' },
-  
-  // Temporal Analytics
-  { id: 'decomposition', label: 'Decomposition', icon: '🔬', category: 'temporal' },
-  { id: 'autocorrelation', label: 'ACF/PACF', icon: '📉', category: 'temporal' },
-  { id: 'fourier', label: 'Fourier Analysis', icon: '〰️', category: 'temporal' },
-  { id: 'lag-features', label: 'Lag Features', icon: '⏱️', category: 'temporal' },
-  { id: 'calendar', label: 'Calendar Effects', icon: '📅', category: 'temporal' },
-  { id: 'cyclical', label: 'Cyclical Patterns', icon: '🔄', category: 'temporal' },
-  { id: 'anomalies', label: 'Anomaly Detection', icon: '🚨', category: 'temporal' },
-  { id: 'changepoints', label: 'Change Points', icon: '📍', category: 'temporal' }
-];
-
-function TemporalAnalyticsContent() {
-  const { state, setActiveTab, dataset } = useTemporalData();
+import { mockPayload } from './data/mockData';
+import HeroSummary from '@/components/legacy/HeroSummary';
+import EventTimeline from '@/components/legacy/EventTimeline';
+import SeasonalityHeatmap from '@/components/legacy/SeasonalityHeatmap';
+import CyclicalExplainer from '@/components/legacy/CyclicalExplainer';
+import ForecastComparison from '@/components/legacy/ForecastComparison';
+import ActionPlaybook from '@/components/legacy/ActionPlaybook';
+export default function TemporalPage() {
   const [isChartLoaded, setIsChartLoaded] = useState(false);
-  
+  const [dateFrom, setDateFrom] = useState('2025-10-19');
+  const [dateTo, setDateTo] = useState('2025-11-18');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'high' | 'seasonal'>('all');
+
   // Check for Chart.js
   useEffect(() => {
     if (typeof window !== 'undefined' && typeof (window as any).Chart !== 'undefined') {
       setIsChartLoaded(true);
     }
   }, []);
-  
-  const handleTabChange = (tabId: string) => {
-    setActiveTab(tabId);
-  };
-  
-  // Update tab badges with dynamic data
-  const tabsWithBadges: Tab[] = TABS.map(tab => {
-    if (tab.id === 'anomalies') {
-      return { ...tab, badge: dataset.anomalies.length };
+
+  // Get next event for Hero Summary - adapt TemporalEvent to CalendarEvent format
+  const nextEvent = mockPayload.summary.nextEvent ? {
+    ...mockPayload.summary.nextEvent,
+    name: mockPayload.summary.nextEvent.label,
+    type: 'holiday' as const,
+    leadTimeImpact: 0,
+    demandImpact: mockPayload.summary.nextEvent.demandDelta,
+    duration: {
+      start: mockPayload.summary.nextEvent.date,
+      end: mockPayload.summary.nextEvent.date,
+      durationDays: 1
+    },
+    historicalData: {
+      occurrences: 1,
+      avgImpact: mockPayload.summary.nextEvent.demandDelta,
+      consistency: 0.85
     }
-    if (tab.id === 'changepoints') {
-      return { ...tab, badge: dataset.changePoints.length };
-    }
-    if (tab.id === 'suppliers') {
-      const poorPerformers = dataset.suppliers.filter(s => s.performance === 'poor').length;
-      return { ...tab, badge: poorPerformers > 0 ? poorPerformers : undefined };
-    }
-    return tab;
-  });
+  } : null;
   
-  const renderTabContent = () => {
-    const LoadingFallback = () => (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>Loading analytics...</p>
-      </div>
-    );
-    
-    switch (state.activeTab) {
-      // Lead Time & Supply Chain
-      case 'overview':
-        return (
-          <Suspense fallback={<LoadingFallback />}>
-            <OverviewTab />
-          </Suspense>
-        );
-      case 'suppliers':
-        return (
-          <Suspense fallback={<LoadingFallback />}>
-            <SupplierPerformanceTab />
-          </Suspense>
-        );
-      case 'forecast':
-        return (
-          <Suspense fallback={<LoadingFallback />}>
-            <ForecastReorderTab />
-          </Suspense>
-        );
-      case 'financial':
-        return (
-          <Suspense fallback={<LoadingFallback />}>
-            <FinancialOptimizationTab />
-          </Suspense>
-        );
-      
-      // Temporal Analytics
-      case 'decomposition':
-        return (
-          <Suspense fallback={<LoadingFallback />}>
-            <DecompositionTab />
-          </Suspense>
-        );
-      case 'autocorrelation':
-        return (
-          <Suspense fallback={<LoadingFallback />}>
-            <AutocorrelationTab />
-          </Suspense>
-        );
-      case 'fourier':
-        return (
-          <Suspense fallback={<LoadingFallback />}>
-            <FourierAnalysisTab />
-          </Suspense>
-        );
-      case 'lag-features':
-        return (
-          <Suspense fallback={<LoadingFallback />}>
-            <LagFeaturesTab />
-          </Suspense>
-        );
-      case 'calendar':
-        return (
-          <Suspense fallback={<LoadingFallback />}>
-            <CalendarEffectsTab />
-          </Suspense>
-        );
-      case 'cyclical':
-        return (
-          <Suspense fallback={<LoadingFallback />}>
-            <CyclicPatternsTab />
-          </Suspense>
-        );
-      case 'anomalies':
-        return (
-          <Suspense fallback={<LoadingFallback />}>
-            <AnomalyDetectionTab />
-          </Suspense>
-        );
-      case 'changepoints':
-        return (
-          <Suspense fallback={<LoadingFallback />}>
-            <ChangePointTab />
-          </Suspense>
-        );
-      
-      default:
-        return <div className="error-state">Tab not found</div>;
-    }
-  };
-  
+  const impactScore = `${mockPayload.summary.nextEvent.demandDelta > 0 ? '+' : ''}${mockPayload.summary.nextEvent.demandDelta}%`;
+  const confidence = mockPayload.summary.confidence;
+  const riskLevel = mockPayload.summary.riskLevel;
+
+  // Filter events based on active filter and adapt to CalendarEvent format
+  const filteredEvents = mockPayload.events
+    .filter(event => {
+      if (activeFilter === 'high') {
+        return Math.abs(event.demandDelta) > 30;
+      }
+      if (activeFilter === 'seasonal') {
+        return event.label.includes('Chuvosa') || event.label.includes('Carnaval');
+      }
+      return true;
+    })
+    .map(event => ({
+      ...event,
+      name: event.label,
+      type: event.label.includes('Chuvosa')
+        ? ('season' as const)
+        : event.label.includes('Manutenção')
+          ? ('maintenance' as const)
+          : ('holiday' as const),
+      leadTimeImpact: 0,
+      demandImpact: event.demandDelta,
+      duration: event.duration ?? {
+        start: event.date,
+        end: event.date,
+        durationDays: 1
+      },
+      historicalData: {
+        occurrences: 1,
+        avgImpact: event.demandDelta,
+        consistency: 0.85
+      }
+    }));
+
   return (
     <>
       <Script
@@ -173,57 +94,84 @@ function TemporalAnalyticsContent() {
         onError={() => console.error('Failed to load Chart.js')}
       />
       
-      <div className="temporal-analytics-page">
-        {/* Page Header */}
-        <div className="page-header">
-          <div className="header-content">
-            <h1 className="page-title">
-              <span className="title-icon">⏱️</span>
-              Temporal & Lead Time Analytics
-            </h1>
-            <p className="page-subtitle">
-              Comprehensive time series analysis, supplier performance tracking, and predictive analytics for C-level procurement decisions
-            </p>
+      <div className="temporal-page-container">
+        {/* Header */}
+        <div className="header">
+          <h1>📊 Features Temporais</h1>
+          <p>Visualização de features de machine learning para previsão de demanda</p>
+        </div>
+
+        {/* Controls Bar */}
+        <div className="controls-bar">
+          <div className="date-range">
+            <label>De:</label>
+            <input
+              type="date"
+              id="dateFrom"
+              className="date-input"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+            />
+            <label>Até:</label>
+            <input
+              type="date"
+              id="dateTo"
+              className="date-input"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+            />
           </div>
-          
-          <div className="header-stats">
-            <div className="stat-chip">
-              <span className="stat-label">Time Range:</span>
-              <span className="stat-value">{dataset.timeSeries.data.length} days</span>
-            </div>
-            <div className="stat-chip">
-              <span className="stat-label">Suppliers:</span>
-              <span className="stat-value">{dataset.suppliers.length}</span>
-            </div>
-            <div className="stat-chip">
-              <span className="stat-label">Events:</span>
-              <span className="stat-value">{dataset.events.length}</span>
-            </div>
-            <div className="stat-chip critical">
-              <span className="stat-label">Anomalies:</span>
-              <span className="stat-value">{dataset.anomalies.length}</span>
-            </div>
+          <div className="filter-toggle">
+            <button
+              className={`filter-btn ${activeFilter === 'all' ? 'active' : ''}`}
+              onClick={() => setActiveFilter('all')}
+            >
+              Todos
+            </button>
+            <button
+              className={`filter-btn ${activeFilter === 'high' ? 'active' : ''}`}
+              onClick={() => setActiveFilter('high')}
+            >
+              Alto Impacto
+            </button>
+            <button
+              className={`filter-btn ${activeFilter === 'seasonal' ? 'active' : ''}`}
+              onClick={() => setActiveFilter('seasonal')}
+            >
+              Sazonalidade
+            </button>
           </div>
         </div>
-        
-        {/* Tab Navigation */}
-        <TabNavigation
-          tabs={tabsWithBadges}
-          activeTab={state.activeTab}
-          onTabChange={handleTabChange}
+
+        {/* Hero Summary */}
+        <HeroSummary
+          nextEvent={nextEvent}
+          impactScore={impactScore}
+          confidence={confidence}
+          riskLevel={riskLevel}
         />
-        
-        {/* Tab Content */}
-        <div className="tab-content-container">
-          {!isChartLoaded && (
-            <div className="chart-loading-notice">
-              <p>📊 Loading Chart.js library...</p>
-            </div>
-          )}
-          {renderTabContent()}
+
+        {/* Event Timeline */}
+        <EventTimeline events={filteredEvents} />
+
+        {/* Seasonality & Cyclical Encoding (2-column grid) */}
+        <div className="grid-2">
+          <SeasonalityHeatmap
+            data={mockPayload.seasonalityMatrix}
+            onCellClick={(month, day) => {
+              console.log(`Clicked: ${month}, ${day}`);
+            }}
+          />
+          <CyclicalExplainer />
         </div>
+
+        {/* Forecast Comparison */}
+        <ForecastComparison forecastSlices={mockPayload.forecastSlices} />
+
+        {/* Action Playbook */}
+        <ActionPlaybook events={filteredEvents} />
       </div>
-      
+
       <style jsx global>{`
         :root {
           --color-primary: #20A084;
@@ -241,173 +189,117 @@ function TemporalAnalyticsContent() {
           --space-8: 8px;
           --space-12: 12px;
           --space-16: 16px;
-          --space-20: 20px;
           --space-24: 24px;
           --space-32: 32px;
           --radius-base: 8px;
           --radius-lg: 12px;
-          --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          --font-family-mono: 'Monaco', 'Menlo', monospace;
         }
-        
-        .temporal-analytics-page {
+
+        .temporal-page-container {
           width: 100%;
           max-width: 100%;
-          margin: 0;
-          padding: 0;
-          background: transparent;
-          color: var(--color-text);
-          min-height: 100vh;
+          margin: 0 auto;
+          padding: var(--space-32) var(--space-32) var(--space-24);
         }
-        
-        .page-header {
-          margin-bottom: 32px;
-          padding-bottom: 24px;
-          border-bottom: 2px solid var(--color-border);
+
+        .header {
+          margin-bottom: var(--space-32);
+          border-bottom: 1px solid var(--color-border);
+          padding-bottom: var(--space-24);
         }
-        
-        .header-content {
-          margin-bottom: 20px;
-        }
-        
-        .page-title {
-          margin: 0 0 8px 0;
-          font-size: 32px;
+
+        .header h1 {
+          margin: 0 0 var(--space-8) 0;
+          font-size: 28px;
           font-weight: 600;
           color: var(--color-text);
-          display: flex;
-          align-items: center;
-          gap: 12px;
         }
-        
-        .title-icon {
-          font-size: 36px;
-        }
-        
-        .page-subtitle {
+
+        .header p {
           margin: 0;
-          font-size: 15px;
           color: var(--color-text-secondary);
-          line-height: 1.6;
+          font-size: 14px;
         }
-        
-        .header-stats {
+
+        .controls-bar {
           display: flex;
-          flex-wrap: wrap;
-          gap: 12px;
-        }
-        
-        .stat-chip {
-          display: flex;
+          gap: var(--space-16);
+          margin-bottom: var(--space-24);
           align-items: center;
-          gap: 8px;
-          padding: 8px 16px;
+          flex-wrap: wrap;
+        }
+
+        .date-range {
+          display: flex;
+          gap: var(--space-12);
+          align-items: center;
+        }
+
+        .date-range label {
+          font-size: 13px;
+          color: var(--color-text-secondary);
+        }
+
+        .date-input {
           background: var(--color-surface);
           border: 1px solid var(--color-border);
+          color: var(--color-text);
+          padding: var(--space-8) var(--space-12);
           border-radius: var(--radius-base);
           font-size: 13px;
         }
-        
-        .stat-chip.critical {
-          background: rgba(239, 68, 68, 0.1);
-          border-color: var(--color-error);
-        }
-        
-        .stat-label {
-          color: var(--color-text-secondary);
-          font-weight: 500;
-        }
-        
-        .stat-value {
-          color: var(--color-primary);
-          font-weight: 700;
-        }
-        
-        .stat-chip.critical .stat-value {
-          color: var(--color-error);
-        }
-        
-        .tab-content-container {
-          min-height: 600px;
-        }
-        
-        .loading-container {
+
+        .filter-toggle {
           display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          min-height: 400px;
-          gap: 16px;
+          gap: var(--space-8);
+          margin-left: auto;
         }
-        
-        .loading-spinner {
-          width: 48px;
-          height: 48px;
-          border: 4px solid var(--color-border);
-          border-top-color: var(--color-primary);
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-        
-        .loading-container p {
-          color: var(--color-text-secondary);
-          font-size: 14px;
-        }
-        
-        .chart-loading-notice {
-          padding: 16px;
-          background: rgba(32, 160, 132, 0.1);
-          border: 1px solid var(--color-primary);
+
+        .filter-btn {
+          padding: var(--space-8) var(--space-16);
+          background: var(--color-surface);
+          border: 1px solid var(--color-border);
+          color: var(--color-text);
           border-radius: var(--radius-base);
-          margin-bottom: 16px;
-          text-align: center;
-          color: var(--color-primary);
-          font-size: 14px;
+          cursor: pointer;
+          font-size: 13px;
+          transition: all 0.2s;
         }
-        
-        .error-state {
-          padding: 40px;
-          text-align: center;
-          color: var(--color-error);
-          font-size: 16px;
+
+        .filter-btn:hover {
+          background: var(--color-surface-alt);
+          border-color: var(--color-primary);
         }
-        
-        /* Responsive */
+
+        .filter-btn.active {
+          background: var(--color-primary);
+          border-color: var(--color-primary);
+          color: white;
+        }
+
+        .grid-2 {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+          gap: var(--space-24);
+          margin-bottom: var(--space-24);
+        }
+
         @media (max-width: 768px) {
-          .page-title {
-            font-size: 24px;
+          .grid-2 {
+            grid-template-columns: 1fr;
           }
-          
-          .title-icon {
-            font-size: 28px;
-          }
-          
-          .page-subtitle {
-            font-size: 13px;
-          }
-          
-          .header-stats {
+          .controls-bar {
             flex-direction: column;
           }
-          
-          .stat-chip {
+          .filter-toggle {
+            margin-left: 0;
             width: 100%;
-            justify-content: space-between;
+          }
+          .filter-btn {
+            flex: 1;
           }
         }
       `}</style>
     </>
-  );
-}
-
-export default function TemporalAnalyticsPage() {
-  return (
-    <TemporalDataProvider>
-      <TemporalAnalyticsContent />
-    </TemporalDataProvider>
   );
 }

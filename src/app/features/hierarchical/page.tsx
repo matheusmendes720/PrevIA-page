@@ -5,6 +5,10 @@ import Script from 'next/script';
 import { apiClient } from '../../../lib/api';
 import { FamilyAggregation, SiteAggregation, SupplierAggregation } from '../../../types/features';
 import { useRouter } from 'next/navigation';
+import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import RiskMatrix from '@/components/RiskMatrix';
+import { prescriptiveDataService } from '@/services/prescriptiveDataService';
+import type { PrescriptiveInsights } from '@/types/prescriptive';
 
 // Prescriptive insights from ML outputs
 const PRESCRIPTIVE_INSIGHTS = {
@@ -86,6 +90,11 @@ export default function HierarchicalFeaturesPage() {
   const [isInitialized, setIsInitialized] = useState(false);
   const initRef = useRef(false);
   const router = useRouter();
+  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveInsights | null>(null);
+  
+  useEffect(() => {
+    prescriptiveDataService.loadPrescriptiveInsights().then(setPrescriptiveData);
+  }, []);
   
   const [activeLevel, setActiveLevel] = useState<'family' | 'site' | 'supplier'>('family');
   const [selectedNode, setSelectedNode] = useState<{ id: string; name: string; level: string } | null>(null);
@@ -161,19 +170,19 @@ export default function HierarchicalFeaturesPage() {
           (window as any).Chart.defaults.color = '#e0e8f0';
           (window as any).Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.2)';
           (window as any).Chart.defaults.backgroundColor = 'rgba(32, 160, 132, 0.15)';
-          (window as any).Chart.defaults.font.size = 16;
+          (window as any).Chart.defaults.font.size = 12;
           (window as any).Chart.defaults.font.family = 'system-ui, -apple-system, sans-serif';
           (window as any).Chart.defaults.font.weight = '500';
           (window as any).Chart.defaults.plugins = (window as any).Chart.defaults.plugins || {};
           (window as any).Chart.defaults.plugins.legend = (window as any).Chart.defaults.plugins.legend || {};
           (window as any).Chart.defaults.plugins.legend.labels = (window as any).Chart.defaults.plugins.legend.labels || {};
           (window as any).Chart.defaults.plugins.legend.labels.font = (window as any).Chart.defaults.plugins.legend.labels.font || {};
-          (window as any).Chart.defaults.plugins.legend.labels.font.size = 16;
+          (window as any).Chart.defaults.plugins.legend.labels.font.size = 12;
           (window as any).Chart.defaults.plugins.legend.labels.font.weight = '500';
           (window as any).Chart.defaults.plugins.tooltip = (window as any).Chart.defaults.plugins.tooltip || {};
-          (window as any).Chart.defaults.plugins.tooltip.titleFont = { size: 18, weight: '600' };
-          (window as any).Chart.defaults.plugins.tooltip.bodyFont = { size: 16, weight: '500' };
-          (window as any).Chart.defaults.plugins.tooltip.padding = 16;
+          (window as any).Chart.defaults.plugins.tooltip.titleFont = { size: 14, weight: '600' };
+          (window as any).Chart.defaults.plugins.tooltip.bodyFont = { size: 12, weight: '500' };
+          (window as any).Chart.defaults.plugins.tooltip.padding = 12;
           (window as any).Chart.defaults.elements = (window as any).Chart.defaults.elements || {};
           (window as any).Chart.defaults.elements.bar = (window as any).Chart.defaults.elements.bar || {};
           (window as any).Chart.defaults.elements.bar.borderWidth = 2;
@@ -205,6 +214,62 @@ export default function HierarchicalFeaturesPage() {
       });
     };
   }, [isChartLoaded, apiData.families, apiData.sites, apiData.suppliers]);
+
+  // Apply inline styles to all oversized elements after render
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    const applyStyles = () => {
+      // Header h1
+      document.querySelectorAll('.hierarchical-header h1').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '18px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      
+      // Metric cards
+      document.querySelectorAll('.metric-card .label').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '500', 'important');
+      });
+      document.querySelectorAll('.metric-card .value').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '24px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      document.querySelectorAll('.metric-card .unit').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+      });
+      
+      // Section titles
+      document.querySelectorAll('.section-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '15px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      
+      // Chart titles
+      document.querySelectorAll('.chart-title').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      
+      // Narrative box
+      document.querySelectorAll('.narrative-box h3').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '16px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+      document.querySelectorAll('.narrative-box p').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '15px', 'important');
+      });
+      
+      // Tab buttons
+      document.querySelectorAll('.tab-button').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '15px', 'important');
+      });
+    };
+    
+    applyStyles();
+    const interval = setInterval(applyStyles, 100);
+    return () => clearInterval(interval);
+  }, [isInitialized]);
 
   // Calculate hierarchical nodes from API data with fallback to mock
   const hierarchicalNodes = useMemo(() => {
@@ -1000,7 +1065,7 @@ export default function HierarchicalFeaturesPage() {
 
           .hierarchical-header h1 {
             margin: 0 0 var(--space-8) 0;
-            font-size: 28px;
+            font-size: 20px;
             font-weight: 600;
             color: var(--color-text);
           }
@@ -1008,7 +1073,7 @@ export default function HierarchicalFeaturesPage() {
           .hierarchical-header p {
             margin: 0;
             color: var(--color-text-secondary);
-            font-size: 18px;
+            font-size: 15px;
             line-height: 1.6;
           }
 
@@ -1016,7 +1081,7 @@ export default function HierarchicalFeaturesPage() {
             background: rgba(50, 184, 198, 0.08);
             border-left: 4px solid var(--color-primary);
             border-radius: var(--radius-lg);
-            padding: var(--space-20);
+            padding: var(--space-24);
             margin-bottom: var(--space-32);
             line-height: 1.8;
           }
@@ -1024,14 +1089,14 @@ export default function HierarchicalFeaturesPage() {
           .narrative-box h3 {
             margin: 0 0 var(--space-12) 0;
             color: var(--color-primary);
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
           }
 
           .narrative-box p {
             margin: 0 0 var(--space-12) 0;
             color: var(--color-text);
-            font-size: 18px;
+            font-size: 15px;
           }
 
           .narrative-box p:last-child {
@@ -1063,7 +1128,7 @@ export default function HierarchicalFeaturesPage() {
             border-bottom: 2px solid transparent;
             color: var(--color-text-secondary);
             cursor: pointer;
-            font-size: 18px;
+            font-size: 15px;
             font-weight: 500;
             transition: all 0.3s ease;
             position: relative;
@@ -1082,7 +1147,7 @@ export default function HierarchicalFeaturesPage() {
           .summary-banner {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: var(--space-16);
+            gap: var(--space-24);
             margin-bottom: var(--space-32);
           }
 
@@ -1090,7 +1155,7 @@ export default function HierarchicalFeaturesPage() {
             background: var(--color-surface);
             border: 1px solid var(--color-border);
             border-radius: var(--radius-lg);
-            padding: var(--space-20);
+            padding: var(--space-24);
             position: relative;
             cursor: help;
             transition: all 0.3s ease;
@@ -1102,7 +1167,7 @@ export default function HierarchicalFeaturesPage() {
           }
 
           .metric-card .label {
-            font-size: 18px;
+            font-size: 13px;
             font-weight: 500;
             text-transform: uppercase;
             color: var(--color-text-secondary);
@@ -1111,14 +1176,14 @@ export default function HierarchicalFeaturesPage() {
           }
 
           .metric-card .value {
-            font-size: 28px;
+            font-size: 30px;
             font-weight: 600;
             color: var(--color-primary);
             margin-bottom: var(--space-4);
           }
 
           .metric-card .unit {
-            font-size: 18px;
+            font-size: 14px;
             color: var(--color-text-secondary);
           }
 

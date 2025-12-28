@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo, memo } from 'react';
-import { ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Line } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Line, ReferenceLine } from 'recharts';
 import Card from '../Card';
 import { apiClient } from '../../lib/api';
 import { Top5Family, TierAnalytics } from '../../types/features';
 import { useToast } from '../../hooks/useToast';
+import { prescriptiveDataService } from '../../services/prescriptiveDataService';
 
 interface BusinessMetricsChartProps {
   materialId?: number;

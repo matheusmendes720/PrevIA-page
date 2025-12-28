@@ -1,0 +1,50 @@
+name: Frontend CI
+
+on:
+  pull_request:
+    branches:
+      - master
+      - demo/frontend-improvements-v2.0.0
+  push:
+    branches:
+      - master
+      - demo/frontend-improvements-v2.0.0
+
+jobs:
+  validate:
+    name: Validate Frontend
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Type check
+        run: npm run type-check
+      
+      - name: Lint
+        run: npm run lint
+      
+      - name: Build test
+        env:
+          NEXT_PUBLIC_USE_MOCKS: 'true'
+        run: npm run build:npm
+      
+      - name: Check build output
+        run: |
+          if [ ! -d "out" ]; then
+            echo "❌ Build output directory 'out' not found"
+            exit 1
+          fi
+          echo "✅ Build output verified"
+          ls -lh out | head -20
+
