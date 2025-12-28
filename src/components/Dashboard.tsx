@@ -167,37 +167,37 @@ const Dashboard: React.FC<DashboardProps> = ({ searchTerm, onSelectAlert }) => {
     }, []);
 
     return (
-        <div className="w-full space-y-6">
+        <div className="w-full space-y-4 sm:space-y-6">
             <AccessibilityEnhancer />
             <GuidedTour />
-            {/* Dashboard Header with Controls */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 animate-fade-in-up">
+            {/* Dashboard Header with Controls - Optimized for Mobile */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 animate-fade-in-up">
                 <div>
-                    <h2 className="text-xl font-bold text-brand-lightest-slate mb-1">Visão Geral</h2>
-                    <p className="text-sm text-brand-slate">Monitoramento em tempo real da operação</p>
+                    <h2 className="text-xl sm:text-2xl font-bold text-brand-lightest-slate leading-tight font-serif">Visão Geral</h2>
+                    <p className="text-[11px] sm:text-sm text-brand-slate font-medium opacity-80">Monitoramento real-time da operação</p>
                 </div>
-                <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-2 text-xs text-brand-slate">
-                        <ClockIcon className="w-4 h-4" />
-                        <span>Atualizado {formatLastRefresh()}</span>
+                <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                    <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-brand-slate bg-brand-light-navy/20 px-2 py-1.5 rounded-lg border border-white/5 order-3 sm:order-1 flex-1 sm:flex-initial justify-center">
+                        <ClockIcon className="w-3.5 h-3.5" />
+                        <span>{formatLastRefresh()}</span>
                     </div>
                     <button
                         onClick={refreshData}
                         disabled={isRefreshing}
-                        className="px-4 py-2 bg-brand-light-navy text-brand-cyan hover:bg-brand-navy rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                        className="px-3 py-2 bg-brand-light-navy/40 text-brand-cyan hover:bg-brand-navy rounded-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm font-bold flex-1 sm:flex-initial justify-center order-1 sm:order-2"
                     >
-                        <RefreshIcon className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                        <span className="hidden sm:inline">Atualizar</span>
+                        <RefreshIcon className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                        <span className="xs:inline">Atualizar</span>
                     </button>
-                    <button className="px-4 py-2 bg-brand-cyan text-brand-navy hover:bg-opacity-80 rounded-lg transition-colors flex items-center gap-2 font-semibold text-sm">
-                        <DownloadIcon className="w-4 h-4" />
-                        <span className="hidden sm:inline">Exportar</span>
+                    <button className="px-3 py-2 bg-brand-cyan text-brand-navy hover:bg-opacity-90 rounded-lg transition-all flex items-center gap-2 font-bold text-xs sm:text-sm flex-1 sm:flex-initial justify-center order-2 sm:order-3">
+                        <DownloadIcon className="w-3.5 h-3.5" />
+                        <span className="xs:inline">Exportar</span>
                     </button>
                 </div>
             </div>
 
-            {/* KPI Cards with Enhanced Animation */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* KPI Cards with Better Mobile Spacing */}
+            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 {kpiMetrics.map((kpi, index) => (
                     <div key={index} className="animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
                         <KpiCard data={kpi} />

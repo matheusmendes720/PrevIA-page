@@ -115,7 +115,7 @@ export default function MainPage() {
             isMobileOpen={isMobileMenuOpen}
             onMobileToggle={handleMobileMenuToggle}
           />
-          <main className="flex-1 min-w-0 p-3 sm:p-4 md:p-5 lg:p-6">
+          <main className="flex-1 min-w-0 flex flex-col h-screen overflow-y-auto">
             <Header
               title={currentPageDetails.title}
               subtitle={currentPageDetails.subtitle}
@@ -124,11 +124,13 @@ export default function MainPage() {
               onMobileMenuToggle={handleMobileMenuToggle}
               isMobileMenuOpen={isMobileMenuOpen}
             />
-            <Suspense fallback={<div className="animate-pulse space-y-4 p-6"><div className="h-64 bg-brand-navy/50 rounded-lg"></div></div>}>
-              <div className="mt-4 sm:mt-5 animate-fade-in-up" key={activePage}>
-                {renderContent}
-              </div>
-            </Suspense>
+            <div className="flex-1 p-3 sm:p-5 lg:p-8">
+              <Suspense fallback={<LoadingSkeleton />}>
+                <div className="animate-fade-in-up" key={activePage}>
+                  {renderContent}
+                </div>
+              </Suspense>
+            </div>
           </main>
         </div>
         <ToastContainer />
