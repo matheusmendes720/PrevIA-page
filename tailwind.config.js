@@ -23,6 +23,9 @@ module.exports = {
         '8xl': ['6rem', { lineHeight: '1' }],           // 90px
         '9xl': ['8rem', { lineHeight: '1' }],           // 120px
       },
+      screens: {
+        'xs': '480px',
+      },
       colors: {
         'brand-blue': '#0a192f',
         'brand-light-navy': '#172a45',

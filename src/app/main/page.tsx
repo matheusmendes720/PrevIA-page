@@ -115,7 +115,7 @@ export default function MainPage() {
             isMobileOpen={isMobileMenuOpen}
             onMobileToggle={handleMobileMenuToggle}
           />
-          <main className="flex-1 min-w-0 flex flex-col h-screen overflow-y-auto">
+          <main className="flex-1 min-w-0 flex flex-col min-h-screen relative overflow-x-hidden">
             <Header
               title={currentPageDetails.title}
               subtitle={currentPageDetails.subtitle}
@@ -124,7 +124,7 @@ export default function MainPage() {
               onMobileMenuToggle={handleMobileMenuToggle}
               isMobileMenuOpen={isMobileMenuOpen}
             />
-            <div className="flex-1 p-3 sm:p-5 lg:p-8">
+            <div className="flex-1 p-3 sm:p-5 lg:p-10 max-w-[1600px] mx-auto w-full">
               <Suspense fallback={<LoadingSkeleton />}>
                 <div className="animate-fade-in-up" key={activePage}>
                   {renderContent}

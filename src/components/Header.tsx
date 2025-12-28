@@ -51,7 +51,7 @@ const Header: React.FC<HeaderProps> = ({
   }, []);
 
   return (
-    <header className={`sticky top-0 z-40 flex flex-col glass-panel border-b border-brand-cyan/20 transition-all duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+    <header className={`sticky top-0 z-50 flex flex-col glass-panel border-b border-brand-cyan/20 transition-all duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
       <div className="flex items-center justify-between py-2 sm:py-3 px-3 sm:px-6">
         <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
           {onMobileMenuToggle && (
@@ -67,6 +67,7 @@ const Header: React.FC<HeaderProps> = ({
           <div className="flex-1 min-w-0">
             <h1 className="text-base sm:text-xl font-bold text-brand-lightest-slate truncate flex items-center gap-1.5">
               {title}
+              <span className="text-[8px] opacity-30 font-mono mt-1">v2.0.2</span>
               <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse hidden xs:block" />
             </h1>
             <p className="text-[9px] sm:text-xs text-brand-slate truncate uppercase tracking-widest opacity-60 hidden xs:block">{subtitle}</p>
