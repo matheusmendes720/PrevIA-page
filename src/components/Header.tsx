@@ -52,52 +52,47 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className={`sticky top-0 z-50 flex flex-col glass-panel border-b border-brand-cyan/20 transition-all duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
-      <div className="flex items-center justify-between py-2 sm:py-3 px-3 sm:px-6">
-        <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
-          {onMobileMenuToggle && (
-            <button
-              onClick={onMobileMenuToggle}
-              className="lg:hidden p-1.5 rounded-lg hover:bg-brand-light-navy/50 text-brand-slate hover:text-brand-cyan transition-colors"
-              aria-label="Menu"
-            >
-              <MenuIcon className="w-6 h-6" />
-            </button>
-          )}
+      <div className="flex items-center justify-between py-2 sm:py-3 px-3 sm:px-6 min-h-[56px]">
+        <div className="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
+          <button
+            onClick={onMobileMenuToggle}
+            className="lg:hidden p-2 rounded-xl bg-brand-cyan/10 text-brand-cyan border border-brand-cyan/30 active:scale-90 transition-all hover:bg-brand-cyan/20"
+            aria-label="Abrir Menu"
+          >
+            <MenuIcon className="w-5 h-5" />
+          </button>
 
           <div className="flex-1 min-w-0">
-            <h1 className="text-base sm:text-xl font-bold text-brand-lightest-slate truncate flex items-center gap-1.5">
-              {title}
-              <span className="text-[8px] opacity-30 font-mono mt-1">v2.0.2</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse hidden xs:block" />
+            <h1 className="text-sm sm:text-lg font-bold text-brand-lightest-slate truncate flex items-center gap-2">
+              <span className="truncate">{title}</span>
+              <span className="bg-brand-cyan text-brand-navy text-[7px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-tighter whitespace-nowrap shadow-sm shadow-brand-cyan/20">v2.0.3-LTE</span>
             </h1>
-            <p className="text-[9px] sm:text-xs text-brand-slate truncate uppercase tracking-widest opacity-60 hidden xs:block">{subtitle}</p>
+            <p className="hidden xs:block text-[9px] sm:text-xs text-brand-slate truncate uppercase tracking-widest opacity-60 font-medium">{subtitle}</p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <div className="relative hidden md:block">
+        <div className="flex items-center gap-2 sm:gap-4 ml-2 flex-shrink-0">
+          <div className="hidden md:flex relative group">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-slate group-focus-within:text-brand-cyan transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
             <input
               type="text"
-              placeholder="Buscar..."
+              placeholder="Pesquisar..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-brand-navy/60 border border-white/10 rounded-xl py-2 px-4 pl-10 text-brand-lightest-slate focus:outline-none focus:ring-1 focus:ring-brand-cyan/50 transition-all w-48 focus:w-64 text-sm glass-panel"
+              className="pl-9 pr-4 py-1.5 bg-brand-light-navy/50 border border-white/5 rounded-full text-xs text-brand-lightest-slate focus:outline-none focus:ring-1 focus:ring-brand-cyan/50 w-32 lg:w-64 transition-all"
             />
-            <svg className="w-4 h-4 text-brand-slate absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
           </div>
 
-          <div className="scale-90 sm:scale-100">
-            <NotificationBell theme="dark" onViewDetails={handleViewDetails} />
-          </div>
-
-          <div className="flex items-center p-0.5 pr-2 sm:pr-3 rounded-full bg-brand-light-navy/30 border border-white/5 hover:border-brand-cyan/20 transition-colors cursor-pointer group">
-            <div className="relative">
-              <img src="https://picsum.photos/40/40" alt="User" className="w-7 h-7 sm:w-9 sm:h-9 rounded-full border border-brand-cyan/10" />
-              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 border-2 border-brand-navy rounded-full" />
-            </div>
-            <div className="hidden sm:block ml-2">
-              <p className="font-bold text-brand-lightest-slate text-[10px] uppercase tracking-tight">Admin</p>
-              <p className="text-[9px] text-brand-slate whitespace-nowrap">HQ Network</p>
+          <div className="scale-90 sm:scale-100 flex items-center gap-1.5 sm:gap-3">
+            <NotificationBell onViewDetails={(n) => console.log('Notification clicked', n)} />
+            <div className="w-8 h-8 rounded-full bg-brand-light-navy border border-brand-cyan/20 flex items-center justify-center overflow-hidden transition-glow cursor-pointer">
+              <div className="w-full h-full bg-gradient-to-br from-brand-cyan/20 to-brand-cyan/5 flex items-center justify-center text-[10px] font-bold text-brand-cyan">
+                AD
+              </div>
             </div>
           </div>
         </div>

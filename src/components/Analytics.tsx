@@ -688,8 +688,8 @@ const Analytics: React.FC<AnalyticsProps> = ({ initialSelectedState }) => {
     return (
         <div className="space-y-6">
             {/* Tab Navigation */}
-            <div className="border-b border-brand-light-navy/50">
-                <nav className="flex space-x-8 overflow-x-auto">
+            <div className="border-b border-white/5">
+                <nav className="flex space-x-4 sm:space-x-8 overflow-x-auto hide-scrollbar pb-1">
                     {tabs.map((tab) => (
                         <button
                             key={tab.key}

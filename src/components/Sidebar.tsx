@@ -339,11 +339,17 @@ const Sidebar: React.FC<SidebarProps> = memo(({
           bg-brand-navy/95 backdrop-blur-xl border-r border-brand-cyan/40 h-screen
           transition-all duration-300 ease-in-out
           flex flex-col
-          ${isMobile
-            ? `fixed inset-y-0 left-0 z-[1000] w-72 transform ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'
-            } shadow-2xl overflow-y-auto`
-            : `sticky top-0 relative ${isCollapsed ? 'w-20' : 'w-64'} hidden lg:flex`
-          }
+          
+          /* Mobile: Fixed overlay */
+          fixed inset-y-0 left-0 z-[1000] w-72 
+          ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
+          shadow-2xl overflow-y-auto
+          
+          /* Desktop: Sticky relative */
+          lg:sticky lg:top-0 lg:relative lg:translate-x-0 lg:flex 
+          ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}
+          ${!isMobileOpen ? 'hidden lg:flex' : ''}
+          
           p-4
           hide-scrollbar
           animate-subtle-glow
