@@ -15,12 +15,11 @@ interface NavItemProps {
 }
 
 const NavItem: React.FC<NavItemProps> = memo(({ icon, label, active, onClick, isCollapsed, onMobileClick }) => {
-  const baseClasses = `flex items-center rounded-lg transition-all duration-200 cursor-pointer w-full text-left transform relative ${
-    isCollapsed ? 'justify-center p-3 my-2' : 'p-3 my-2 space-x-3'
-  }`;
+  const baseClasses = `flex items-center rounded-lg transition-all duration-200 cursor-pointer w-full text-left transform relative ${isCollapsed ? 'justify-center p-3 my-2' : 'p-3 my-2 space-x-3'
+    }`;
   const activeClasses = "bg-brand-cyan/10 text-brand-cyan shadow-inner shadow-cyan-500/10";
   const inactiveClasses = "text-brand-slate hover:bg-brand-light-navy/50 hover:text-brand-lightest-slate hover:translate-x-1";
-  
+
   const handleClick = useCallback(() => {
     onClick();
     // Close mobile sidebar when item is clicked
@@ -28,7 +27,7 @@ const NavItem: React.FC<NavItemProps> = memo(({ icon, label, active, onClick, is
       onMobileClick();
     }
   }, [onClick, onMobileClick]);
-  
+
   // Check if icon is a string (emoji) or React element
   const iconElement = typeof icon === 'string' ? (
     <span className="text-lg leading-none">{icon}</span>
@@ -55,10 +54,10 @@ interface SidebarProps {
   onMobileToggle?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = memo(({ 
-  activePage, 
-  setActivePage, 
-  isCollapsed = false, 
+const Sidebar: React.FC<SidebarProps> = memo(({
+  activePage,
+  setActivePage,
+  isCollapsed = false,
   onToggleCollapse,
   isMobileOpen = false,
   onMobileToggle
@@ -76,7 +75,7 @@ const Sidebar: React.FC<SidebarProps> = memo(({
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 1024); // lg breakpoint
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -96,7 +95,7 @@ const Sidebar: React.FC<SidebarProps> = memo(({
 
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    
+
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
@@ -136,7 +135,7 @@ const Sidebar: React.FC<SidebarProps> = memo(({
       }
       return;
     }
-    
+
     // Otherwise, handle as main page navigation
     if (isOnFeaturesPage) {
       router.push('/main');
@@ -291,15 +290,13 @@ const Sidebar: React.FC<SidebarProps> = memo(({
                 prefetch={true}
                 onMouseEnter={() => handleLinkHover(item.href)}
                 onClick={handleFeatureLinkClick}
-                className={`flex items-center rounded-lg transition-all duration-200 ${
-                  isCollapsedMode 
-                    ? 'justify-center p-3 my-2' 
+                className={`flex items-center rounded-lg transition-all duration-200 ${isCollapsedMode
+                    ? 'justify-center p-3 my-2'
                     : 'p-3 my-2 space-x-3'
-                } ${
-                  isActive
+                  } ${isActive
                     ? 'bg-brand-cyan/10 text-brand-cyan shadow-inner shadow-cyan-500/10 font-semibold'
                     : 'text-brand-slate hover:bg-brand-light-navy/50 hover:text-brand-lightest-slate'
-                }`}
+                  }`}
                 title={isCollapsedMode ? `${item.icon} ${item.label}` : undefined}
               >
                 <div className="w-7 h-7 flex-shrink-0 flex items-center justify-center">
@@ -313,11 +310,11 @@ const Sidebar: React.FC<SidebarProps> = memo(({
       </div>
       {(!isCollapsed || isMobile) && (
         <div className="mt-auto pt-4">
-          <div className="p-4 rounded-lg glass-card text-center animate-subtle-glow">
-            <h3 className="font-bold text-brand-lightest-slate">Upgrade to Pro</h3>
-            <p className="text-xs text-brand-slate mt-1 mb-3">Get access to all features and advanced analytics.</p>
-            <button className="w-full bg-brand-cyan text-brand-navy font-bold py-2 px-4 rounded-lg hover:bg-opacity-80 transition-all duration-300 shadow-lg shadow-brand-cyan/20 hover:shadow-brand-cyan/40">
-                Upgrade
+          <div className="p-4 rounded-lg glass-panel text-center transition-glow">
+            <h3 className="font-bold text-brand-lightest-slate uppercase tracking-wider text-[10px]">Upgrade to Elite</h3>
+            <p className="text-[10px] text-brand-slate mt-1 mb-3">Acesso completo à engine de otimização prescritiva.</p>
+            <button className="w-full bg-brand-cyan text-brand-navy font-bold py-2 px-4 rounded-lg hover:scale-105 transition-all duration-300 shadow-lg shadow-brand-cyan/20">
+              Upgrade
             </button>
           </div>
         </div>
@@ -343,10 +340,9 @@ const Sidebar: React.FC<SidebarProps> = memo(({
           transition-all duration-300 ease-in-out
           flex flex-col
           relative
-          ${isMobile 
-            ? `fixed inset-y-0 left-0 z-[1000] w-80 transform ${
-                isMobileOpen ? 'translate-x-0' : '-translate-x-full'
-              } shadow-2xl`
+          ${isMobile
+            ? `fixed inset-y-0 left-0 z-[1000] w-80 transform ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+            } shadow-2xl`
             : `sticky top-0 ${isCollapsed ? 'w-20' : 'w-64'} hidden lg:flex`
           }
           p-4
@@ -362,7 +358,7 @@ const Sidebar: React.FC<SidebarProps> = memo(({
       >
         {/* Tiny vertical accent bar on right edge - visible on both mobile and desktop */}
         <div className="absolute right-0 top-0 bottom-0 w-[2px] bg-brand-cyan/70 z-20 pointer-events-none" />
-        
+
         {sidebarContent}
       </aside>
     </>
