@@ -18,53 +18,54 @@ import ExportPrescriptiveReport from './ExportPrescriptiveReport';
 import GuidedTour from './GuidedTour';
 import AccessibilityEnhancer from './AccessibilityEnhancer';
 import { useToast } from '../hooks/useToast';
+import RegimePolicyPanel from './RegimePolicyPanel';
 
 const kpiMetrics: KpiData[] = [
     {
-      title: 'Acurácia da Previsão',
-      value: '92.7%',
-      change: '2.5%',
-      changeType: 'increase',
-      icon: <TrendingUpIcon />,
+        title: 'Acurácia da Previsão',
+        value: '92.7%',
+        change: '2.5%',
+        changeType: 'increase',
+        icon: <TrendingUpIcon />,
     },
     {
-      title: 'Nível de Serviço',
-      value: '98.2%',
-      change: '0.8%',
-      changeType: 'increase',
-      icon: <TargetIcon />,
+        title: 'Nível de Serviço',
+        value: '98.2%',
+        change: '0.8%',
+        changeType: 'increase',
+        icon: <TargetIcon />,
     },
     {
-      title: 'Giro de Estoque',
-      value: '6.4',
-      change: '0.5',
-      changeType: 'decrease',
-      icon: <ChartBarIcon />,
+        title: 'Giro de Estoque',
+        value: '6.4',
+        change: '0.5',
+        changeType: 'decrease',
+        icon: <ChartBarIcon />,
     },
     {
-      title: 'Custo de Estoque',
-      value: 'R$ 1.2M',
-      change: '5%',
-      changeType: 'decrease',
-      icon: <ServerIcon className="w-8 h-8 text-brand-cyan" />,
+        title: 'Custo de Estoque',
+        value: 'R$ 1.2M',
+        change: '5%',
+        changeType: 'decrease',
+        icon: <ServerIcon className="w-8 h-8 text-brand-cyan" />,
     },
 ];
 
 const generateMockForecastData = (): ForecastDataPoint[] => {
-  const data: ForecastDataPoint[] = [];
-  const today = new Date();
-  for (let i = 29; i >= 0; i--) {
-    const date = new Date(today);
-    date.setDate(today.getDate() - i);
-    const baseDemand = 80 + Math.sin(i / 5) * 20 + Math.random() * 10;
-    const forecastDemand = baseDemand - 5 + Math.random() * 10;
-    data.push({
-      date: date.toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' }),
-      'Demanda Real': parseFloat(baseDemand.toFixed(0)),
-      'Demanda Prevista': parseFloat(forecastDemand.toFixed(0)),
-    });
-  }
-  return data;
+    const data: ForecastDataPoint[] = [];
+    const today = new Date();
+    for (let i = 29; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        const baseDemand = 80 + Math.sin(i / 5) * 20 + Math.random() * 10;
+        const forecastDemand = baseDemand - 5 + Math.random() * 10;
+        data.push({
+            date: date.toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' }),
+            'Demanda Real': parseFloat(baseDemand.toFixed(0)),
+            'Demanda Prevista': parseFloat(forecastDemand.toFixed(0)),
+        });
+    }
+    return data;
 };
 
 const mockAlertsData: Alert[] = [
@@ -142,10 +143,10 @@ const Dashboard: React.FC<DashboardProps> = ({ searchTerm, onSelectAlert }) => {
 
     const filteredAlerts = useMemo(() => {
         return mockAlertsData.filter(alert => {
-            const matchesSearch = !searchTerm || 
+            const matchesSearch = !searchTerm ||
                 alert.item.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 alert.itemCode.toLowerCase().includes(searchTerm.toLowerCase());
-            
+
             const matchesFilter = !statusFilter || alert.level === statusFilter;
 
             return matchesSearch && matchesFilter;
@@ -157,7 +158,7 @@ const Dashboard: React.FC<DashboardProps> = ({ searchTerm, onSelectAlert }) => {
             acc[alert.level] = (acc[alert.level] || 0) + 1;
             return acc;
         }, {} as Record<AlertLevel, number>);
-        
+
         return [
             { name: 'Crítico', value: counts.CRITICAL || 0, level: AlertLevel.CRITICAL },
             { name: 'Atenção', value: counts.WARNING || 0, level: AlertLevel.WARNING },
@@ -198,10 +199,50 @@ const Dashboard: React.FC<DashboardProps> = ({ searchTerm, onSelectAlert }) => {
             {/* KPI Cards with Enhanced Animation */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {kpiMetrics.map((kpi, index) => (
-                     <div key={index} className="animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
+                    <div key={index} className="animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
                         <KpiCard data={kpi} />
-                     </div>
+                    </div>
                 ))}
+            </div>
+
+            {/* Premium Regime Section */}
+            <div className="animate-fade-in-up" style={{ animationDelay: '400ms' }}>
+                <RegimePolicyPanel
+                    currentRegime="Alta Demanda (Expansão 5G)"
+                    regimeStats={{
+                        mean: 1450,
+                        std: 120,
+                        duration: "14 dias"
+                    }}
+                    totalSavings={158400}
+                    adjustments={[
+                        {
+                            parameter: "Estoque de Segurança (Transceptores)",
+                            current: 50,
+                            recommended: 85,
+                            unit: "un",
+                            impact: "Redução de 95% no risco de stockout em clusters críticos.",
+                            urgency: "URGENT"
+                        },
+                        {
+                            parameter: "Ponto de Pedido (Cabos Ópticos)",
+                            current: 200,
+                            recommended: 350,
+                            unit: "un",
+                            impact: "Otimização de lead time para atendimento de SLA contratual.",
+                            urgency: "IMPORTANT"
+                        },
+                        {
+                            parameter: "Frequência de Ressuprimento (Torres)",
+                            current: 7,
+                            recommended: 4,
+                            unit: "dias",
+                            impact: "Economia logística de R$ 12k/mês através de rotas otimizadas.",
+                            urgency: "OK"
+                        }
+                    ]}
+                    onApplyAdjustment={(p) => addToast(`Ajuste para ${p} aplicado via ML Engine`, 'success')}
+                />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -209,14 +250,14 @@ const Dashboard: React.FC<DashboardProps> = ({ searchTerm, onSelectAlert }) => {
                     <DemandForecastChart data={forecastData} />
                 </div>
                 <div className="lg:col-span-1 animate-fade-in-up flex flex-col min-h-0" style={{ animationDelay: '500ms' }}>
-                    <OperationalStatus data={operationalStatusData} onSliceClick={handleStatusSelect} activeFilter={statusFilter}/>
+                    <OperationalStatus data={operationalStatusData} onSliceClick={handleStatusSelect} activeFilter={statusFilter} />
                 </div>
             </div>
 
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in-up" style={{ animationDelay: '700ms' }}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in-up" style={{ animationDelay: '700ms' }}>
                 <div className="lg:col-span-2">
-                    <AlertsTable 
-                        alerts={filteredAlerts} 
+                    <AlertsTable
+                        alerts={filteredAlerts}
                         onSelectAlert={onSelectAlert}
                         onShowInsight={handleOpenInsightModal}
                     />
@@ -244,7 +285,7 @@ const Dashboard: React.FC<DashboardProps> = ({ searchTerm, onSelectAlert }) => {
                 </div>
             </div>
             {isInsightModalOpen && insightModalAlert && (
-                <InsightModal 
+                <InsightModal
                     alert={insightModalAlert}
                     onClose={() => setIsInsightModalOpen(false)}
                 />

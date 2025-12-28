@@ -23,6 +23,28 @@ export const metadata: Metadata = {
       { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
   },
+  openGraph: {
+    title: 'Nova Corrente - Demand Forecasting Dashboard',
+    description: 'Production-ready demand forecasting system with ML/DL models',
+    url: 'https://previa-novacorrente.netlify.app',
+    siteName: 'Nova Corrente',
+    images: [
+      {
+        url: 'https://previa-novacorrente.netlify.app/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Nova Corrente - Demand Forecasting Dashboard',
+      },
+    ],
+    locale: 'pt_BR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Nova Corrente - Demand Forecasting Dashboard',
+    description: 'Production-ready demand forecasting system with ML/DL models',
+    images: ['https://previa-novacorrente.netlify.app/og-image.png'],
+  },
 };
 
 export const viewport: Viewport = {

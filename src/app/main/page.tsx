@@ -96,7 +96,7 @@ export default function MainPage() {
       case 'Configurações':
         return <Settings searchTerm={searchTerm} />;
       default:
-        return <Dashboard searchTerm={searchTerm} onSelectAlert={handleSelectAlert}/>;
+        return <Dashboard searchTerm={searchTerm} onSelectAlert={handleSelectAlert} />;
     }
   }, [activePage, searchTerm, analyticsTargetState, handleSelectAlert]);
 
@@ -104,10 +104,11 @@ export default function MainPage() {
 
   return (
     <ToastProvider>
-      <div className="min-h-screen text-brand-lightest-slate font-sans">
-        <div className="flex">
-          <Sidebar 
-            activePage={activePage} 
+      <div className="min-h-screen text-brand-lightest-slate font-sans relative">
+        <div className="mesh-bg" aria-hidden="true" />
+        <div className="flex relative z-10">
+          <Sidebar
+            activePage={activePage}
             setActivePage={handlePageChange}
             isCollapsed={isSidebarCollapsed}
             onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}

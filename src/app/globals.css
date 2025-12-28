@@ -3,19 +3,23 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 10, 25, 47;
+  --background-end-rgb: 2, 12, 27;
+  --brand-cyan: #64ffda;
+  --brand-navy: #0a192f;
+  --brand-light-navy: #112240;
+  --brand-lightest-navy: #233554;
+  --brand-slate: #8892b0;
+  --brand-light-slate: #a8b2d1;
+  --brand-lightest-slate: #ccd6f6;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
+  background: linear-gradient(to bottom,
       transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+      rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
 }
 
 @layer utilities {
@@ -26,23 +30,29 @@ body {
 
 /* Smooth auto-glowing animations */
 @keyframes soft-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(100, 255, 218, 0.1),
-                0 0 40px rgba(100, 255, 218, 0.05),
-                inset 0 0 20px rgba(100, 255, 218, 0.05);
+      0 0 40px rgba(100, 255, 218, 0.05),
+      inset 0 0 20px rgba(100, 255, 218, 0.05);
   }
+
   50% {
     box-shadow: 0 0 30px rgba(100, 255, 218, 0.2),
-                0 0 60px rgba(100, 255, 218, 0.1),
-                inset 0 0 30px rgba(100, 255, 218, 0.1);
+      0 0 60px rgba(100, 255, 218, 0.1),
+      inset 0 0 30px rgba(100, 255, 218, 0.1);
   }
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.6;
     transform: scale(1);
   }
+
   50% {
     opacity: 1;
     transform: scale(1.05);
@@ -53,6 +63,7 @@ body {
   0% {
     background-position: -1000px 0;
   }
+
   100% {
     background-position: 1000px 0;
   }
@@ -63,6 +74,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -77,14 +89,108 @@ body {
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
+/* Premium Linear Gradients */
+.bg-premium-gradient {
+  background: linear-gradient(135deg, var(--brand-navy) 0%, var(--brand-light-navy) 100%);
+}
+
+.bg-cyan-glow {
+  background: radial-gradient(circle at center, rgba(100, 255, 218, 0.15) 0%, transparent 70%);
+}
+
+/* Neon Text Effects */
+.text-neon-cyan {
+  color: var(--brand-cyan);
+  text-shadow: 0 0 10px rgba(100, 255, 218, 0.5),
+    0 0 20px rgba(100, 255, 218, 0.3);
+}
+
+/* Glassmorphism Plus */
+.glass-panel {
+  background: rgba(17, 34, 64, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(100, 255, 218, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(2, 12, 27, 0.37);
+}
+
+.glass-panel:hover {
+  border-color: rgba(100, 255, 218, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(100, 255, 218, 0.1);
+}
+
+/* Moving Mesh Background */
+.mesh-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-color: var(--brand-navy);
+  background-image:
+    radial-gradient(at 0% 0%, rgba(100, 255, 218, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(20, 145, 147, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(10, 75, 85, 0.05) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(100, 255, 218, 0.05) 0px, transparent 50%);
+}
+
+/* Animated Border Glow */
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+
+@keyframes border-glow {
+
+  0%,
+  100% {
+    border-color: rgba(100, 255, 218, 0.2);
+  }
+
+  50% {
+    border-color: rgba(100, 255, 218, 0.6);
+  }
+}
+
+.animate-border-glow {
+  animation: border-glow 4s ease-in-out infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--brand-navy);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--brand-lightest-navy);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-cyan);
+}
+
 .animate-shimmer {
   animation: shimmer 3s linear infinite;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(100, 255, 218, 0.1),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(100, 255, 218, 0.1),
+      transparent);
   background-size: 1000px 100%;
 }
 
@@ -99,7 +205,7 @@ body {
 
 .transition-glow:hover {
   box-shadow: 0 8px 24px rgba(100, 255, 218, 0.15),
-              0 0 40px rgba(100, 255, 218, 0.1);
+    0 0 40px rgba(100, 255, 218, 0.1);
 }
 
 /* Card glow effect */
@@ -118,12 +224,10 @@ body {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(100, 255, 218, 0.1),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(100, 255, 218, 0.1),
+      transparent);
   transition: left 0.5s;
 }
 

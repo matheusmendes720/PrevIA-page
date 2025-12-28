@@ -62,29 +62,27 @@ const ActionBadge: React.FC<ActionBadgeProps> = ({
   className = ''
 }) => {
   const config = statusConfig[status];
-  const sizeStyles = sizeConfig[size];
+
+  const sizeClasses = {
+    sm: 'px-1.5 py-0.5 text-[9px]',
+    md: 'px-2 py-1 text-[10px]',
+    lg: 'px-3 py-1.5 text-[11px]'
+  };
+
+  const statusClasses = {
+    CRITICAL: 'bg-red-500/20 text-red-500 border-red-500/50',
+    URGENT: 'bg-red-400/20 text-red-400 border-red-400/50',
+    IMPORTANT: 'bg-orange-500/20 text-orange-500 border-orange-500/50',
+    MONITOR: 'bg-yellow-500/20 text-yellow-500 border-yellow-500/50',
+    OK: 'bg-green-500/20 text-green-500 border-green-500/50'
+  };
 
   return (
     <span
-      className={`action-badge ${className}`}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '4px',
-        padding: sizeStyles.padding,
-        fontSize: sizeStyles.fontSize,
-        fontWeight: 700,
-        textTransform: 'uppercase',
-        letterSpacing: '0.5px',
-        backgroundColor: config.bgColor,
-        color: config.textColor,
-        border: `1px solid ${config.borderColor}`,
-        borderRadius: '4px',
-        whiteSpace: 'nowrap'
-      }}
+      className={`inline-flex items-center gap-1 font-bold uppercase tracking-wider border rounded transition-all duration-300 ${sizeClasses[size]} ${statusClasses[status]} ${className}`}
     >
       {showIcon && (
-        <span style={{ fontSize: sizeStyles.iconSize }}>{config.icon}</span>
+        <span className="leading-none">{config.icon}</span>
       )}
       {config.label}
     </span>

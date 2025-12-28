@@ -17,6 +17,7 @@ import FormulaExplainer from './FormulaExplainer';
 import ClusteringDashboard from './ClusteringDashboard';
 import ModelPerformanceDashboard from './ModelPerformanceDashboard';
 import PrescriptiveRecommendationsEnhanced from './PrescriptiveRecommendationsEnhanced';
+import RegimePolicyPanel from './RegimePolicyPanel';
 
 const globalInventoryData: PieChartData[] = [
     { name: 'Cabos e Fibras', value: 450 },
@@ -43,53 +44,57 @@ const globalMaintenanceHistory: TimeSeriesDataPoint[] = [
 
 
 const mockStateData: Record<string, StateData> = {
-    'AC': { name: 'Acre', category: 'consolidated', towers: 45, maintenance: 3, projects: 5, 
+    'AC': {
+        name: 'Acre', category: 'consolidated', towers: 45, maintenance: 3, projects: 5,
         projectsList: [
-            {id: 'AC-P1', name: 'Conexão Rural Acre', status: 'Planning', budget: 500000, actualBudget: 50000, manager: 'Carlos Silva'}
-        ], 
+            { id: 'AC-P1', name: 'Conexão Rural Acre', status: 'Planning', budget: 500000, actualBudget: 50000, manager: 'Carlos Silva' }
+        ],
         maintenanceSchedule: [
-            {id: 'AC-M1', description: 'Inspeção Torre Rio Branco', type: 'Preventive', scheduledDate: '15/08/2024', status: 'Scheduled', equipmentId: 'EQ-AC-001'}
-        ], 
+            { id: 'AC-M1', description: 'Inspeção Torre Rio Branco', type: 'Preventive', scheduledDate: '15/08/2024', status: 'Scheduled', equipmentId: 'EQ-AC-001' }
+        ],
         inventory: [
-             { id: 'AC-INV-01', name: 'Painel Solar 150W', category: 'Baterias e Energia', quantity: 20, value: 30000, reorderPoint: 10, supplierId: 'SUP-REG-NORTE' }
-        ], 
+            { id: 'AC-INV-01', name: 'Painel Solar 150W', category: 'Baterias e Energia', quantity: 20, value: 30000, reorderPoint: 10, supplierId: 'SUP-REG-NORTE' }
+        ],
         suppliers: [
             { id: 'SUP-REG-NORTE', name: 'Distribuidora Norte', avgLeadTime: 35, reliability: 85 }
         ],
-        maintenanceHistory: [ { date: 'Jul', Manutenções: 3 } ]
+        maintenanceHistory: [{ date: 'Jul', Manutenções: 3 }]
     },
-    'AL': { name: 'Alagoas', category: 'expansion', towers: 120, maintenance: 8, projects: 12, 
+    'AL': {
+        name: 'Alagoas', category: 'expansion', towers: 120, maintenance: 8, projects: 12,
         projectsList: [
-            {id: 'AL-P1', name: 'Fibra Litoral Alagoano', status: 'In Progress', budget: 1500000, actualBudget: 900000, manager: 'Daniela Souza'}
-        ], 
-        maintenanceSchedule: [
-            {id: 'AL-M1', description: 'Manutenção Pajuçara', type: 'Corrective', scheduledDate: '10/07/2024', status: 'Completed', equipmentId: 'EQ-AL-001'}
-        ], 
-        inventory: [
-            {id: 'AL-INV-1', name: 'Cabo Drop 1FO', category: 'Cabos e Fibras', quantity: 100, value: 30000, reorderPoint: 50, supplierId: 'SUP-NE-1'}
-        ], 
-        suppliers: [
-            {id: 'SUP-NE-1', name: 'Fornecedor Nordeste A', avgLeadTime: 25, reliability: 90}
+            { id: 'AL-P1', name: 'Fibra Litoral Alagoano', status: 'In Progress', budget: 1500000, actualBudget: 900000, manager: 'Daniela Souza' }
         ],
-        maintenanceHistory: [ { date: 'Jul', Manutenções: 8 } ]
+        maintenanceSchedule: [
+            { id: 'AL-M1', description: 'Manutenção Pajuçara', type: 'Corrective', scheduledDate: '10/07/2024', status: 'Completed', equipmentId: 'EQ-AL-001' }
+        ],
+        inventory: [
+            { id: 'AL-INV-1', name: 'Cabo Drop 1FO', category: 'Cabos e Fibras', quantity: 100, value: 30000, reorderPoint: 50, supplierId: 'SUP-NE-1' }
+        ],
+        suppliers: [
+            { id: 'SUP-NE-1', name: 'Fornecedor Nordeste A', avgLeadTime: 25, reliability: 90 }
+        ],
+        maintenanceHistory: [{ date: 'Jul', Manutenções: 8 }]
     },
-    'AP': { name: 'Amapá', category: 'consolidated', towers: 30, maintenance: 1, projects: 4, 
+    'AP': {
+        name: 'Amapá', category: 'consolidated', towers: 30, maintenance: 1, projects: 4,
         projectsList: [
-            {id: 'AP-P1', name: 'Torre Macapá', status: 'Completed', budget: 750000, actualBudget: 740000, manager: 'Fernanda Alves'}
-        ], 
-        maintenanceSchedule: [], 
+            { id: 'AP-P1', name: 'Torre Macapá', status: 'Completed', budget: 750000, actualBudget: 740000, manager: 'Fernanda Alves' }
+        ],
+        maintenanceSchedule: [],
         inventory: [
             { id: 'AP-INV-01', name: 'Bateria Selada 12V', category: 'Baterias e Energia', quantity: 40, value: 24000, reorderPoint: 20, supplierId: 'SUP-REG-NORTE' }
-        ], 
+        ],
         suppliers: [
             { id: 'SUP-REG-NORTE', name: 'Distribuidora Norte', avgLeadTime: 35, reliability: 85 }
-        ] 
+        ]
     },
-    'AM': { name: 'Amazonas', category: 'consolidated', towers: 80, maintenance: 5, projects: 10, 
+    'AM': {
+        name: 'Amazonas', category: 'consolidated', towers: 80, maintenance: 5, projects: 10,
         projectsList: [
             { id: 'AM-P1', name: 'Expansão 4G Manaus', description: 'Projeto para aumentar a cobertura 4G na área metropolitana de Manaus, incluindo a instalação de 15 novas torres.', status: 'In Progress', budget: 1200000, actualBudget: 750000, manager: 'Beatriz Costa', startDate: '01/06/2024', endDate: '31/10/2024' },
-            { id: 'AM-P2', name: 'Fibra Óptica Parintins', description: 'Levar infraestrutura de fibra óptica para a cidade de Parintins para melhorar a conectividade local.', status: 'Completed', budget: 850000, actualBudget: 820000, manager: 'Fernanda Alves', startDate: '01/09/2023', endDate: '30/04/2024'  },
-        ], 
+            { id: 'AM-P2', name: 'Fibra Óptica Parintins', description: 'Levar infraestrutura de fibra óptica para a cidade de Parintins para melhorar a conectividade local.', status: 'Completed', budget: 850000, actualBudget: 820000, manager: 'Fernanda Alves', startDate: '01/09/2023', endDate: '30/04/2024' },
+        ],
         maintenanceSchedule: [
             { id: 'AM-M1', description: 'Manutenção Torre 112', type: 'Preventive', scheduledDate: '20/07/2024', status: 'Scheduled', equipmentId: 'EQ-AM-001', assignedTo: 'Equipe Gamma', notes: 'Verificação de rotina dos sistemas de energia e transmissão.' }
         ],
@@ -100,194 +105,209 @@ const mockStateData: Record<string, StateData> = {
         suppliers: [
             { id: 'SUP-02B', name: 'Fornecedor B (AM)', avgLeadTime: 35, reliability: 88.0 },
         ],
-         maintenanceHistory: [ { date: 'Jul', Manutenções: 5 }, { date: 'Ago', Manutenções: 7 } ]
+        maintenanceHistory: [{ date: 'Jul', Manutenções: 5 }, { date: 'Ago', Manutenções: 7 }]
     },
-    'BA': { name: 'Bahia', category: 'expansion', towers: 450, maintenance: 25, projects: 40, 
+    'BA': {
+        name: 'Bahia', category: 'expansion', towers: 450, maintenance: 25, projects: 40,
         projectsList: [
-            {id: 'BA-P1', name: 'Expansão Costa do Dendê', status: 'In Progress', budget: 3500000, actualBudget: 2100000, manager: 'Gustavo Pereira'}, 
-            {id: 'BA-P2', name: 'Modernização Salvador', status: 'Planning', budget: 5000000, manager: 'Helena Ribeiro'}
-        ], 
-        maintenanceSchedule: [
-            {id: 'BA-M1', description: 'Manutenção de rotina Pelourinho', type: 'Preventive', scheduledDate: '22/07/2024', status: 'Scheduled', equipmentId: 'EQ-BA-PEL'}
-        ], 
-        inventory: [
-            {id: 'BA-INV-1', name: 'Transceptor 5G', category: 'Equipamentos Ativos', quantity: 150, value: 450000, reorderPoint: 70, supplierId: 'SUP-NE-1'},
-            {id: 'BA-INV-2', name: 'Parafuso M16 Aço Inox', category: 'Hardware Estrutural', quantity: 5000, value: 7500, reorderPoint: 2500, supplierId: 'SUP-NE-2'}
-        ], 
-        suppliers: [
-            {id: 'SUP-NE-1', name: 'Fornecedor Nordeste A', avgLeadTime: 18, reliability: 94},
-            {id: 'SUP-NE-2', name: 'Fornecedor Nordeste B', avgLeadTime: 24, reliability: 91}
+            { id: 'BA-P1', name: 'Expansão Costa do Dendê', status: 'In Progress', budget: 3500000, actualBudget: 2100000, manager: 'Gustavo Pereira' },
+            { id: 'BA-P2', name: 'Modernização Salvador', status: 'Planning', budget: 5000000, manager: 'Helena Ribeiro' }
         ],
-        maintenanceHistory: [ { date: 'Jun', Manutenções: 20 }, { date: 'Jul', Manutenções: 25 } ]
+        maintenanceSchedule: [
+            { id: 'BA-M1', description: 'Manutenção de rotina Pelourinho', type: 'Preventive', scheduledDate: '22/07/2024', status: 'Scheduled', equipmentId: 'EQ-BA-PEL' }
+        ],
+        inventory: [
+            { id: 'BA-INV-1', name: 'Transceptor 5G', category: 'Equipamentos Ativos', quantity: 150, value: 450000, reorderPoint: 70, supplierId: 'SUP-NE-1' },
+            { id: 'BA-INV-2', name: 'Parafuso M16 Aço Inox', category: 'Hardware Estrutural', quantity: 5000, value: 7500, reorderPoint: 2500, supplierId: 'SUP-NE-2' }
+        ],
+        suppliers: [
+            { id: 'SUP-NE-1', name: 'Fornecedor Nordeste A', avgLeadTime: 18, reliability: 94 },
+            { id: 'SUP-NE-2', name: 'Fornecedor Nordeste B', avgLeadTime: 24, reliability: 91 }
+        ],
+        maintenanceHistory: [{ date: 'Jun', Manutenções: 20 }, { date: 'Jul', Manutenções: 25 }]
     },
-    'CE': { name: 'Ceará', category: 'expansion', towers: 300, maintenance: 18, projects: 22, 
+    'CE': {
+        name: 'Ceará', category: 'expansion', towers: 300, maintenance: 18, projects: 22,
         projectsList: [
-            {id: 'CE-P1', name: 'Rede Metro Fortaleza', status: 'Completed', budget: 4000000, actualBudget: 3800000, manager: 'Fernanda Alves'}
-        ], 
-        maintenanceSchedule: [], 
+            { id: 'CE-P1', name: 'Rede Metro Fortaleza', status: 'Completed', budget: 4000000, actualBudget: 3800000, manager: 'Fernanda Alves' }
+        ],
+        maintenanceSchedule: [],
         inventory: [
             { id: 'CE-INV-1', name: 'Roteador de Borda', category: 'Equipamentos Ativos', quantity: 40, value: 320000, reorderPoint: 15, supplierId: 'SUP-NE-1' }
-        ], 
+        ],
         suppliers: [
-             {id: 'SUP-NE-1', name: 'Fornecedor Nordeste A', avgLeadTime: 20, reliability: 93}
-        ] 
+            { id: 'SUP-NE-1', name: 'Fornecedor Nordeste A', avgLeadTime: 20, reliability: 93 }
+        ]
     },
-    'DF': { name: 'Distrito Federal', category: 'expansion', towers: 150, maintenance: 10, projects: 15, 
+    'DF': {
+        name: 'Distrito Federal', category: 'expansion', towers: 150, maintenance: 10, projects: 15,
         projectsList: [
-            {id: 'DF-P1', name: '5G Eixo Monumental', status: 'In Progress', budget: 2000000, actualBudget: 1200000, manager: 'Beatriz Costa'}
-        ], 
-        maintenanceSchedule: [], 
+            { id: 'DF-P1', name: '5G Eixo Monumental', status: 'In Progress', budget: 2000000, actualBudget: 1200000, manager: 'Beatriz Costa' }
+        ],
+        maintenanceSchedule: [],
         inventory: [
             { id: 'DF-INV-1', name: 'Antena 5G mmWave', category: 'Equipamentos Ativos', quantity: 60, value: 180000, reorderPoint: 25, supplierId: 'SUP-CO-1' }
-        ], 
+        ],
         suppliers: [
-            {id: 'SUP-CO-1', name: 'Fornecedor Centro-Oeste', avgLeadTime: 15, reliability: 97 }
-        ] 
+            { id: 'SUP-CO-1', name: 'Fornecedor Centro-Oeste', avgLeadTime: 15, reliability: 97 }
+        ]
     },
-    'ES': { name: 'Espírito Santo', category: 'expansion', towers: 180, maintenance: 12, projects: 18, 
+    'ES': {
+        name: 'Espírito Santo', category: 'expansion', towers: 180, maintenance: 12, projects: 18,
         projectsList: [
-            {id: 'ES-P1', name: 'Malha Óptica Vitória', status: 'Planning', budget: 1800000, manager: 'Daniela Souza'}
-        ], 
-        maintenanceSchedule: [], 
+            { id: 'ES-P1', name: 'Malha Óptica Vitória', status: 'Planning', budget: 1800000, manager: 'Daniela Souza' }
+        ],
+        maintenanceSchedule: [],
         inventory: [
             { id: 'ES-INV-1', name: 'Splitter Óptico 1x8', category: 'Conectores', quantity: 200, value: 10000, reorderPoint: 100, supplierId: 'SUP-SE-2' }
-        ], 
+        ],
         suppliers: [
             { id: 'SUP-SE-2', name: 'Fornecedor Sudeste B', avgLeadTime: 16, reliability: 96 }
-        ] 
+        ]
     },
-    'GO': { name: 'Goiás', category: 'expansion', towers: 320, maintenance: 20, projects: 30, 
+    'GO': {
+        name: 'Goiás', category: 'expansion', towers: 320, maintenance: 20, projects: 30,
         projectsList: [
-            {id: 'GO-P1', name: 'Conectividade Agronegócio', status: 'In Progress', budget: 2800000, actualBudget: 1500000, manager: 'Gustavo Pereira'}
-        ], 
-        maintenanceSchedule: [], 
+            { id: 'GO-P1', name: 'Conectividade Agronegócio', status: 'In Progress', budget: 2800000, actualBudget: 1500000, manager: 'Gustavo Pereira' }
+        ],
+        maintenanceSchedule: [],
         inventory: [
-             { id: 'GO-INV-1', name: 'Antena Rural 700MHz', category: 'Equipamentos Ativos', quantity: 150, value: 120000, reorderPoint: 60, supplierId: 'SUP-CO-1' }
-        ], 
+            { id: 'GO-INV-1', name: 'Antena Rural 700MHz', category: 'Equipamentos Ativos', quantity: 150, value: 120000, reorderPoint: 60, supplierId: 'SUP-CO-1' }
+        ],
         suppliers: [
-            {id: 'SUP-CO-1', name: 'Fornecedor Centro-Oeste', avgLeadTime: 18, reliability: 94 }
-        ] 
+            { id: 'SUP-CO-1', name: 'Fornecedor Centro-Oeste', avgLeadTime: 18, reliability: 94 }
+        ]
     },
-    'MA': { name: 'Maranhão', category: 'expansion', towers: 200, maintenance: 15, projects: 18, 
+    'MA': {
+        name: 'Maranhão', category: 'expansion', towers: 200, maintenance: 15, projects: 18,
         projectsList: [
-            {id: 'MA-P1', name: 'Expansão São Luís', status: 'Completed', budget: 2200000, actualBudget: 2100000, manager: 'Fernanda Alves'}
-        ], 
-        maintenanceSchedule: [], 
+            { id: 'MA-P1', name: 'Expansão São Luís', status: 'Completed', budget: 2200000, actualBudget: 2100000, manager: 'Fernanda Alves' }
+        ],
+        maintenanceSchedule: [],
         inventory: [
             { id: 'MA-INV-1', name: 'Cabo Óptico 1Km', category: 'Cabos e Fibras', quantity: 30, value: 90000, reorderPoint: 15, supplierId: 'SUP-NE-2' }
-        ], 
+        ],
         suppliers: [
             { id: 'SUP-NE-2', name: 'Fornecedor Nordeste B', avgLeadTime: 28, reliability: 89 }
-        ] 
+        ]
     },
-    'MT': { name: 'Mato Grosso', category: 'consolidated', towers: 250, maintenance: 14, projects: 25, 
+    'MT': {
+        name: 'Mato Grosso', category: 'consolidated', towers: 250, maintenance: 14, projects: 25,
         projectsList: [
-            {id: 'MT-P1', name: 'Infovia do Pantanal', status: 'In Progress', budget: 3000000, actualBudget: 1800000, manager: 'Gustavo Pereira'}
-        ], 
-        maintenanceSchedule: [], 
+            { id: 'MT-P1', name: 'Infovia do Pantanal', status: 'In Progress', budget: 3000000, actualBudget: 1800000, manager: 'Gustavo Pereira' }
+        ],
+        maintenanceSchedule: [],
         inventory: [
             { id: 'MT-INV-1', name: 'Rádio Ponto-a-Ponto 5.8GHz', category: 'Equipamentos Ativos', quantity: 50, value: 75000, reorderPoint: 20, supplierId: 'SUP-CO-1' }
-        ], 
+        ],
         suppliers: [
             { id: 'SUP-CO-1', name: 'Fornecedor Centro-Oeste', avgLeadTime: 22, reliability: 92 }
-        ] 
+        ]
     },
-    'MS': { name: 'Mato Grosso do Sul', category: 'expansion', towers: 190, maintenance: 9, projects: 20, 
+    'MS': {
+        name: 'Mato Grosso do Sul', category: 'expansion', towers: 190, maintenance: 9, projects: 20,
         projectsList: [
-            {id: 'MS-P1', name: 'Conexão Bonito', status: 'Planning', budget: 1200000, manager: 'Daniela Souza'}
-        ], 
-        maintenanceSchedule: [], 
+            { id: 'MS-P1', name: 'Conexão Bonito', status: 'Planning', budget: 1200000, manager: 'Daniela Souza' }
+        ],
+        maintenanceSchedule: [],
         inventory: [
             { id: 'MS-INV-1', name: 'OLT GPON 16 Portas', category: 'Equipamentos Ativos', quantity: 25, value: 175000, reorderPoint: 10, supplierId: 'SUP-SUL-1' }
-        ], 
+        ],
         suppliers: [
-             { id: 'SUP-SUL-1', name: 'Fornecedor Sul A', avgLeadTime: 20, reliability: 95 }
-        ] 
+            { id: 'SUP-SUL-1', name: 'Fornecedor Sul A', avgLeadTime: 20, reliability: 95 }
+        ]
     },
-    'MG': { name: 'Minas Gerais', category: 'expansion', towers: 600, maintenance: 40, projects: 55, 
+    'MG': {
+        name: 'Minas Gerais', category: 'expansion', towers: 600, maintenance: 40, projects: 55,
         projectsList: [
-            {id: 'MG-P1', name: '5G Cidades Históricas', status: 'In Progress', budget: 6000000, actualBudget: 3500000, manager: 'Beatriz Costa'}, 
-            {id: 'MG-P2', name: 'Fibra Triângulo Mineiro', status: 'Completed', budget: 4500000, actualBudget: 4400000, manager: 'Fernanda Alves'}
-        ], 
-        maintenanceSchedule: [], 
+            { id: 'MG-P1', name: '5G Cidades Históricas', status: 'In Progress', budget: 6000000, actualBudget: 3500000, manager: 'Beatriz Costa' },
+            { id: 'MG-P2', name: 'Fibra Triângulo Mineiro', status: 'Completed', budget: 4500000, actualBudget: 4400000, manager: 'Fernanda Alves' }
+        ],
+        maintenanceSchedule: [],
         inventory: [
             { id: 'MG-INV-1', name: 'Bateria de Lítio 48V', category: 'Baterias e Energia', quantity: 250, value: 300000, reorderPoint: 100, supplierId: 'SUP-SE-1' },
             { id: 'MG-INV-2', name: 'Módulo SFP+ 10G', category: 'Equipamentos Ativos', quantity: 400, value: 200000, reorderPoint: 150, supplierId: 'SUP-SE-2' }
-        ], 
+        ],
         suppliers: [
             { id: 'SUP-SE-1', name: 'Fornecedor Sudeste A', avgLeadTime: 15, reliability: 98 },
             { id: 'SUP-SE-2', name: 'Fornecedor Sudeste B', avgLeadTime: 18, reliability: 94 }
-        ] 
+        ]
     },
-    'PA': { name: 'Pará', category: 'consolidated', towers: 150, maintenance: 12, projects: 20, 
+    'PA': {
+        name: 'Pará', category: 'consolidated', towers: 150, maintenance: 12, projects: 20,
         projectsList: [
-            {id: 'PA-P1', name: 'Norte Conectado - Pará', status: 'In Progress', budget: 4000000, actualBudget: 2000000, manager: 'Carlos Silva'}
-        ], 
-        maintenanceSchedule: [], 
+            { id: 'PA-P1', name: 'Norte Conectado - Pará', status: 'In Progress', budget: 4000000, actualBudget: 2000000, manager: 'Carlos Silva' }
+        ],
+        maintenanceSchedule: [],
         inventory: [
-             { id: 'PA-INV-01', name: 'Antena Satelital Banda Ka', category: 'Equipamentos Ativos', quantity: 30, value: 210000, reorderPoint: 10, supplierId: 'SUP-REG-NORTE' }
-        ], 
+            { id: 'PA-INV-01', name: 'Antena Satelital Banda Ka', category: 'Equipamentos Ativos', quantity: 30, value: 210000, reorderPoint: 10, supplierId: 'SUP-REG-NORTE' }
+        ],
         suppliers: [
-             { id: 'SUP-REG-NORTE', name: 'Distribuidora Norte', avgLeadTime: 40, reliability: 82 }
-        ] 
+            { id: 'SUP-REG-NORTE', name: 'Distribuidora Norte', avgLeadTime: 40, reliability: 82 }
+        ]
     },
-    'PB': { name: 'Paraíba', category: 'expansion', towers: 140, maintenance: 7, projects: 10, 
+    'PB': {
+        name: 'Paraíba', category: 'expansion', towers: 140, maintenance: 7, projects: 10,
         projectsList: [
-            {id: 'PB-P1', name: 'Projeto Litoral Paraibano', status: 'Completed', budget: 1300000, actualBudget: 1250000, manager: 'Eduardo Lima'}
-        ], 
-        maintenanceSchedule: [], 
+            { id: 'PB-P1', name: 'Projeto Litoral Paraibano', status: 'Completed', budget: 1300000, actualBudget: 1250000, manager: 'Eduardo Lima' }
+        ],
+        maintenanceSchedule: [],
         inventory: [
             { id: 'PB-INV-1', name: 'Caixa Terminal Óptica', category: 'Hardware Estrutural', quantity: 500, value: 35000, reorderPoint: 200, supplierId: 'SUP-NE-2' }
-        ], 
+        ],
         suppliers: [
             { id: 'SUP-NE-2', name: 'Fornecedor Nordeste B', avgLeadTime: 26, reliability: 90 }
-        ] 
+        ]
     },
-    'PR': { name: 'Paraná', category: 'expansion', towers: 400, maintenance: 30, projects: 45, 
+    'PR': {
+        name: 'Paraná', category: 'expansion', towers: 400, maintenance: 30, projects: 45,
         projectsList: [
-            {id: 'PR-P1', name: 'Expansão Curitiba e RMC', status: 'In Progress', budget: 4800000, actualBudget: 3000000, manager: 'Daniela Souza'}
-        ], 
-        maintenanceSchedule: [], 
+            { id: 'PR-P1', name: 'Expansão Curitiba e RMC', status: 'In Progress', budget: 4800000, actualBudget: 3000000, manager: 'Daniela Souza' }
+        ],
+        maintenanceSchedule: [],
         inventory: [
             { id: 'PR-INV-1', name: 'Switch Gerenciável L2', category: 'Equipamentos Ativos', quantity: 100, value: 200000, reorderPoint: 40, supplierId: 'SUP-SUL-1' },
             { id: 'PR-INV-2', name: 'Gabinete Outdoor 42U', category: 'Hardware Estrutural', quantity: 40, value: 120000, reorderPoint: 15, supplierId: 'SUP-SUL-2' }
-        ], 
+        ],
         suppliers: [
             { id: 'SUP-SUL-1', name: 'Fornecedor Sul A', avgLeadTime: 14, reliability: 97 },
             { id: 'SUP-SUL-2', name: 'Fornecedor Sul B', avgLeadTime: 19, reliability: 93 }
-        ] 
+        ]
     },
-    'PE': { name: 'Pernambuco', category: 'expansion', towers: 350, maintenance: 22, projects: 30, 
+    'PE': {
+        name: 'Pernambuco', category: 'expansion', towers: 350, maintenance: 22, projects: 30,
         projectsList: [
-            {id: 'PE-P1', name: 'Porto Digital Conectado', status: 'Completed', budget: 3200000, actualBudget: 3100000, manager: 'Fernanda Alves'},
-            {id: 'PE-P2', name: 'Expansão 5G Agreste', description: 'Levar cobertura 5G para o interior do estado, focando no polo de confecções.', status: 'In Progress', budget: 4500000, actualBudget: 2000000, manager: 'Beatriz Costa' }
-        ], 
+            { id: 'PE-P1', name: 'Porto Digital Conectado', status: 'Completed', budget: 3200000, actualBudget: 3100000, manager: 'Fernanda Alves' },
+            { id: 'PE-P2', name: 'Expansão 5G Agreste', description: 'Levar cobertura 5G para o interior do estado, focando no polo de confecções.', status: 'In Progress', budget: 4500000, actualBudget: 2000000, manager: 'Beatriz Costa' }
+        ],
         maintenanceSchedule: [
-             {id: 'PE-M1', description: 'Verificação Torre Recife Antigo', type: 'Preventive', scheduledDate: '28/07/2024', status: 'Scheduled', equipmentId: 'EQ-PE-001'}
-        ], 
+            { id: 'PE-M1', description: 'Verificação Torre Recife Antigo', type: 'Preventive', scheduledDate: '28/07/2024', status: 'Scheduled', equipmentId: 'EQ-PE-001' }
+        ],
         inventory: [
             { id: 'PE-INV-1', name: 'Switch Gerenciável L2', category: 'Equipamentos Ativos', quantity: 80, value: 160000, reorderPoint: 35, supplierId: 'SUP-NE-1' },
             { id: 'PE-INV-2', name: 'Cabo UTP Cat6', category: 'Cabos e Fibras', quantity: 50, value: 15000, reorderPoint: 25, supplierId: 'SUP-NE-2' }
-        ], 
+        ],
         suppliers: [
             { id: 'SUP-NE-1', name: 'Fornecedor Nordeste A', avgLeadTime: 21, reliability: 93.5 },
             { id: 'SUP-NE-2', name: 'Fornecedor Nordeste B', avgLeadTime: 25, reliability: 90 }
         ],
-        maintenanceHistory: [ { date: 'Jun', Manutenções: 18 }, { date: 'Jul', Manutenções: 22 } ]
+        maintenanceHistory: [{ date: 'Jun', Manutenções: 18 }, { date: 'Jul', Manutenções: 22 }]
     },
-    'PI': { name: 'Piauí', category: 'expansion', towers: 160, maintenance: 10, projects: 14, 
+    'PI': {
+        name: 'Piauí', category: 'expansion', towers: 160, maintenance: 10, projects: 14,
         projectsList: [
-            {id: 'PI-P1', name: 'Serra da Capivara 4G', status: 'Planning', budget: 1100000, manager: 'Carlos Silva'}
-        ], 
-        maintenanceSchedule: [], 
+            { id: 'PI-P1', name: 'Serra da Capivara 4G', status: 'Planning', budget: 1100000, manager: 'Carlos Silva' }
+        ],
+        maintenanceSchedule: [],
         inventory: [
             { id: 'PI-INV-1', name: 'Conector Óptico SC/APC', category: 'Conectores', quantity: 2000, value: 10000, reorderPoint: 1000, supplierId: 'SUP-NE-2' }
-        ], 
+        ],
         suppliers: [
-             { id: 'SUP-NE-2', name: 'Fornecedor Nordeste B', avgLeadTime: 30, reliability: 88 }
-        ] 
+            { id: 'SUP-NE-2', name: 'Fornecedor Nordeste B', avgLeadTime: 30, reliability: 88 }
+        ]
     },
-    'RJ': { name: 'Rio de Janeiro', category: 'expansion', towers: 550, maintenance: 35, projects: 50,
+    'RJ': {
+        name: 'Rio de Janeiro', category: 'expansion', towers: 550, maintenance: 35, projects: 50,
         projectsList: [
             { id: 'RJ-P1', name: 'Implantação 5G-SA', description: 'Implementação da rede 5G Stand-Alone em toda a região metropolitana do Rio, focando em áreas de alta densidade populacional.', status: 'In Progress', budget: 5000000, actualBudget: 3100000, manager: 'Beatriz Costa', startDate: '01/02/2024', endDate: '30/09/2024' },
             { id: 'RJ-P2', name: 'Reforço Estrutural Torre 20', description: 'Reforço da estrutura da Torre 20 para suportar novos equipamentos 5G e melhorar a resiliência a ventos fortes.', status: 'Planning', budget: 750000, manager: 'Daniela Souza', startDate: '01/10/2024', endDate: '31/12/2024' },
@@ -306,71 +326,77 @@ const mockStateData: Record<string, StateData> = {
             { id: 'SUP-02', name: 'Fornecedor B (RJ)', avgLeadTime: 20, reliability: 92.3 },
             { id: 'SUP-05', name: 'Fornecedor E (RJ)', avgLeadTime: 14, reliability: 99.1 },
         ],
-        maintenanceHistory: [ { date: 'Jun', Manutenções: 32 }, { date: 'Jul', Manutenções: 35 } ]
+        maintenanceHistory: [{ date: 'Jun', Manutenções: 32 }, { date: 'Jul', Manutenções: 35 }]
     },
-    'RN': { name: 'Rio Grande do Norte', category: 'expansion', towers: 130, maintenance: 9, projects: 11, 
+    'RN': {
+        name: 'Rio Grande do Norte', category: 'expansion', towers: 130, maintenance: 9, projects: 11,
         projectsList: [
-            {id: 'RN-P1', name: 'Conexão Litoral Potiguar', status: 'In Progress', budget: 1400000, actualBudget: 800000, manager: 'Eduardo Lima'}
-        ], 
-        maintenanceSchedule: [], 
+            { id: 'RN-P1', name: 'Conexão Litoral Potiguar', status: 'In Progress', budget: 1400000, actualBudget: 800000, manager: 'Eduardo Lima' }
+        ],
+        maintenanceSchedule: [],
         inventory: [
             { id: 'RN-INV-1', name: 'ONT Wi-Fi 6', category: 'Equipamentos Ativos', quantity: 300, value: 105000, reorderPoint: 150, supplierId: 'SUP-NE-1' }
-        ], 
+        ],
         suppliers: [
             { id: 'SUP-NE-1', name: 'Fornecedor Nordeste A', avgLeadTime: 24, reliability: 91 }
-        ] 
+        ]
     },
-    'RS': { name: 'Rio Grande do Sul', category: 'expansion', towers: 420, maintenance: 28, projects: 38, 
+    'RS': {
+        name: 'Rio Grande do Sul', category: 'expansion', towers: 420, maintenance: 28, projects: 38,
         projectsList: [
-            {id: 'RS-P1', name: 'Malha Metropolitana POA', status: 'Completed', budget: 4200000, actualBudget: 4100000, manager: 'Fernanda Alves'}
-        ], 
-        maintenanceSchedule: [], 
+            { id: 'RS-P1', name: 'Malha Metropolitana POA', status: 'Completed', budget: 4200000, actualBudget: 4100000, manager: 'Fernanda Alves' }
+        ],
+        maintenanceSchedule: [],
         inventory: [
-             { id: 'RS-INV-1', name: 'Cabo Óptico 1Km', category: 'Cabos e Fibras', quantity: 60, value: 180000, reorderPoint: 25, supplierId: 'SUP-SUL-1' },
-             { id: 'RS-INV-2', name: 'Placa de Circuito TX/RX', category: 'Equipamentos Ativos', quantity: 90, value: 135000, reorderPoint: 40, supplierId: 'SUP-SUL-2' }
-        ], 
+            { id: 'RS-INV-1', name: 'Cabo Óptico 1Km', category: 'Cabos e Fibras', quantity: 60, value: 180000, reorderPoint: 25, supplierId: 'SUP-SUL-1' },
+            { id: 'RS-INV-2', name: 'Placa de Circuito TX/RX', category: 'Equipamentos Ativos', quantity: 90, value: 135000, reorderPoint: 40, supplierId: 'SUP-SUL-2' }
+        ],
         suppliers: [
-             { id: 'SUP-SUL-1', name: 'Fornecedor Sul A', avgLeadTime: 12, reliability: 98 },
-             { id: 'SUP-SUL-2', name: 'Fornecedor Sul B', avgLeadTime: 18, reliability: 94 }
-        ] 
+            { id: 'SUP-SUL-1', name: 'Fornecedor Sul A', avgLeadTime: 12, reliability: 98 },
+            { id: 'SUP-SUL-2', name: 'Fornecedor Sul B', avgLeadTime: 18, reliability: 94 }
+        ]
     },
-    'RO': { name: 'Rondônia', category: 'consolidated', towers: 60, maintenance: 4, projects: 8, 
+    'RO': {
+        name: 'Rondônia', category: 'consolidated', towers: 60, maintenance: 4, projects: 8,
         projectsList: [
-            {id: 'RO-P1', name: 'BR-364 Conectada', status: 'Planning', budget: 900000, manager: 'Carlos Silva'}
-        ], 
-        maintenanceSchedule: [], 
+            { id: 'RO-P1', name: 'BR-364 Conectada', status: 'Planning', budget: 900000, manager: 'Carlos Silva' }
+        ],
+        maintenanceSchedule: [],
         inventory: [
-             { id: 'RO-INV-1', name: 'Rádio Ponto-a-Ponto 5.8GHz', category: 'Equipamentos Ativos', quantity: 30, value: 45000, reorderPoint: 15, supplierId: 'SUP-REG-NORTE' }
-        ], 
+            { id: 'RO-INV-1', name: 'Rádio Ponto-a-Ponto 5.8GHz', category: 'Equipamentos Ativos', quantity: 30, value: 45000, reorderPoint: 15, supplierId: 'SUP-REG-NORTE' }
+        ],
         suppliers: [
             { id: 'SUP-REG-NORTE', name: 'Distribuidora Norte', avgLeadTime: 38, reliability: 84 }
-        ] 
+        ]
     },
-    'RR': { name: 'Roraima', category: 'consolidated', towers: 25, maintenance: 2, projects: 3, 
+    'RR': {
+        name: 'Roraima', category: 'consolidated', towers: 25, maintenance: 2, projects: 3,
         projectsList: [
-            {id: 'RR-P1', name: 'Fronteira Digital', status: 'In Progress', budget: 600000, actualBudget: 300000, manager: 'Gustavo Pereira'}
-        ], 
-        maintenanceSchedule: [], 
+            { id: 'RR-P1', name: 'Fronteira Digital', status: 'In Progress', budget: 600000, actualBudget: 300000, manager: 'Gustavo Pereira' }
+        ],
+        maintenanceSchedule: [],
         inventory: [
             { id: 'RR-INV-1', name: 'Antena Satelital Banda Ka', category: 'Equipamentos Ativos', quantity: 15, value: 105000, reorderPoint: 5, supplierId: 'SUP-REG-NORTE' }
-        ], 
+        ],
         suppliers: [
             { id: 'SUP-REG-NORTE', name: 'Distribuidora Norte', avgLeadTime: 45, reliability: 80 }
-        ] 
+        ]
     },
-    'SC': { name: 'Santa Catarina', category: 'expansion', towers: 380, maintenance: 26, projects: 35, 
+    'SC': {
+        name: 'Santa Catarina', category: 'expansion', towers: 380, maintenance: 26, projects: 35,
         projectsList: [
-            {id: 'SC-P1', name: 'Vale do Itajaí 5G', status: 'In Progress', budget: 3600000, actualBudget: 2200000, manager: 'Daniela Souza'}
-        ], 
-        maintenanceSchedule: [], 
+            { id: 'SC-P1', name: 'Vale do Itajaí 5G', status: 'In Progress', budget: 3600000, actualBudget: 2200000, manager: 'Daniela Souza' }
+        ],
+        maintenanceSchedule: [],
         inventory: [
             { id: 'SC-INV-1', name: 'Fibra Óptica Monomodo', category: 'Cabos e Fibras', quantity: 120, value: 48000, reorderPoint: 50, supplierId: 'SUP-SUL-1' }
-        ], 
+        ],
         suppliers: [
-             { id: 'SUP-SUL-1', name: 'Fornecedor Sul A', avgLeadTime: 13, reliability: 97.5 }
-        ] 
+            { id: 'SUP-SUL-1', name: 'Fornecedor Sul A', avgLeadTime: 13, reliability: 97.5 }
+        ]
     },
-    'SP': { name: 'São Paulo', category: 'expansion', towers: 800, maintenance: 50, projects: 70,
+    'SP': {
+        name: 'São Paulo', category: 'expansion', towers: 800, maintenance: 50, projects: 70,
         projectsList: [
             { id: 'SP-P1', name: 'Data Center Campinas', description: 'Construção do novo data center regional em Campinas para suportar a expansão da nuvem e serviços 5G.', status: 'Completed', budget: 15000000, actualBudget: 14850000, manager: 'Fernanda Alves', startDate: '01/01/2023', endDate: '31/12/2023' },
             { id: 'SP-P2', name: 'Expansão 5G Litoral', description: 'Ampliação da cobertura 5G para todas as cidades do litoral paulista, visando a alta temporada de verão.', status: 'In Progress', budget: 7500000, actualBudget: 4200000, manager: 'Beatriz Costa', startDate: '15/03/2024', endDate: '31/12/2024' },
@@ -397,29 +423,31 @@ const mockStateData: Record<string, StateData> = {
             { date: 'Out', Manutenções: 60 }, { date: 'Nov', Manutenções: 62 }, { date: 'Dez', Manutenções: 65 },
         ]
     },
-    'SE': { name: 'Sergipe', category: 'expansion', towers: 110, maintenance: 6, projects: 9, 
+    'SE': {
+        name: 'Sergipe', category: 'expansion', towers: 110, maintenance: 6, projects: 9,
         projectsList: [
-            {id: 'SE-P1', name: '4G Cânion do Xingó', status: 'Completed', budget: 950000, actualBudget: 940000, manager: 'Eduardo Lima'}
-        ], 
-        maintenanceSchedule: [], 
+            { id: 'SE-P1', name: '4G Cânion do Xingó', status: 'Completed', budget: 950000, actualBudget: 940000, manager: 'Eduardo Lima' }
+        ],
+        maintenanceSchedule: [],
         inventory: [
-             { id: 'SE-INV-1', name: 'Conector Mecânico', category: 'Conectores', quantity: 1500, value: 12000, reorderPoint: 700, supplierId: 'SUP-NE-2' }
-        ], 
+            { id: 'SE-INV-1', name: 'Conector Mecânico', category: 'Conectores', quantity: 1500, value: 12000, reorderPoint: 700, supplierId: 'SUP-NE-2' }
+        ],
         suppliers: [
             { id: 'SUP-NE-2', name: 'Fornecedor Nordeste B', avgLeadTime: 25, reliability: 91 }
-        ] 
+        ]
     },
-    'TO': { name: 'Tocantins', category: 'expansion', towers: 90, maintenance: 5, projects: 12, 
+    'TO': {
+        name: 'Tocantins', category: 'expansion', towers: 90, maintenance: 5, projects: 12,
         projectsList: [
-            {id: 'TO-P1', name: 'Jalapão Conectado', status: 'Planning', budget: 1300000, manager: 'Carlos Silva'}
-        ], 
-        maintenanceSchedule: [], 
+            { id: 'TO-P1', name: 'Jalapão Conectado', status: 'Planning', budget: 1300000, manager: 'Carlos Silva' }
+        ],
+        maintenanceSchedule: [],
         inventory: [
-             { id: 'TO-INV-1', name: 'Painel Solar 150W', category: 'Baterias e Energia', quantity: 50, value: 75000, reorderPoint: 20, supplierId: 'SUP-CO-1' }
-        ], 
+            { id: 'TO-INV-1', name: 'Painel Solar 150W', category: 'Baterias e Energia', quantity: 50, value: 75000, reorderPoint: 20, supplierId: 'SUP-CO-1' }
+        ],
         suppliers: [
-             { id: 'SUP-CO-1', name: 'Fornecedor Centro-Oeste', avgLeadTime: 28, reliability: 90 }
-        ] 
+            { id: 'SUP-CO-1', name: 'Fornecedor Centro-Oeste', avgLeadTime: 28, reliability: 90 }
+        ]
     },
 };
 
@@ -432,7 +460,7 @@ interface AnalyticsProps {
 const Analytics: React.FC<AnalyticsProps> = ({ initialSelectedState }) => {
     const [selectedState, setSelectedState] = useState<string | null>(initialSelectedState || null);
     const [showAnalysis, setShowAnalysis] = useState(false);
-    const [detailModalData, setDetailModalData] = useState<{title: string, data: any[], type: 'inventory' | 'supplier'} | null>(null);
+    const [detailModalData, setDetailModalData] = useState<{ title: string, data: any[], type: 'inventory' | 'supplier' } | null>(null);
     const [activeTab, setActiveTab] = useState<AnalyticsTab>('Geographic');
 
     useEffect(() => {
@@ -461,16 +489,16 @@ const Analytics: React.FC<AnalyticsProps> = ({ initialSelectedState }) => {
             return acc;
         }, {} as Record<string, PieChartData>))
     }, [selectedStateData]);
-        
+
     const supplierData = useMemo(() => {
         const data = selectedStateData ? selectedStateData.suppliers : Object.values(mockStateData).flatMap(s => s.suppliers);
         if (!data.length) return [];
-        
+
         const uniqueSuppliers = Array.from(new Map(data.map(item => [item.id, item])).values());
-        
+
         return uniqueSuppliers.map(s => ({ name: s.name, 'Lead Time (dias)': s.avgLeadTime }))
     }, [selectedStateData]);
-        
+
     const maintenanceHistoryData = selectedStateData?.maintenanceHistory || globalMaintenanceHistory;
 
     const projectStatusData = useMemo(() => {
@@ -480,7 +508,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ initialSelectedState }) => {
             acc[project.status] = (acc[project.status] || 0) + 1;
             return acc;
         }, {} as Record<Project['status'], number>);
-        
+
         const statusMap: Record<Project['status'], string> = {
             'Planning': 'Planejamento',
             'In Progress': 'Em Progresso',
@@ -508,25 +536,25 @@ const Analytics: React.FC<AnalyticsProps> = ({ initialSelectedState }) => {
 
     const maintenanceTypeData = useMemo(() => {
         const tasksToCount = selectedState ? (selectedStateData?.maintenanceSchedule || []) : Object.values(mockStateData).flatMap(s => s.maintenanceSchedule);
-    
+
         if (!tasksToCount.length) return [
             { name: 'Preventiva', value: 0 },
             { name: 'Corretiva', value: 0 },
         ];
-    
+
         const typeCounts = tasksToCount.reduce((acc, task) => {
             const typeName = task.type === 'Preventive' ? 'Preventiva' : 'Corretiva';
             acc[typeName] = (acc[typeName] || 0) + 1;
             return acc;
         }, {} as Record<string, number>);
-        
+
         const finalData = [
             { name: 'Preventiva', value: typeCounts['Preventiva'] || 0 },
             { name: 'Corretiva', value: typeCounts['Corretiva'] || 0 },
         ];
-    
+
         return finalData;
-    
+
     }, [selectedState, selectedStateData]);
 
     const handleInventoryDrillDown = (category: string) => {
@@ -562,7 +590,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ initialSelectedState }) => {
             case 'Geographic':
                 return (
                     <div className="space-y-6">
-                        <InteractiveMap 
+                        <InteractiveMap
                             stateData={mockStateData}
                             selectedState={selectedState}
                             onStateClick={handleStateSelection}
@@ -599,7 +627,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ initialSelectedState }) => {
                             <HistoricalDataChart title={historyTitle} data={maintenanceHistoryData} />
                         </div>
                         {detailModalData && (
-                            <AnalyticsDetailModal 
+                            <AnalyticsDetailModal
                                 title={detailModalData.title}
                                 data={detailModalData.data}
                                 type={detailModalData.type}
@@ -619,7 +647,30 @@ const Analytics: React.FC<AnalyticsProps> = ({ initialSelectedState }) => {
                 return <ModelPerformanceDashboard />;
 
             case 'Prescriptive':
-                return <PrescriptiveRecommendationsEnhanced />;
+                return (
+                    <div className="space-y-6">
+                        <PrescriptiveRecommendationsEnhanced />
+                        <RegimePolicyPanel
+                            currentRegime="Alta Demanda (Expansão 5G)"
+                            regimeStats={{
+                                mean: 1450,
+                                std: 120,
+                                duration: "14 dias"
+                            }}
+                            totalSavings={158400}
+                            adjustments={[
+                                {
+                                    parameter: "Estoque de Segurança",
+                                    current: 50,
+                                    recommended: 85,
+                                    unit: "un",
+                                    impact: "Redução de stockout em clusters críticos.",
+                                    urgency: "URGENT"
+                                }
+                            ]}
+                        />
+                    </div>
+                );
 
             default:
                 return null;
@@ -633,7 +684,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ initialSelectedState }) => {
         { key: 'Models', label: 'Modelos' },
         { key: 'Prescriptive', label: 'Prescritivo' },
     ];
-    
+
     return (
         <div className="space-y-6">
             {/* Tab Navigation */}
@@ -643,11 +694,10 @@ const Analytics: React.FC<AnalyticsProps> = ({ initialSelectedState }) => {
                         <button
                             key={tab.key}
                             onClick={() => setActiveTab(tab.key)}
-                            className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                                activeTab === tab.key
-                                    ? 'border-brand-cyan text-brand-cyan'
-                                    : 'border-transparent text-brand-slate hover:text-brand-lightest-slate hover:border-brand-light-slate'
-                            }`}
+                            className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeTab === tab.key
+                                ? 'border-brand-cyan text-brand-cyan'
+                                : 'border-transparent text-brand-slate hover:text-brand-lightest-slate hover:border-brand-light-slate'
+                                }`}
                         >
                             {tab.label}
                         </button>
