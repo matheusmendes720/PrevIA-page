@@ -28,7 +28,7 @@ const PrescriptiveTooltip: React.FC<PrescriptiveTooltipProps> = ({
     whyItMatters: typeof content === 'string' ? content : '',
     whatToDoNow: typeof content === 'object' && content !== null ? 'See details' : '',
   };
-  
+
   const tooltipChildren = children || <InfoIcon className="w-5 h-5 text-brand-cyan cursor-help" />;
   const [isVisible, setIsVisible] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -107,7 +107,7 @@ const PrescriptiveTooltip: React.FC<PrescriptiveTooltipProps> = ({
       {isVisible && (
         <div
           ref={tooltipRef}
-          className={`absolute z-50 ${positionClasses[position]} ${isExpanded ? 'w-96' : 'w-80'} bg-brand-navy border border-brand-cyan/40 rounded-lg shadow-xl p-4 animate-fade-in`}
+          className={`absolute z-50 ${positionClasses[position]} w-[85vw] sm:w-80 ${isExpanded ? 'sm:w-96' : ''} max-w-[calc(100vw-2rem)] bg-brand-navy border border-brand-cyan/40 rounded-lg shadow-xl p-4 animate-fade-in`}
           role="tooltip"
         >
           {!isExpanded ? (
@@ -193,11 +193,10 @@ const PrescriptiveTooltip: React.FC<PrescriptiveTooltipProps> = ({
                       <div key={idx} className="bg-brand-light-navy/50 p-2 rounded text-xs">
                         <div className="flex items-center justify-between mb-1">
                           <span className="font-semibold text-brand-cyan">{action.action}</span>
-                          <span className={`px-2 py-0.5 rounded text-xs ${
-                            action.priority === 'URGENT' ? 'bg-red-500/20 text-red-400' :
-                            action.priority === 'HIGH' ? 'bg-orange-500/20 text-orange-400' :
-                            'bg-yellow-500/20 text-yellow-400'
-                          }`}>
+                          <span className={`px-2 py-0.5 rounded text-xs ${action.priority === 'URGENT' ? 'bg-red-500/20 text-red-400' :
+                              action.priority === 'HIGH' ? 'bg-orange-500/20 text-orange-400' :
+                                'bg-yellow-500/20 text-yellow-400'
+                            }`}>
                             {action.priority}
                           </span>
                         </div>

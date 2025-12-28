@@ -291,8 +291,8 @@ const Sidebar: React.FC<SidebarProps> = memo(({
                 onMouseEnter={() => handleLinkHover(item.href)}
                 onClick={handleFeatureLinkClick}
                 className={`flex items-center rounded-lg transition-all duration-200 ${isCollapsedMode
-                    ? 'justify-center p-3 my-2'
-                    : 'p-3 my-2 space-x-3'
+                  ? 'justify-center p-3 my-2'
+                  : 'p-3 my-2 space-x-3'
                   } ${isActive
                     ? 'bg-brand-cyan/10 text-brand-cyan shadow-inner shadow-cyan-500/10 font-semibold'
                     : 'text-brand-slate hover:bg-brand-light-navy/50 hover:text-brand-lightest-slate'
@@ -339,14 +339,12 @@ const Sidebar: React.FC<SidebarProps> = memo(({
           bg-brand-navy/95 backdrop-blur-xl border-r border-brand-cyan/40 h-screen
           transition-all duration-300 ease-in-out
           flex flex-col
-          relative
           ${isMobile
-            ? `fixed inset-y-0 left-0 z-[1000] w-80 transform ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'
-            } shadow-2xl`
-            : `sticky top-0 ${isCollapsed ? 'w-20' : 'w-64'} hidden lg:flex`
+            ? `fixed inset-y-0 left-0 z-[1000] w-72 transform ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+            } shadow-2xl overflow-y-auto`
+            : `sticky top-0 relative ${isCollapsed ? 'w-20' : 'w-64'} hidden lg:flex`
           }
           p-4
-          overflow-y-auto
           hide-scrollbar
           animate-subtle-glow
         `}

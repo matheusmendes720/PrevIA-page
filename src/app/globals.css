@@ -235,9 +235,33 @@ body {
   left: 100%;
 }
 
-/* Timeline dot glow */
-.timeline-dot-glow {
-  position: relative;
+/* Mobile Layout Safety Fixes */
+@media (max-width: 1024px) {
+
+  html,
+  body {
+    overflow-x: hidden;
+    position: relative;
+    width: 100%;
+  }
+
+  #__next,
+  main {
+    overflow-x: hidden;
+    width: 100%;
+  }
+}
+
+/* Ensure images and SVGs never overflow their containers */
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Fix flex child shrink behavior */
+.min-w-0 {
+  min-width: 0;
 }
 
 .timeline-dot-glow::after {
