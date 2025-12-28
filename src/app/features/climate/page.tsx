@@ -5,14 +5,14 @@ import Script from 'next/script';
 import ExternalFactorsDashboard from '@/components/ExternalFactorsDashboard';
 import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
 import { prescriptiveDataService } from '@/services/prescriptiveDataService';
-import type { PrescriptiveData } from '@/types/prescriptive';
+import type { PrescriptiveInsights } from '@/types/prescriptive';
 
 export default function ClimateFeaturesPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isChartLoaded, setIsChartLoaded] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const initRef = useRef(false);
-  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveData | null>(null);
+  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveInsights | null>(null);
   
   useEffect(() => {
     prescriptiveDataService.loadPrescriptiveInsights().then(setPrescriptiveData);

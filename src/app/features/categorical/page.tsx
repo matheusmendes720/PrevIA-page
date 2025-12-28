@@ -84,17 +84,17 @@ export default function CategoricalFeaturesPage() {
   const initRef = useRef(false);
   const router = useRouter();
   const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveInsights | null>(null);
-  
+
   useEffect(() => {
     prescriptiveDataService.loadPrescriptiveInsights().then(setPrescriptiveData);
   }, []);
-  
+
   const [activeCategoryType, setActiveCategoryType] = useState<'family' | 'site' | 'supplier'>('family');
   const [selectedCategory, setSelectedCategory] = useState<{ id: string; name: string; type: string } | null>(null);
   const [currentInsightIdx, setCurrentInsightIdx] = useState(0);
   const [sortColumn, setSortColumn] = useState<number>(-1);
   const [sortAscending, setSortAscending] = useState(true);
-  
+
   const [apiData, setApiData] = useState<{
     families: FamilyEncoding[];
     sites: SiteEncoding[];
@@ -158,8 +158,8 @@ export default function CategoricalFeaturesPage() {
 
     // Check if API has meaningful data
     const hasApiData = (apiData.families.length > 0 && apiData.families.some(f => ((f as any).material_count || 0) > 0)) ||
-                       (apiData.sites.length > 0 && apiData.sites.some(s => ((s as any).material_count || 0) > 0)) ||
-                       (apiData.suppliers.length > 0 && apiData.suppliers.some(s => ((s as any).material_count || 0) > 0));
+      (apiData.sites.length > 0 && apiData.sites.some(s => ((s as any).material_count || 0) > 0)) ||
+      (apiData.suppliers.length > 0 && apiData.suppliers.some(s => ((s as any).material_count || 0) > 0));
     const useMockData = !hasApiData;
 
     if (useMockData) {
@@ -207,7 +207,7 @@ export default function CategoricalFeaturesPage() {
         const encodingValue = ((f as any).familia_encoded || (f as any).encoded_value || idx) / 100;
         const totalMaterials = apiData.families.reduce((sum, fam) => sum + ((fam as any).material_count || 0), 0);
         const demandShare = totalMaterials > 0 ? (materialCount / totalMaterials) * 100 : 0;
-        
+
         const familyKey = familyName.toUpperCase().replace(/\s+/g, '_');
         const insightData = PRESCRIPTIVE_INSIGHTS[familyKey as keyof typeof PRESCRIPTIVE_INSIGHTS];
         const importanceScore = insightData ? insightData.importance_score : Math.min(0.3, demandShare / 100);
@@ -291,7 +291,7 @@ export default function CategoricalFeaturesPage() {
     const highImportanceSites = categoricalEncodings
       .filter(e => e.categoryType === 'site' && e.importanceScore > 0.25)
       .slice(0, 2);
-    
+
     highImportanceSites.forEach(site => {
       insightsList.push({
         categoryType: 'site',
@@ -305,7 +305,7 @@ export default function CategoricalFeaturesPage() {
     const highImportanceSuppliers = categoricalEncodings
       .filter(e => e.categoryType === 'supplier' && e.importanceScore > 0.20)
       .slice(0, 2);
-    
+
     highImportanceSuppliers.forEach(supplier => {
       insightsList.push({
         categoryType: 'supplier',
@@ -411,14 +411,14 @@ export default function CategoricalFeaturesPage() {
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const tooltipWrapper = target.closest('.tooltip-wrapper');
-      
+
       if (tooltipWrapper) {
         document.querySelectorAll('.tooltip-content').forEach((tooltip) => {
           const tooltipEl = tooltip as HTMLElement;
           tooltipEl.style.visibility = 'hidden';
           tooltipEl.style.opacity = '0';
         });
-        
+
         const tooltipContent = tooltipWrapper.querySelector('.tooltip-content') as HTMLElement;
         if (tooltipContent) {
           tooltipContent.style.visibility = 'visible';
@@ -505,14 +505,14 @@ export default function CategoricalFeaturesPage() {
   // Apply inline styles to all oversized elements after render
   useEffect(() => {
     if (!isInitialized) return;
-    
+
     const applyStyles = () => {
       // Header h1
       document.querySelectorAll('.categorical-header h1').forEach((el) => {
         (el as HTMLElement).style.setProperty('font-size', '18px', 'important');
         (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
       });
-      
+
       // Metric cards
       document.querySelectorAll('.metric-card .label').forEach((el) => {
         (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
@@ -525,19 +525,19 @@ export default function CategoricalFeaturesPage() {
       document.querySelectorAll('.metric-card .unit').forEach((el) => {
         (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
       });
-      
+
       // Section titles
       document.querySelectorAll('.section-title').forEach((el) => {
         (el as HTMLElement).style.setProperty('font-size', '15px', 'important');
         (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
       });
-      
+
       // Chart titles
       document.querySelectorAll('.chart-title').forEach((el) => {
         (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
         (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
       });
-      
+
       // Narrative box
       document.querySelectorAll('.narrative-box h3').forEach((el) => {
         (el as HTMLElement).style.setProperty('font-size', '16px', 'important');
@@ -546,13 +546,13 @@ export default function CategoricalFeaturesPage() {
       document.querySelectorAll('.narrative-box p').forEach((el) => {
         (el as HTMLElement).style.setProperty('font-size', '15px', 'important');
       });
-      
+
       // Tab buttons
       document.querySelectorAll('.tab-button').forEach((el) => {
         (el as HTMLElement).style.setProperty('font-size', '15px', 'important');
       });
     };
-    
+
     applyStyles();
     const interval = setInterval(applyStyles, 100);
     return () => clearInterval(interval);
@@ -564,7 +564,7 @@ export default function CategoricalFeaturesPage() {
 
     const currentEncodings = categoricalEncodings;
     const filteredEncodings = currentEncodings.filter(e => e.categoryType === activeCategoryType);
-    
+
     if (filteredEncodings.length === 0) return;
 
     const timer = setTimeout(() => {
@@ -590,15 +590,15 @@ export default function CategoricalFeaturesPage() {
                 datasets: [{
                   label: 'Importância (%)',
                   data: importanceData,
-                  backgroundColor: filteredEncodings.map(e => 
+                  backgroundColor: filteredEncodings.map(e =>
                     e.importanceScore > 0.25 ? 'rgba(50, 184, 198, 0.7)' :
-                    e.importanceScore > 0.15 ? 'rgba(230, 129, 97, 0.7)' :
-                    'rgba(167, 169, 169, 0.7)'
+                      e.importanceScore > 0.15 ? 'rgba(230, 129, 97, 0.7)' :
+                        'rgba(167, 169, 169, 0.7)'
                   ),
-                  borderColor: filteredEncodings.map(e => 
+                  borderColor: filteredEncodings.map(e =>
                     e.importanceScore > 0.25 ? 'rgba(50, 184, 198, 1)' :
-                    e.importanceScore > 0.15 ? 'rgba(230, 129, 97, 1)' :
-                    'rgba(167, 169, 169, 1)'
+                      e.importanceScore > 0.15 ? 'rgba(230, 129, 97, 1)' :
+                        'rgba(167, 169, 169, 1)'
                   ),
                   borderWidth: 2,
                 }],
@@ -609,9 +609,9 @@ export default function CategoricalFeaturesPage() {
                 maintainAspectRatio: false,
                 scales: {
                   x: {
-                    ticks: { 
+                    ticks: {
                       color: 'rgba(167, 169, 169, 0.7)',
-                      callback: function(value: any) {
+                      callback: function (value: any) {
                         return value + '%';
                       },
                     },
@@ -619,14 +619,14 @@ export default function CategoricalFeaturesPage() {
                     beginAtZero: true,
                   },
                   y: {
-                    ticks: { 
+                    ticks: {
                       color: 'rgba(167, 169, 169, 0.7)',
                     },
                     grid: { color: 'rgba(119, 124, 124, 0.1)' },
                   },
                 },
                 plugins: {
-                  legend: { 
+                  legend: {
                     display: false,
                   },
                   tooltip: {
@@ -666,15 +666,15 @@ export default function CategoricalFeaturesPage() {
                     x: e.encodingValue * 100,
                     y: e.demandShare,
                   })),
-                  backgroundColor: filteredEncodings.map(e => 
+                  backgroundColor: filteredEncodings.map(e =>
                     e.importanceScore > 0.25 ? 'rgba(50, 184, 198, 0.7)' :
-                    e.importanceScore > 0.15 ? 'rgba(230, 129, 97, 0.7)' :
-                    'rgba(167, 169, 169, 0.7)'
+                      e.importanceScore > 0.15 ? 'rgba(230, 129, 97, 0.7)' :
+                        'rgba(167, 169, 169, 0.7)'
                   ),
-                  borderColor: filteredEncodings.map(e => 
+                  borderColor: filteredEncodings.map(e =>
                     e.importanceScore > 0.25 ? 'rgba(50, 184, 198, 1)' :
-                    e.importanceScore > 0.15 ? 'rgba(230, 129, 97, 1)' :
-                    'rgba(167, 169, 169, 1)'
+                      e.importanceScore > 0.15 ? 'rgba(230, 129, 97, 1)' :
+                        'rgba(167, 169, 169, 1)'
                   ),
                   borderWidth: 2,
                   pointRadius: 8,
@@ -691,9 +691,9 @@ export default function CategoricalFeaturesPage() {
                       text: 'Valor de Encoding (%)',
                       color: 'rgba(167, 169, 169, 0.7)',
                     },
-                    ticks: { 
+                    ticks: {
                       color: 'rgba(167, 169, 169, 0.7)',
-                      callback: function(value: any) {
+                      callback: function (value: any) {
                         return value + '%';
                       },
                     },
@@ -706,9 +706,9 @@ export default function CategoricalFeaturesPage() {
                       text: 'Participação na Demanda (%)',
                       color: 'rgba(167, 169, 169, 0.7)',
                     },
-                    ticks: { 
+                    ticks: {
                       color: 'rgba(167, 169, 169, 0.7)',
-                      callback: function(value: any) {
+                      callback: function (value: any) {
                         return value + '%';
                       },
                     },
@@ -717,7 +717,7 @@ export default function CategoricalFeaturesPage() {
                   },
                 },
                 plugins: {
-                  legend: { 
+                  legend: {
                     display: true,
                     labels: { color: 'rgba(167, 169, 169, 1)' },
                   },
@@ -1459,9 +1459,9 @@ export default function CategoricalFeaturesPage() {
             📈 Visão Geral - Impacto dos Encodings Categóricos
             <div className="tooltip-content">
               <strong>Análise de Features Categóricas</strong>
-              <br/><br/>
+              <br /><br />
               Esta página mostra como variáveis categóricas (famílias de materiais, sites/torres, fornecedores) são codificadas e utilizadas pelo modelo de machine learning para prever demanda.
-              <br/><br/>
+              <br /><br />
               <strong>Uso:</strong> Identifique quais categorias têm maior impacto na precisão do modelo e use essas informações para otimizar estratégias de estoque e supply chain.
             </div>
           </h3>
@@ -1472,7 +1472,7 @@ export default function CategoricalFeaturesPage() {
             </span>.
             Ganho de modelo estimado: <strong>{summary.modelGain.toFixed(1)}%</strong> de melhoria na precisão do forecast.
           </p>
-      </div>
+        </div>
 
         {/* Tabs */}
         <div className="tabs-container">
@@ -1483,11 +1483,11 @@ export default function CategoricalFeaturesPage() {
             📦 Por Família
             <div className="tooltip-content">
               <strong>Análise por Família de Materiais</strong>
-              <br/><br/>
+              <br /><br />
               <strong>O que é:</strong> Encodings categóricos para famílias de materiais (EPI, Ferro e Aço, Material Elétrico, etc.).
-              <br/><br/>
+              <br /><br />
               <strong>Uso:</strong> Identifique quais famílias têm maior importância no modelo de forecast e requerem atenção estratégica.
-              <br/><br/>
+              <br /><br />
               <strong>Benefício:</strong> Permite otimizar planejamento de estoque e estratégias de compra por categoria de produto.
             </div>
           </button>
@@ -1498,11 +1498,11 @@ export default function CategoricalFeaturesPage() {
             🏢 Por Site/Torre
             <div className="tooltip-content">
               <strong>Análise por Site/Torre</strong>
-              <br/><br/>
+              <br /><br />
               <strong>O que é:</strong> Encodings categóricos para localizações físicas (torres, depósitos, bases operacionais).
-              <br/><br/>
+              <br /><br />
               <strong>Uso:</strong> Identifique quais sites têm maior importância no modelo e requerem estratégias específicas de distribuição.
-              <br/><br/>
+              <br /><br />
               <strong>Benefício:</strong> Permite otimização logística regional e planejamento de distribuição estratégica.
             </div>
           </button>
@@ -1513,15 +1513,15 @@ export default function CategoricalFeaturesPage() {
             🤝 Por Fornecedor
             <div className="tooltip-content">
               <strong>Análise por Fornecedor</strong>
-              <br/><br/>
+              <br /><br />
               <strong>O que é:</strong> Encodings categóricos para fornecedores individuais.
-              <br/><br/>
+              <br /><br />
               <strong>Uso:</strong> Identifique quais fornecedores têm maior importância no modelo e impacto na precisão do forecast.
-              <br/><br/>
+              <br /><br />
               <strong>Benefício:</strong> Permite otimização de relacionamento comercial e estratégias de sourcing.
             </div>
           </button>
-          </div>
+        </div>
 
         {/* Summary Metrics */}
         <div className="summary-banner">
@@ -1531,13 +1531,13 @@ export default function CategoricalFeaturesPage() {
             <div className="unit">{categoryLabels[activeCategoryType]} | Importância: {(summary.topImportance * 100).toFixed(1)}%</div>
             <div className="tooltip-content">
               <strong>Top Contribuidor Categórico</strong>
-              <br/><br/>
+              <br /><br />
               A categoria que tem maior importância no modelo de forecast para o nível {categoryLabels[activeCategoryType]}.
-              <br/><br/>
+              <br /><br />
               <strong>Interpretação:</strong> Esta categoria contribui mais significativamente para a precisão do modelo de previsão de demanda.
-              <br/><br/>
+              <br /><br />
               <strong>Uso:</strong> Foque estratégias de otimização nesta categoria para maximizar impacto na precisão do forecast.
-        </div>
+            </div>
           </div>
 
           <div className="metric-card tooltip-wrapper">
@@ -1548,9 +1548,9 @@ export default function CategoricalFeaturesPage() {
             <div className="unit">Melhoria de Precisão | {summary.modelGain > 10 ? 'Alto Impacto' : 'Moderado'}</div>
             <div className="tooltip-content">
               <strong>Ganho de Precisão do Modelo</strong>
-              <br/><br/>
+              <br /><br />
               Percentual estimado de melhoria na precisão do forecast devido ao uso de encodings categóricos.
-              <br/><br/>
+              <br /><br />
               <strong>Interpretação:</strong>
               <ul>
                 <li>&gt;10%: Alto impacto - encodings categóricos são críticos</li>
@@ -1567,9 +1567,9 @@ export default function CategoricalFeaturesPage() {
             <div className="unit">{categoryLabels[activeCategoryType]}s | Nível: {activeCategoryType}</div>
             <div className="tooltip-content">
               <strong>Total de Categorias Analisadas</strong>
-              <br/><br/>
+              <br /><br />
               Número total de {categoryLabels[activeCategoryType]}s com encodings categóricos no modelo.
-              <br/><br/>
+              <br /><br />
               <strong>Uso:</strong> Entenda a granularidade da análise categórica e cobertura do modelo.
             </div>
           </div>
@@ -1582,11 +1582,11 @@ export default function CategoricalFeaturesPage() {
             <div className="unit">Por Categoria | {activeCategoryType}</div>
             <div className="tooltip-content">
               <strong>Importância Média por Categoria</strong>
-              <br/><br/>
+              <br /><br />
               Importância média das categorias no nível {categoryLabels[activeCategoryType]}.
-              <br/><br/>
+              <br /><br />
               <strong>Interpretação:</strong> Valores altos indicam que as categorias têm impacto significativo e distribuído no modelo.
-              <br/><br/>
+              <br /><br />
               <strong>Uso:</strong> Avalie se a importância está concentrada em poucas categorias ou distribuída uniformemente.
             </div>
           </div>
@@ -1597,11 +1597,11 @@ export default function CategoricalFeaturesPage() {
           📊 Gráficos de Importância e Encoding
           <div className="tooltip-content">
             <strong>Visualizações de Encodings Categóricos</strong>
-            <br/><br/>
+            <br /><br />
             <strong>Gráfico de Importância:</strong> Mostra a importância relativa de cada categoria no modelo de forecast.
-            <br/><br/>
+            <br /><br />
             <strong>Gráfico Encoding vs. Demanda:</strong> Compara valores de encoding com participação na demanda para identificar anomalias.
-            <br/><br/>
+            <br /><br />
             <strong>Uso:</strong> Identifique categorias com alta importância mas baixa demanda (oportunidades) ou alta demanda mas baixa importância (otimização).
           </div>
         </div>
@@ -1611,18 +1611,18 @@ export default function CategoricalFeaturesPage() {
               Importância no Modelo por {categoryLabels[activeCategoryType]}
               <div className="tooltip-content">
                 <strong>Importância no Modelo de Forecast</strong>
-                <br/><br/>
+                <br /><br />
                 <strong>O que mostra:</strong> Percentual de importância de cada categoria no modelo de machine learning.
-                <br/><br/>
+                <br /><br />
                 <strong>Cores:</strong>
                 <ul>
                   <li>Azul: Importância &gt; 25% (crítico)</li>
                   <li>Laranja: Importância 15-25% (significativo)</li>
                   <li>Cinza: Importância &lt; 15% (moderado)</li>
                 </ul>
-                <br/>
+                <br />
                 <strong>Interpretação:</strong> Categorias com maior importância têm mais peso nas previsões do modelo.
-                <br/><br/>
+                <br /><br />
                 <strong>Ação:</strong> Foque otimizações nas categorias de maior importância para maximizar impacto.
               </div>
             </div>
@@ -1636,18 +1636,18 @@ export default function CategoricalFeaturesPage() {
               Encoding vs. Participação na Demanda
               <div className="tooltip-content">
                 <strong>Relação Encoding vs. Demanda</strong>
-                <br/><br/>
+                <br /><br />
                 <strong>Eixo X:</strong> Valor de encoding (0-100%) - como a categoria é codificada no modelo.
-                <br/><br/>
+                <br /><br />
                 <strong>Eixo Y:</strong> Participação na demanda total (%) - quanto a categoria representa da demanda.
-                <br/><br/>
+                <br /><br />
                 <strong>Interpretação:</strong>
                 <ul>
                   <li>Alto encoding + Alta demanda: Categoria crítica e bem representada</li>
                   <li>Alto encoding + Baixa demanda: Oportunidade de crescimento</li>
                   <li>Baixo encoding + Alta demanda: Pode requerer ajuste no modelo</li>
                 </ul>
-                <br/>
+                <br />
                 <strong>Uso:</strong> Identifique anomalias e oportunidades de otimização.
               </div>
             </div>
@@ -1662,14 +1662,14 @@ export default function CategoricalFeaturesPage() {
           📋 Tabela de Encodings e Importância
           <div className="tooltip-content">
             <strong>Tabela Detalhada de Encodings Categóricos</strong>
-            <br/><br/>
+            <br /><br />
             <strong>Funcionalidades:</strong>
             <ul>
               <li><strong>Clique nas colunas</strong> para ordenar (Nome, Encoding, Importância, Demanda)</li>
               <li><strong>Clique nas linhas</strong> para ver detalhes e fazer drill-down</li>
               <li><strong>Linhas destacadas</strong> (azul claro) indicam importância &gt; 25%</li>
             </ul>
-            <br/>
+            <br />
             <strong>Interpretação:</strong> Use esta tabela para identificar rapidamente as categorias que requerem atenção estratégica.
           </div>
         </div>
@@ -1681,7 +1681,7 @@ export default function CategoricalFeaturesPage() {
                   Nome
                   <div className="tooltip-content">
                     <strong>Nome da Categoria</strong>
-                    <br/><br/>
+                    <br /><br />
                     Clique para ordenar alfabeticamente. Clique na linha para ver detalhes e fazer drill-down.
                   </div>
                 </th>
@@ -1689,7 +1689,7 @@ export default function CategoricalFeaturesPage() {
                   Encoding
                   <div className="tooltip-content">
                     <strong>Valor de Encoding</strong>
-                    <br/><br/>
+                    <br /><br />
                     Valor numérico (0-100%) usado pelo modelo para representar esta categoria. Valores mais altos indicam categorias mais distintas.
                   </div>
                 </th>
@@ -1697,7 +1697,7 @@ export default function CategoricalFeaturesPage() {
                   Importância %
                   <div className="tooltip-content">
                     <strong>Importância no Modelo</strong>
-                    <br/><br/>
+                    <br /><br />
                     Percentual de contribuição desta categoria para a precisão do modelo de forecast. Valores altos indicam maior impacto nas previsões.
                   </div>
                 </th>
@@ -1705,7 +1705,7 @@ export default function CategoricalFeaturesPage() {
                   Demanda %
                   <div className="tooltip-content">
                     <strong>Participação na Demanda Total</strong>
-                    <br/><br/>
+                    <br /><br />
                     Percentual da demanda total representado por esta categoria. Comparar com importância para identificar anomalias.
                   </div>
                 </th>
@@ -1713,7 +1713,7 @@ export default function CategoricalFeaturesPage() {
                   Narrativa
                   <div className="tooltip-content">
                     <strong>Narrativa e Contexto</strong>
-                    <br/><br/>
+                    <br /><br />
                     Descrição do impacto e significado desta categoria no modelo e nas operações.
                   </div>
                 </th>
@@ -1722,8 +1722,8 @@ export default function CategoricalFeaturesPage() {
             <tbody>
               {sortedEncodings.map((encoding) => {
                 const isHighImportance = encoding.importanceScore > 0.25;
-                const importanceClass = encoding.importanceScore > 0.25 ? 'importance-high' : 
-                                       encoding.importanceScore > 0.15 ? 'importance-medium' : 'importance-low';
+                const importanceClass = encoding.importanceScore > 0.25 ? 'importance-high' :
+                  encoding.importanceScore > 0.15 ? 'importance-medium' : 'importance-low';
 
                 return (
                   <tr
@@ -1736,15 +1736,15 @@ export default function CategoricalFeaturesPage() {
                         {encoding.name.length > 30 ? encoding.name.substring(0, 30) + '...' : encoding.name}
                         <div className="tooltip-content">
                           <strong>{encoding.name}</strong>
-                          <br/><br/>
+                          <br /><br />
                           <strong>Tipo:</strong> {categoryLabels[encoding.categoryType]}
-                          <br/>
+                          <br />
                           <strong>Encoding:</strong> {(encoding.encodingValue * 100).toFixed(1)}%
-                          <br/>
+                          <br />
                           <strong>Importância:</strong> {(encoding.importanceScore * 100).toFixed(1)}%
-                          <br/>
+                          <br />
                           <strong>Demanda:</strong> {encoding.demandShare.toFixed(1)}%
-                          <br/><br/>
+                          <br /><br />
                           <strong>Clique para:</strong> Ver detalhes e análise temporal desta categoria.
                         </div>
                       </span>
@@ -1753,7 +1753,7 @@ export default function CategoricalFeaturesPage() {
                       {(encoding.encodingValue * 100).toFixed(1)}%
                       <div className="tooltip-content">
                         <strong>Valor de Encoding: {(encoding.encodingValue * 100).toFixed(1)}%</strong>
-                        <br/><br/>
+                        <br /><br />
                         Valor numérico usado pelo modelo para representar esta categoria.
                       </div>
                     </td>
@@ -1779,11 +1779,11 @@ export default function CategoricalFeaturesPage() {
                 💡 Insights Prescritivos (ML)
                 <div className="tooltip-content">
                   <strong>Insights Gerados por Machine Learning</strong>
-                  <br/><br/>
+                  <br /><br />
                   <strong>O que são:</strong> Recomendações prescritivas baseadas em análise de importância de encodings categóricos e impacto no modelo.
-                  <br/><br/>
+                  <br /><br />
                   <strong>Fonte:</strong> Modelos ML analisam padrões de importância e geram recomendações acionáveis.
-                  <br/><br/>
+                  <br /><br />
                   <strong>Uso:</strong> Use as setas para navegar entre insights. Cada insight inclui descrição e recomendação acionável.
                 </div>
               </div>
@@ -1836,7 +1836,7 @@ export default function CategoricalFeaturesPage() {
           🔗 Explorar Relacionados
           <div className="tooltip-content">
             <strong>Navegação para Páginas Relacionadas</strong>
-            <br/><br/>
+            <br /><br />
             Use estes botões para aprofundar a análise em aspectos relacionados aos encodings categóricos.
           </div>
         </div>
@@ -1847,7 +1847,7 @@ export default function CategoricalFeaturesPage() {
             <div className="cta-subtext">Ver análise hierárquica de famílias, sites e fornecedores</div>
             <div className="tooltip-content">
               <strong>Análise Hierárquica</strong>
-              <br/><br/>
+              <br /><br />
               Explore como as categorias se relacionam hierarquicamente e impactam a demanda agregada.
             </div>
           </div>
@@ -1857,7 +1857,7 @@ export default function CategoricalFeaturesPage() {
             <div className="cta-subtext">Investigar impacto de fornecedores no lead time</div>
             <div className="tooltip-content">
               <strong>Análise de Lead Time</strong>
-              <br/><br/>
+              <br /><br />
               Veja como os fornecedores (categoria categórica) impactam os tempos de entrega.
             </div>
           </div>
@@ -1867,7 +1867,7 @@ export default function CategoricalFeaturesPage() {
             <div className="cta-subtext">Monitorar risco de penalidades contratuais</div>
             <div className="tooltip-content">
               <strong>Dashboard de SLA</strong>
-              <br/><br/>
+              <br /><br />
               Relacione encodings categóricos com performance de SLA e risco de violações.
             </div>
           </div>
@@ -1878,7 +1878,7 @@ export default function CategoricalFeaturesPage() {
           📚 Guia Educacional - Encodings Categóricos
           <div className="tooltip-content">
             <strong>Seção Educacional</strong>
-            <br/><br/>
+            <br /><br />
             Esta seção fornece explicações detalhadas sobre encodings categóricos e seu impacto no modelo de forecast.
           </div>
         </div>
@@ -1890,13 +1890,13 @@ export default function CategoricalFeaturesPage() {
                 <div className="educational-card">
                   <h4 className="educational-card-title">O que são Encodings Categóricos?</h4>
                   <p className="educational-text">
-                    Encodings categóricos são valores numéricos que representam categorias (famílias de materiais) no modelo de machine learning. 
+                    Encodings categóricos são valores numéricos que representam categorias (famílias de materiais) no modelo de machine learning.
                     Permitem que o modelo aprenda padrões específicos de cada categoria.
                   </p>
                   <p className="educational-text">
                     <strong>Benefício:</strong> O modelo pode identificar que diferentes famílias têm padrões de demanda distintos e ajustar previsões accordingly.
-              </p>
-            </div>
+                  </p>
+                </div>
                 <div className="educational-card">
                   <h4 className="educational-card-title">Como Interpretar Importância?</h4>
                   <p className="educational-text">
@@ -1907,8 +1907,8 @@ export default function CategoricalFeaturesPage() {
                   </p>
                   <p className="educational-text">
                     <strong>Baixa Importância (&lt;15%):</strong> A família tem impacto menor. Pode ser agrupada ou simplificada sem grande perda de precisão.
-              </p>
-            </div>
+                  </p>
+                </div>
                 <div className="educational-card">
                   <h4 className="educational-card-title">Encoding vs. Demanda</h4>
                   <p className="educational-text">
@@ -1919,8 +1919,8 @@ export default function CategoricalFeaturesPage() {
                   </p>
                   <p className="educational-text">
                     <strong>Baixo Encoding + Alta Demanda:</strong> Pode indicar necessidade de ajuste no modelo ou estratégia de encoding.
-              </p>
-            </div>
+                  </p>
+                </div>
                 <div className="educational-card">
                   <h4 className="educational-card-title">Ações Recomendadas</h4>
                   <ul className="educational-list">
@@ -1928,8 +1928,8 @@ export default function CategoricalFeaturesPage() {
                     <li><strong>Famílias de Média Importância:</strong> Manter estratégias atuais, monitorar tendências</li>
                     <li><strong>Famílias de Baixa Importância:</strong> Considerar simplificação ou agrupamento para reduzir complexidade</li>
                   </ul>
-          </div>
-        </div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -1940,10 +1940,10 @@ export default function CategoricalFeaturesPage() {
                 <div className="educational-card">
                   <h4 className="educational-card-title">O que são Encodings por Site?</h4>
                   <p className="educational-text">
-                    Encodings categóricos por site permitem que o modelo aprenda padrões específicos de cada localização física. 
+                    Encodings categóricos por site permitem que o modelo aprenda padrões específicos de cada localização física.
                     Diferentes sites podem ter padrões de demanda distintos devido a fatores geográficos, climáticos ou operacionais.
                   </p>
-    </div>
+                </div>
                 <div className="educational-card">
                   <h4 className="educational-card-title">Fatores que Influenciam Importância</h4>
                   <ul className="educational-list">
@@ -1988,7 +1988,7 @@ export default function CategoricalFeaturesPage() {
                 <div className="educational-card">
                   <h4 className="educational-card-title">O que são Encodings por Fornecedor?</h4>
                   <p className="educational-text">
-                    Encodings categóricos por fornecedor permitem que o modelo aprenda padrões específicos de cada fornecedor. 
+                    Encodings categóricos por fornecedor permitem que o modelo aprenda padrões específicos de cada fornecedor.
                     Diferentes fornecedores podem ter impactos distintos na demanda devido a lead times, confiabilidade e qualidade.
                   </p>
                 </div>

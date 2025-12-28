@@ -25,7 +25,7 @@ describe('Dev Server Tests', () => {
       const devScript = packageJson.scripts.dev;
       // Should NOT contain 'bun --bun' in default dev script
       expect(devScript).not.toContain('bun --bun');
-      // Should use 'next dev' directly
+      // Should use 'next dev' (may include port kill script)
       expect(devScript).toMatch(/next dev/);
     });
 
@@ -123,8 +123,9 @@ describe('Dev Server Tests', () => {
       
       // Default dev should use Node.js (no bun prefix)
       // This ensures compatibility with Next.js tracing API
+      // May include port kill script before next dev
       expect(devScript).not.toMatch(/^bun/);
-      expect(devScript).toMatch(/^next dev/);
+      expect(devScript).toMatch(/next dev/);
     });
   });
 

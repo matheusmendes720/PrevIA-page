@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { projections } from '../data';
 import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import { InfoIcon } from '@/components/icons';
 import ScenarioComparison from '@/components/ScenarioComparison';
 import { prescriptiveDataService } from '@/services/prescriptiveDataService';
 import type { ComprehensivePrescriptive } from '@/types/prescriptive';
@@ -35,16 +36,14 @@ export default function ProjectionsTab({ isChartReady, scenario = 'base' }: Proj
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-brand-lightest-slate">Projeções Prescritivas 5G</h3>
             <PrescriptiveTooltip
-              title="Modelo de Previsão"
-              content={
-                <div>
-                  <p><strong>Modelo:</strong> {comprehensiveData.best_model}</p>
-                  <p><strong>R²:</strong> {(comprehensiveData.model_performance.r2 * 100).toFixed(1)}%</p>
-                  <p><strong>MAPE:</strong> {comprehensiveData.model_performance.mape.toFixed(1)}%</p>
-                  <p><strong>Recomendação:</strong> {comprehensiveData.recommendations.frequency?.recommended_action || 'Monitorar de perto'}</p>
-                </div>
-              }
-            />
+              data={{
+                whatItMeans: `Modelo: ${comprehensiveData.best_model}`,
+                whyItMatters: `R²: ${(comprehensiveData.model_performance.r2 * 100).toFixed(1)}%, MAPE: ${comprehensiveData.model_performance.mape.toFixed(1)}%`,
+                whatToDoNow: comprehensiveData.recommendations.frequency?.recommended_action || 'Monitorar de perto'
+              }}
+            >
+              <InfoIcon className="w-5 h-5 text-brand-cyan cursor-help" />
+            </PrescriptiveTooltip>
           </div>
         </div>
       )}

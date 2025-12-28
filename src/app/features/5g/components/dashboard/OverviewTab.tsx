@@ -11,6 +11,7 @@ import {
 import StatusBadge from '../ui/StatusBadge';
 import Tooltip from '../ui/Tooltip';
 import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import { InfoIcon } from '@/components/icons';
 import ExternalFactorsDashboard from '@/components/ExternalFactorsDashboard';
 import ActionBoard from '@/components/ActionBoard';
 import { prescriptiveDataService } from '@/services/prescriptiveDataService';
@@ -95,15 +96,14 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ onNavigateToTab }) => {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-brand-lightest-slate">Insights Prescritivos 5G</h3>
             <PrescriptiveTooltip
-              title="Análise Prescritiva 5G"
-              content={
-                <div>
-                  <p><strong>ROI Estimado:</strong> {prescriptiveData.business_impact.roi_estimate}</p>
-                  <p><strong>Economia de Inventário:</strong> {prescriptiveData.business_impact.inventory_cost_savings}</p>
-                  <p><strong>Recomendações Urgentes:</strong> {prescriptiveData.recommendations.filter(r => r.includes('URGENT')).length}</p>
-                </div>
-              }
-            />
+              data={{
+                whatItMeans: `ROI Estimado: ${prescriptiveData.business_impact.roi_estimate}`,
+                whyItMatters: `Economia de Inventário: ${prescriptiveData.business_impact.inventory_cost_savings}`,
+                whatToDoNow: `Recomendações Urgentes: ${prescriptiveData.recommendations.filter(r => r.includes('URGENT')).length}`
+              }}
+            >
+              <InfoIcon className="w-5 h-5 text-brand-cyan cursor-help" />
+            </PrescriptiveTooltip>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-brand-light-navy/30 p-4 rounded-lg">

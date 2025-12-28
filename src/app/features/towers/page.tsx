@@ -274,6 +274,28 @@ export default function TowersPage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Standardize font sizes
+  useEffect(() => {
+    const applyFontSizes = () => {
+      // Header h1
+      const headerH1 = document.querySelector('.towers-sidebar h1');
+      if (headerH1) {
+        (headerH1 as HTMLElement).style.setProperty('font-size', '18px', 'important');
+        (headerH1 as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      }
+
+      // Stats values (text-2xl) - keep at 24px which is correct
+      document.querySelectorAll('.towers-sidebar .text-2xl').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '24px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+    };
+
+    applyFontSizes();
+    const interval = setInterval(applyFontSizes, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Initialize map
   useEffect(() => {
     if (!isLeafletLoaded || !mapContainerRef.current || isInitialized || typeof window === 'undefined') return;
@@ -570,7 +592,7 @@ export default function TowersPage() {
             : 'w-80'
         }`}>
           <div className="mb-6">
-            <h1 className="text-xl font-semibold mb-1 text-brand-cyan">🗼 Nova Corrente</h1>
+            <h1 className="text-xl font-semibold mb-1 text-brand-cyan towers-header-h1">🗼 Nova Corrente</h1>
             <p className="text-xs text-brand-slate">Tower Maintenance Network</p>
             {!loading && (
               <p className="text-xs text-brand-slate mt-1">
@@ -606,7 +628,7 @@ export default function TowersPage() {
               <button
                 key={tab}
                 onClick={() => setSidebarTab(tab)}
-                className={`px-2 py-1.5 text-xs font-semibold transition capitalize rounded ${
+                className={`px-2 py-2 text-sm font-semibold transition capitalize rounded ${
                   sidebarTab === tab
                     ? 'bg-brand-cyan text-white'
                     : 'bg-brand-light-navy/50 text-brand-slate hover:bg-brand-light-navy hover:text-brand-lightest-slate'
@@ -1182,6 +1204,16 @@ export default function TowersPage() {
           )}
         </div>
       </div>
+      <style jsx global>{`
+        .towers-header-h1 {
+          font-size: 18px !important;
+          font-weight: 600 !important;
+        }
+        .towers-sidebar .text-2xl {
+          font-size: 24px !important;
+          font-weight: 600 !important;
+        }
+      `}</style>
     </>
   );
 }

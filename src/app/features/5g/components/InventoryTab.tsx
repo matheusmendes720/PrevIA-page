@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { stockManagement } from '../data';
 import PrescriptiveTooltip from '@/components/PrescriptiveTooltip';
+import { InfoIcon } from '@/components/icons';
 import RiskMatrix from '@/components/RiskMatrix';
 import { prescriptiveDataService } from '@/services/prescriptiveDataService';
 import type { PrescriptiveInsights } from '@/types/prescriptive';
@@ -100,15 +101,14 @@ export default function InventoryTab({ isChartReady }: InventoryTabProps) {
         <h2 className="text-2xl font-bold" style={{ color: '#f0f4f8' }}>📦 Gestão de Estoque</h2>
         {prescriptiveData && (
           <PrescriptiveTooltip
-            title="Insights Prescritivos de Estoque"
-            content={
-              <div>
-                <p><strong>Itens Críticos:</strong> {stockManagement.criticalItems.filter(i => i.status === 'critical').length}</p>
-                <p><strong>Famílias de Alto Risco:</strong> {Object.values(prescriptiveData.risk_assessments).filter(r => r.stockout_risk === 'HIGH' || r.stockout_risk === 'CRITICAL').length}</p>
-                <p><strong>Economia Potencial:</strong> {prescriptiveData.business_impact.inventory_cost_savings}</p>
-              </div>
-            }
-          />
+            data={{
+              whatItMeans: `Itens Críticos: ${stockManagement.criticalItems.filter(i => i.status === 'critical').length}`,
+              whyItMatters: `Famílias de Alto Risco: ${Object.values(prescriptiveData.risk_assessments).filter(r => r.stockout_risk === 'HIGH' || r.stockout_risk === 'CRITICAL').length}`,
+              whatToDoNow: `Economia Potencial: ${prescriptiveData.business_impact.inventory_cost_savings}`
+            }}
+          >
+            <InfoIcon className="w-5 h-5 text-brand-cyan cursor-help ml-2" />
+          </PrescriptiveTooltip>
         )}
       </div>
       

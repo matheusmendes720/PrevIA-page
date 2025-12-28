@@ -3,27 +3,93 @@
 import React from 'react';
 
 export const DashboardIcon: React.FC<{ className?: string }> = ({ className = 'w-6 h-6' }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2z" />
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none">
+    <defs>
+      <linearGradient id="dashboardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#64ffda" />
+        <stop offset="100%" stopColor="#20A084" />
+      </linearGradient>
+      <filter id="dashboardShadow">
+        <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.4"/>
+      </filter>
+    </defs>
+    <rect x="2" y="2" width="20" height="20" rx="2.5" fill="url(#dashboardGradient)" filter="url(#dashboardShadow)" />
+    <rect x="5" y="5" width="6" height="6" rx="1" fill="#0a192f" opacity="0.4" />
+    <rect x="13" y="5" width="6" height="6" rx="1" fill="#0a192f" opacity="0.4" />
+    <rect x="5" y="13" width="6" height="6" rx="1" fill="#0a192f" opacity="0.4" />
+    <rect x="13" y="13" width="6" height="6" rx="1" fill="#0a192f" opacity="0.4" />
+    <circle cx="8" cy="8" r="1.5" fill="#64ffda" />
+    <rect x="14.5" y="7" width="3" height="2" rx="0.5" fill="#64ffda" />
+    <rect x="6.5" y="15" width="3" height="2" rx="0.5" fill="#64ffda" />
+    <rect x="14.5" y="15" width="3" height="2" rx="0.5" fill="#64ffda" />
   </svg>
 );
 
 export const ReportIcon: React.FC<{ className?: string }> = ({ className = 'w-6 h-6' }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none">
+    <defs>
+      <linearGradient id="reportGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#f59e0b" />
+        <stop offset="100%" stopColor="#f97316" />
+      </linearGradient>
+      <filter id="reportShadow">
+        <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.4"/>
+      </filter>
+    </defs>
+    <path d="M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z" fill="url(#reportGradient)" filter="url(#reportShadow)" />
+    <rect x="8" y="6" width="8" height="2" rx="1" fill="#0a192f" opacity="0.6" />
+    <rect x="8" y="10" width="6" height="2" rx="1" fill="#0a192f" opacity="0.6" />
+    <rect x="8" y="14" width="7" height="2" rx="1" fill="#0a192f" opacity="0.6" />
+    <rect x="8" y="18" width="5" height="2" rx="1" fill="#0a192f" opacity="0.6" />
+    <circle cx="9.5" cy="7" r="0.75" fill="#f59e0b" />
+    <circle cx="9.5" cy="11" r="0.75" fill="#f59e0b" />
+    <circle cx="9.5" cy="15" r="0.75" fill="#f59e0b" />
+    <circle cx="9.5" cy="19" r="0.75" fill="#f59e0b" />
   </svg>
 );
 
 export const AnalyticsIcon: React.FC<{ className?: string }> = ({ className = 'w-6 h-6' }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none">
+    <defs>
+      <linearGradient id="analyticsGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#0ea5e9" />
+        <stop offset="100%" stopColor="#3b82f6" />
+      </linearGradient>
+      <filter id="analyticsShadow">
+        <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.4"/>
+      </filter>
+    </defs>
+    <rect x="2" y="18" width="20" height="4" rx="1" fill="url(#analyticsGradient)" fillOpacity="0.2" />
+    <path d="M4 18 L7 12 L10 15 L13 8 L16 11 L19 6 L20 18 Z" fill="url(#analyticsGradient)" filter="url(#analyticsShadow)" opacity="0.8" />
+    <circle cx="7" cy="12" r="2" fill="#ffffff" />
+    <circle cx="10" cy="15" r="2" fill="#ffffff" />
+    <circle cx="13" cy="8" r="2" fill="#ffffff" />
+    <circle cx="16" cy="11" r="2" fill="#ffffff" />
+    <circle cx="19" cy="6" r="2" fill="#ffffff" />
+    <circle cx="7" cy="12" r="1" fill="url(#analyticsGradient)" />
+    <circle cx="10" cy="15" r="1" fill="url(#analyticsGradient)" />
+    <circle cx="13" cy="8" r="1" fill="url(#analyticsGradient)" />
+    <circle cx="16" cy="11" r="1" fill="url(#analyticsGradient)" />
+    <circle cx="19" cy="6" r="1" fill="url(#analyticsGradient)" />
   </svg>
 );
 
 export const SettingsIcon: React.FC<{ className?: string }> = ({ className = 'w-6 h-6' }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066 2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none">
+        <defs>
+            <linearGradient id="settingsGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#8b5cf6" />
+                <stop offset="100%" stopColor="#a855f7" />
+            </linearGradient>
+            <filter id="settingsShadow">
+                <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.4"/>
+            </filter>
+        </defs>
+        <circle cx="12" cy="12" r="10" fill="url(#settingsGradient)" fillOpacity="0.2" />
+        <path d="M12 2l2.5 5.5L20 8l-4 4 1 5.5L12 15l-5 2.5 1-5.5L4 8l5.5-0.5L12 2z" fill="url(#settingsGradient)" filter="url(#settingsShadow)" />
+        <circle cx="12" cy="12" r="3.5" fill="#0a192f" opacity="0.5" />
+        <circle cx="12" cy="12" r="2" fill="url(#settingsGradient)" />
+        <circle cx="12" cy="12" r="1" fill="#ffffff" />
     </svg>
 );
 
@@ -256,6 +322,12 @@ export const ChevronLeftIcon: React.FC<{ className?: string }> = ({ className = 
     </svg>
 );
 
+export const ChevronRightIcon: React.FC<{ className?: string }> = ({ className = 'w-6 h-6' }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+    </svg>
+);
+
 export const FileIcon: React.FC<{ className?: string }> = ({ className = 'w-5 h-5' }) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -281,7 +353,24 @@ export const TrendingDownIcon: React.FC<{ className?: string }> = ({ className =
 );
 
 export const ChatbotIcon: React.FC<{ className?: string }> = ({ className = 'w-6 h-6' }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 000-8.741 5.969 5.969 0 01.474-.065 5.972 5.972 0 013.035-2.278A9.764 9.764 0 0112 3.75c4.97 0 9 3.694 9 8.25z" />
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none">
+        <defs>
+            <linearGradient id="chatbotGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#ec4899" />
+                <stop offset="100%" stopColor="#f472b6" />
+            </linearGradient>
+            <filter id="chatbotShadow">
+                <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.4"/>
+            </filter>
+        </defs>
+        <circle cx="12" cy="10" r="8" fill="url(#chatbotGradient)" filter="url(#chatbotShadow)" />
+        <rect x="6" y="8" width="12" height="10" rx="2" fill="#0a192f" opacity="0.3" />
+        <circle cx="9" cy="11" r="2" fill="#ffffff" />
+        <circle cx="15" cy="11" r="2" fill="#ffffff" />
+        <circle cx="9" cy="11" r="1" fill="url(#chatbotGradient)" />
+        <circle cx="15" cy="11" r="1" fill="url(#chatbotGradient)" />
+        <path d="M8 15c0 1.5 1.5 2.5 4 2.5s4-1 4-2.5" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.9" />
+        <path d="M12 2l1 3h-2l1-3z" fill="url(#chatbotGradient)" />
+        <circle cx="12" cy="2" r="1.5" fill="url(#chatbotGradient)" />
     </svg>
 );

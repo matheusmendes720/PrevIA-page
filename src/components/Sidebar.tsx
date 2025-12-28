@@ -1,8 +1,9 @@
 
 import React, { useMemo, memo, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { DashboardIcon, ReportIcon, AnalyticsIcon, SettingsIcon, ChevronLeftIcon, MenuIcon, XIcon } from './icons';
+import { ChevronLeftIcon, MenuIcon, XIcon } from './icons';
 
 interface NavItemProps {
   icon: React.ReactNode;
@@ -119,11 +120,11 @@ const Sidebar: React.FC<SidebarProps> = memo(({
   }, [isMobile, isMobileOpen]);
 
   const navItems = useMemo(() => [
-    { label: 'Dashboard', icon: <DashboardIcon className="w-7 h-7" />, route: null },
-    { label: 'Análises', icon: <AnalyticsIcon className="w-7 h-7" />, route: null },
-    { label: 'Relatórios', icon: <ReportIcon className="w-7 h-7" />, route: null },
-    { label: 'Configurações', icon: <SettingsIcon className="w-7 h-7" />, route: null },
-    { label: 'Chatbot', icon: <span className="text-2xl">🤖</span>, route: '/chatbot' },
+    { label: 'Dashboard', icon: '📊', route: null },
+    { label: 'Análises', icon: '📈', route: null },
+    { label: 'Chatbot', icon: '🤖', route: '/chatbot' },
+    { label: 'Relatórios', icon: '📄', route: null },
+    { label: 'Configurações', icon: '⚙️', route: null },
   ], []);
 
   const handleMainNavClick = useCallback((page: string, route?: string | null) => {
@@ -195,20 +196,27 @@ const Sidebar: React.FC<SidebarProps> = memo(({
     <>
       {/* Mobile Header with Close Button */}
       {isMobile && (
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-brand-light-navy/50">
-          <div className="flex items-center space-x-2 flex-1 min-w-0">
-            <div className="w-10 h-10 bg-cyan-400/10 rounded-lg flex items-center justify-center border border-brand-cyan/20 flex-shrink-0">
-              <svg className="w-6 h-6 text-brand-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        <div className="flex items-center justify-between gap-3 mb-6 pb-4 border-b border-brand-light-navy/50">
+          <div className="flex items-center space-x-3 flex-1 min-w-0 overflow-hidden">
+            <div className="relative flex-shrink-0 opacity-90 hover:opacity-100 transition-opacity z-10">
+              <Image
+                src="/images/logos/sidebar-logo.png"
+                alt="PrevIA"
+                width={36}
+                height={36}
+                className="object-contain"
+                priority
+              />
             </div>
-            <h1 className="text-xl font-bold text-brand-lightest-slate whitespace-nowrap">Nova Corrente</h1>
+            <h1 className="text-lg sm:text-xl font-bold text-brand-lightest-slate whitespace-nowrap truncate flex-shrink-0">Nova Corrente</h1>
           </div>
           {onMobileToggle && (
             <button
               onClick={onMobileToggle}
-              className="p-2 rounded-lg hover:bg-brand-light-navy/50 text-brand-slate hover:text-brand-cyan transition-colors flex-shrink-0 lg:hidden"
+              className="p-2 rounded-lg hover:bg-brand-light-navy/50 text-brand-slate hover:text-brand-cyan transition-colors flex-shrink-0 lg:hidden relative z-10"
               aria-label="Close sidebar"
             >
-              <XIcon className="w-6 h-6" />
+              <XIcon className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           )}
         </div>
@@ -217,16 +225,27 @@ const Sidebar: React.FC<SidebarProps> = memo(({
       {/* Desktop Header */}
       {!isMobile && (
         <div className={`flex items-center ${isCollapsed ? 'justify-center flex-col gap-3' : 'justify-between'} mb-10`}>
-          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2 flex-1 min-w-0'}`}>
-            <div className="w-10 h-10 bg-cyan-400/10 rounded-lg flex items-center justify-center border border-brand-cyan/20 flex-shrink-0">
-              <svg className="w-6 h-6 text-brand-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} ${!isCollapsed ? 'flex-1 min-w-0 pr-2' : ''}`}>
+            <div className="relative flex-shrink-0 opacity-90 hover:opacity-100 transition-opacity">
+              <Image
+                src="/images/logos/sidebar-logo.png"
+                alt="PrevIA"
+                width={isCollapsed ? 36 : 40}
+                height={isCollapsed ? 36 : 40}
+                className="object-contain"
+                priority
+              />
             </div>
-            {!isCollapsed && <h1 className="text-xl font-bold text-brand-lightest-slate whitespace-nowrap">Nova Corrente</h1>}
+            {!isCollapsed && (
+              <h1 className="text-xl font-bold text-brand-lightest-slate truncate min-w-0">
+                Nova Corrente
+              </h1>
+            )}
           </div>
           {onToggleCollapse && !isCollapsed && (
             <button
               onClick={handleToggleCollapse}
-              className="p-1.5 rounded-lg hover:bg-brand-light-navy/50 text-brand-slate hover:text-brand-cyan transition-colors flex-shrink-0"
+              className="p-1.5 rounded-lg bg-brand-light-navy/30 hover:bg-brand-light-navy/50 text-brand-slate hover:text-brand-cyan transition-all duration-200 flex-shrink-0 ml-2"
               title="Collapse sidebar"
             >
               <ChevronLeftIcon className="w-4 h-4" />
@@ -235,10 +254,10 @@ const Sidebar: React.FC<SidebarProps> = memo(({
           {onToggleCollapse && isCollapsed && (
             <button
               onClick={handleToggleCollapse}
-              className="p-1.5 rounded-lg hover:bg-brand-light-navy/50 text-brand-slate hover:text-brand-cyan transition-colors flex-shrink-0"
+              className="p-2 rounded-lg bg-brand-cyan/10 border border-brand-cyan/30 hover:bg-brand-cyan/20 hover:border-brand-cyan/50 text-brand-cyan hover:text-brand-cyan transition-all duration-200 flex-shrink-0 shadow-sm hover:shadow-md hover:shadow-cyan-500/20 ring-1 ring-brand-cyan/20 hover:ring-brand-cyan/40"
               title="Expand sidebar"
             >
-              <MenuIcon className="w-4 h-4" />
+              <MenuIcon className="w-5 h-5" />
             </button>
           )}
         </div>
@@ -272,7 +291,7 @@ const Sidebar: React.FC<SidebarProps> = memo(({
                 prefetch={true}
                 onMouseEnter={() => handleLinkHover(item.href)}
                 onClick={handleFeatureLinkClick}
-                className={`flex items-center rounded-lg text-sm transition-all duration-200 ${
+                className={`flex items-center rounded-lg transition-all duration-200 ${
                   isCollapsedMode 
                     ? 'justify-center p-3 my-2' 
                     : 'p-3 my-2 space-x-3'

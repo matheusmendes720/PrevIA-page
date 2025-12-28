@@ -2,10 +2,10 @@ import React, { useMemo } from 'react';
 // Note: react-window not installed - using fallback implementation
 // import { FixedSizeList as List } from 'react-window';
 import RiskCard from './RiskCard';
-import { RiskAssessment, RiskAssessmentFamily } from '../types/prescriptive';
+import { RiskAssessment } from '../types/prescriptive';
 
 interface VirtualizedRiskListProps {
-  riskAssessments: RiskAssessmentFamily;
+  riskAssessments: Record<string, RiskAssessment>;
   onRiskClick: (familyName: string, riskData: RiskAssessment) => void;
   height?: number;
 }
@@ -37,9 +37,9 @@ const VirtualizedRiskList: React.FC<VirtualizedRiskListProps> = ({
       {riskEntries.map(([familyName, riskData], index) => (
         <div key={index} className="px-2">
           <RiskCard
-            familyName={familyName}
-            riskData={riskData}
-            onClick={onRiskClick}
+                  family={familyName}
+            risk={riskData}
+            onCardClick={() => onRiskClick(familyName, riskData)}
           />
         </div>
       ))}

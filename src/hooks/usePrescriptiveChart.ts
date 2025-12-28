@@ -9,7 +9,7 @@ export interface PrescriptiveChartData {
   riskOverlay?: {
     family: string;
     riskScore: number;
-    riskLevel: 'HIGH' | 'MEDIUM' | 'LOW';
+    riskLevel: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
     color: string;
   };
   confidence?: number;

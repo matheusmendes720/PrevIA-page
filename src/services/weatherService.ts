@@ -3,6 +3,8 @@
  * Real-time weather API integration (INMET) and historical climate data
  */
 
+import { generateClimateMetrics } from '../mocks';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 const OPENWEATHER_API_KEY = '941ae7a1a0e249c20b4926388c6758d8';
 const OPENWEATHER_API_URL = 'https://api.openweathermap.org/data/2.5';
@@ -72,13 +74,13 @@ function getCacheKey(endpoint: string, params?: Record<string, any>): string {
 function getCached<T>(key: string): T | null {
   const cached = cache.get(key);
   if (!cached) return null;
-  
+
   const age = Date.now() - cached.timestamp;
   if (age > WEATHER_CACHE_TTL) {
     cache.delete(key);
     return null;
   }
-  
+
   return cached.data as T;
 }
 
@@ -120,17 +122,37 @@ export const weatherService = {
     const cached = getCached<WeatherData>(cacheKey);
     if (cached) return cached;
 
+    // USE MOCKS IF CONFIGURED
+    if (process.env.NEXT_PUBLIC_USE_MOCKS === 'true') {
+      const metrics = generateClimateMetrics(1);
+      const metric = metrics[0];
+
+      const weather: WeatherData = {
+        temperature: metric.temperature.avg,
+        precipitation: metric.rainfall,
+        humidity: metric.humidity,
+        windSpeed: metric.wind,
+        windDirection: Math.random() * 360,
+        timestamp: new Date().toISOString(),
+        condition: metric.rainfall > 0 ? 'Rain' : 'Clear',
+        icon: metric.rainfall > 0 ? '10d' : '01d',
+      };
+
+      setCache(cacheKey, weather);
+      return weather;
+    }
+
     try {
       // Use OpenWeatherMap Current Weather API
       const url = `${OPENWEATHER_API_URL}/weather?lat=${lat}&lon=${lng}&appid=${OPENWEATHER_API_KEY}&units=metric&lang=pt_br`;
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         throw new Error(`OpenWeatherMap API error: ${response.status}`);
       }
 
       const data = await response.json();
-      
+
       const weather: WeatherData = {
         temperature: data.main.temp,
         feelsLike: data.main.feels_like,
@@ -144,17 +166,17 @@ export const weatherService = {
         icon: data.weather[0]?.icon,
         timestamp: new Date(data.dt * 1000).toISOString(),
       };
-      
+
       setCache(cacheKey, weather);
       return weather;
     } catch (error) {
       console.error('OpenWeatherMap API error, trying fallback:', error);
-      
+
       // Fallback to climate features API
       try {
         const url = `${API_BASE_URL}/api/v1/features/climate/salvador`;
         const data = await fetchWithErrorHandling<any>(url);
-        
+
         const weather: WeatherData = {
           temperature: data.temperature_avg_c || 25,
           precipitation: data.precipitation_mm || 0,
@@ -162,7 +184,7 @@ export const weatherService = {
           windSpeed: data.wind_speed_kmh || 10,
           timestamp: data.data_coleta || new Date().toISOString(),
         };
-        
+
         setCache(cacheKey, weather);
         return weather;
       } catch (fallbackError) {
@@ -180,18 +202,52 @@ export const weatherService = {
     const cached = getCached<WeatherForecast[]>(cacheKey);
     if (cached) return cached;
 
+    // USE MOCKS IF CONFIGURED
+    if (process.env.NEXT_PUBLIC_USE_MOCKS === 'true') {
+      const metrics = generateClimateMetrics(2); // Get 48 hours worth approx
+      const forecasts: WeatherForecast[] = [];
+
+      // Generate 48 hourly forecasts based on the daily metrics
+      const now = Math.floor(Date.now() / 1000);
+
+      for (let i = 0; i < 48; i++) {
+        const dayIndex = Math.floor(i / 24);
+        const metric = metrics[Math.min(dayIndex, metrics.length - 1)];
+
+        forecasts.push({
+          dt: now + i * 3600,
+          temp: metric.temperature.avg + Math.sin(i / 24 * Math.PI * 2) * 5, // Daily cycle
+          feels_like: metric.temperature.avg,
+          humidity: metric.humidity,
+          pressure: 1013,
+          wind_speed: metric.wind,
+          wind_deg: Math.random() * 360,
+          weather: [{
+            main: metric.rainfall > 5 ? 'Rain' : 'Clouds',
+            description: metric.rainfall > 5 ? 'light rain' : 'cloudy',
+            icon: metric.rainfall > 5 ? '10d' : '03d'
+          }],
+          clouds: 50,
+          prob_precipitation: metric.rainfall > 0 ? 0.8 : 0,
+        } as any);
+      }
+
+      setCache(cacheKey, forecasts);
+      return forecasts;
+    }
+
     try {
       // Use OpenWeatherMap One Call API 3.0 (or 2.5 if 3.0 not available)
       const url = `${OPENWEATHER_API_URL}/forecast?lat=${lat}&lon=${lng}&appid=${OPENWEATHER_API_KEY}&units=metric&lang=pt_br&cnt=48`;
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         throw new Error(`OpenWeatherMap Forecast API error: ${response.status}`);
       }
 
       const data = await response.json();
       const forecasts: WeatherForecast[] = data.list || [];
-      
+
       setCache(cacheKey, forecasts);
       return forecasts;
     } catch (error) {
@@ -213,7 +269,7 @@ export const weatherService = {
       // Note: This requires One Call API subscription. For free tier, use forecast endpoint
       const url = `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lng}&appid=${OPENWEATHER_API_KEY}&units=metric&lang=pt_br&exclude=current,minutely,hourly,alerts`;
       const response = await fetch(url);
-      
+
       if (response.ok) {
         const data = await response.json();
         return data.daily || [];
@@ -237,7 +293,7 @@ export const weatherService = {
     } catch (error) {
       console.error('Error fetching daily forecast:', error);
     }
-    
+
     return [];
   },
 
@@ -254,7 +310,7 @@ export const weatherService = {
 
     const url = `${API_BASE_URL}/api/v1/features/climate?start_date=${startDate}&end_date=${endDate}`;
     const data = await fetchWithErrorHandling<any[]>(url);
-    
+
     const climateData: HistoricalClimateData[] = data.map((item: any) => ({
       date: item.data_coleta || item.date,
       temperature_avg: item.temperature_avg_c || item.temperature_avg || 25,
@@ -264,7 +320,7 @@ export const weatherService = {
       corrosion_risk: item.corrosion_risk,
       field_work_disruption: item.field_work_disruption,
     }));
-    
+
     setCache(cacheKey, climateData);
     return climateData;
   },
@@ -280,14 +336,14 @@ export const weatherService = {
     try {
       const url = `${API_BASE_URL}/api/v1/features/climate/risks?lat=${lat}&lng=${lng}`;
       const data = await fetchWithErrorHandling<any>(url);
-      
+
       const risks: ClimateRisk = {
         corrosion_risk: data.corrosion_risk || 'low',
         field_work_disruption: data.field_work_disruption || 'low',
         extreme_heat: data.extreme_heat || false,
         heavy_rain: data.heavy_rain || false,
       };
-      
+
       setCache(cacheKey, risks);
       return risks;
     } catch (error) {

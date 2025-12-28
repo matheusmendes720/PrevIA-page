@@ -1,9 +1,9 @@
 {
-  "name": "nova-corrente-frontend",
+  "name": "previa-novacorrente",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3003",
+    "dev": "powershell -ExecutionPolicy Bypass -File ./scripts/kill-port.ps1 3003 && next dev -p 3003",
     "dev:bun": "bun --bun next dev -p 3003",
     "dev:npm": "next dev -p 3003",
     "dev:fast": "bun --bun next dev -p 3003 --turbo",
@@ -50,8 +50,8 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
-    "@types/node": "^20.11.24",
-    "@types/react": "^18.2.21",
+    "@types/node": "20.19.27",
+    "@types/react": "18.3.27",
     "@types/react-dom": "^18.2.7",
     "@types/recharts": "^1.8.25",
     "autoprefixer": "^10.4.16",
@@ -64,10 +64,7 @@
     "postcss": "^8.4.33",
     "tailwindcss": "^3.4.1",
     "ts-jest": "^29.1.1",
-    "typescript": "^5.3.3",
+    "typescript": "5.9.3",
     "whatwg-fetch": "^3.6.20"
-  },
-  "optionalDependencies": {
-    "@netlify/plugin-nextjs": "^4.39.0"
   }
 }

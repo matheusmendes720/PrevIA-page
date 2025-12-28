@@ -663,6 +663,16 @@ export default function BusinessFeaturesPage() {
   const [alerts, setAlerts] = useState<MarketIntelligenceAlert[]>([]);
   const [alertsSummary, setAlertsSummary] = useState<AlertsSummary | null>(null);
   const [miLoading, setMiLoading] = useState(false);
+  
+  // Prescriptive data state
+  const [prescriptiveData, setPrescriptiveData] = useState<PrescriptiveInsights | null>(null);
+  const [comprehensiveData, setComprehensiveData] = useState<ComprehensivePrescriptive | null>(null);
+
+  // Load prescriptive data
+  useEffect(() => {
+    prescriptiveDataService.loadPrescriptiveInsights().then(setPrescriptiveData);
+    prescriptiveDataService.loadComprehensivePrescriptive().then(setComprehensiveData);
+  }, []);
 
   // Log tab changes
   useEffect(() => {

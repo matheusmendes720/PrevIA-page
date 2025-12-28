@@ -3,11 +3,14 @@ import type { PrescriptiveTooltipData } from '../types/prescriptive';
 import { InfoIcon } from './icons';
 
 interface PrescriptiveTooltipProps {
-  data: PrescriptiveTooltipData;
-  children: React.ReactNode;
+  data?: PrescriptiveTooltipData;
+  children?: React.ReactNode;
   position?: 'top' | 'bottom' | 'left' | 'right';
   showOnHover?: boolean;
   showOnClick?: boolean;
+  // Legacy props for backward compatibility
+  title?: string;
+  content?: React.ReactNode;
 }
 
 const PrescriptiveTooltip: React.FC<PrescriptiveTooltipProps> = ({
@@ -16,7 +19,17 @@ const PrescriptiveTooltip: React.FC<PrescriptiveTooltipProps> = ({
   position = 'top',
   showOnHover = true,
   showOnClick = false,
+  title,
+  content,
 }) => {
+  // Handle legacy format (title/content) by converting to data format
+  const tooltipData: PrescriptiveTooltipData = data || {
+    whatItMeans: title || '',
+    whyItMatters: typeof content === 'string' ? content : '',
+    whatToDoNow: typeof content === 'object' && content !== null ? 'See details' : '',
+  };
+  
+  const tooltipChildren = children || <InfoIcon className="w-5 h-5 text-brand-cyan cursor-help" />;
   const [isVisible, setIsVisible] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -90,7 +103,7 @@ const PrescriptiveTooltip: React.FC<PrescriptiveTooltipProps> = ({
       }}
       aria-label="Mostrar informações prescritivas"
     >
-      {children}
+      {tooltipChildren}
       {isVisible && (
         <div
           ref={tooltipRef}
@@ -112,16 +125,22 @@ const PrescriptiveTooltip: React.FC<PrescriptiveTooltipProps> = ({
                   Ver mais
                 </button>
               </div>
-              <p className="text-xs text-brand-slate">{data.whatItMeans}</p>
-              <div className="pt-2 border-t border-brand-cyan/20">
-                <p className="text-xs font-semibold text-brand-lightest-slate">Ação recomendada:</p>
-                <p className="text-xs text-brand-slate mt-1">{data.whatToDoNow}</p>
-              </div>
+              {content ? (
+                <div className="text-xs text-brand-slate">{content}</div>
+              ) : (
+                <>
+                  <p className="text-xs text-brand-slate">{tooltipData.whatItMeans}</p>
+                  <div className="pt-2 border-t border-brand-cyan/20">
+                    <p className="text-xs font-semibold text-brand-lightest-slate">Ação recomendada:</p>
+                    <p className="text-xs text-brand-slate mt-1">{tooltipData.whatToDoNow}</p>
+                  </div>
+                </>
+              )}
             </div>
           ) : (
             <div className="space-y-3 max-h-96 overflow-y-auto">
               <div className="flex items-start justify-between">
-                <h4 className="text-sm font-bold text-brand-cyan">Análise Prescritiva</h4>
+                <h4 className="text-sm font-bold text-brand-cyan">{title || 'Análise Prescritiva'}</h4>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -134,37 +153,43 @@ const PrescriptiveTooltip: React.FC<PrescriptiveTooltipProps> = ({
                 </button>
               </div>
 
-              <div>
-                <h5 className="text-xs font-semibold text-brand-lightest-slate mb-1">O que significa?</h5>
-                <p className="text-xs text-brand-slate">{data.whatItMeans}</p>
-              </div>
+              {content ? (
+                <div className="text-xs text-brand-slate">{content}</div>
+              ) : (
+                <>
+                  <div>
+                    <h5 className="text-xs font-semibold text-brand-lightest-slate mb-1">O que significa?</h5>
+                    <p className="text-xs text-brand-slate">{tooltipData.whatItMeans}</p>
+                  </div>
 
-              <div>
-                <h5 className="text-xs font-semibold text-brand-lightest-slate mb-1">Por que importa?</h5>
-                <p className="text-xs text-brand-slate">{data.whyItMatters}</p>
-              </div>
+                  <div>
+                    <h5 className="text-xs font-semibold text-brand-lightest-slate mb-1">Por que importa?</h5>
+                    <p className="text-xs text-brand-slate">{tooltipData.whyItMatters}</p>
+                  </div>
 
-              <div>
-                <h5 className="text-xs font-semibold text-brand-lightest-slate mb-1">O que fazer agora?</h5>
-                <p className="text-xs text-brand-slate">{data.whatToDoNow}</p>
-              </div>
+                  <div>
+                    <h5 className="text-xs font-semibold text-brand-lightest-slate mb-1">O que fazer agora?</h5>
+                    <p className="text-xs text-brand-slate">{tooltipData.whatToDoNow}</p>
+                  </div>
+                </>
+              )}
 
-              {data.rootCauses && data.rootCauses.length > 0 && (
+              {tooltipData.rootCauses && tooltipData.rootCauses.length > 0 && (
                 <div>
                   <h5 className="text-xs font-semibold text-brand-lightest-slate mb-1">Causas raiz:</h5>
                   <ul className="text-xs text-brand-slate list-disc list-inside space-y-1">
-                    {data.rootCauses.map((cause, idx) => (
+                    {tooltipData.rootCauses.map((cause, idx) => (
                       <li key={idx}>{cause}</li>
                     ))}
                   </ul>
                 </div>
               )}
 
-              {data.recommendedActions && data.recommendedActions.length > 0 && (
+              {tooltipData.recommendedActions && tooltipData.recommendedActions.length > 0 && (
                 <div>
                   <h5 className="text-xs font-semibold text-brand-lightest-slate mb-1">Ações recomendadas:</h5>
                   <div className="space-y-2">
-                    {data.recommendedActions.map((action, idx) => (
+                    {tooltipData.recommendedActions.map((action, idx) => (
                       <div key={idx} className="bg-brand-light-navy/50 p-2 rounded text-xs">
                         <div className="flex items-center justify-between mb-1">
                           <span className="font-semibold text-brand-cyan">{action.action}</span>
@@ -187,11 +212,11 @@ const PrescriptiveTooltip: React.FC<PrescriptiveTooltipProps> = ({
                 </div>
               )}
 
-              {data.dataSources && data.dataSources.length > 0 && (
+              {tooltipData.dataSources && tooltipData.dataSources.length > 0 && (
                 <div>
                   <h5 className="text-xs font-semibold text-brand-lightest-slate mb-1">Fontes de dados:</h5>
                   <div className="space-y-1">
-                    {data.dataSources.map((source, idx) => (
+                    {tooltipData.dataSources.map((source, idx) => (
                       <div key={idx} className="text-xs text-brand-slate">
                         <span className="font-semibold">{source.name}</span>
                         <span className="text-brand-cyan ml-1">({source.confidence}% confiança)</span>
@@ -202,11 +227,11 @@ const PrescriptiveTooltip: React.FC<PrescriptiveTooltipProps> = ({
                 </div>
               )}
 
-              {data.externalFactors && data.externalFactors.length > 0 && (
+              {tooltipData.externalFactors && tooltipData.externalFactors.length > 0 && (
                 <div>
                   <h5 className="text-xs font-semibold text-brand-lightest-slate mb-1">Fatores externos:</h5>
                   <div className="space-y-1">
-                    {data.externalFactors.map((factor, idx) => (
+                    {tooltipData.externalFactors.map((factor, idx) => (
                       <div key={idx} className="text-xs text-brand-slate">
                         <span className="font-semibold">{factor.factor}:</span> {factor.value}
                         <span className="ml-1 text-brand-cyan">{factor.change}</span>

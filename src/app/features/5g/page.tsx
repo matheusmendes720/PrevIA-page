@@ -84,6 +84,51 @@ export default function FiveGFeaturesPage() {
     console.log('🔍 5G Page - isChartReady:', isChartReady);
   }, [isChartReady]);
 
+  // Standardize font sizes
+  React.useEffect(() => {
+    const applyFontSizes = () => {
+      // Header h1
+      const headerH1 = document.querySelector('header h1');
+      if (headerH1) {
+        (headerH1 as HTMLElement).style.setProperty('font-size', '18px', 'important');
+        (headerH1 as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      }
+
+      // Header p
+      const headerP = document.querySelector('header p');
+      if (headerP) {
+        (headerP as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      }
+
+      // KPI values (text-3xl)
+      document.querySelectorAll('.text-3xl').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '24px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+
+      // Section titles (text-lg)
+      document.querySelectorAll('h2.text-lg').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '15px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+
+      // Card titles (text-base font-semibold)
+      document.querySelectorAll('.text-base.font-semibold').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '14px', 'important');
+        (el as HTMLElement).style.setProperty('font-weight', '600', 'important');
+      });
+
+      // Card descriptions (text-sm)
+      document.querySelectorAll('.text-sm.text-brand-slate').forEach((el) => {
+        (el as HTMLElement).style.setProperty('font-size', '13px', 'important');
+      });
+    };
+
+    applyFontSizes();
+    const interval = setInterval(applyFontSizes, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Transform data for components
   const projectionData = projections[scenario];
   const coverageData = {
@@ -126,10 +171,10 @@ export default function FiveGFeaturesPage() {
       <div className="min-h-screen bg-brand-blue text-brand-lightest-slate p-8">
         {/* Header */}
         <header className="mb-8">
-          <h1 className="text-2xl font-bold text-brand-lightest-slate mb-2">
+          <h1 className="text-2xl font-bold text-brand-lightest-slate mb-2 fiveg-header-h1">
             Features 5G
           </h1>
-          <p className="text-base text-brand-slate">
+          <p className="text-base text-brand-slate fiveg-header-p">
             Monitoramento da expansão 5G e impacto na demanda de materiais
           </p>
         </header>
@@ -150,7 +195,7 @@ export default function FiveGFeaturesPage() {
                   <span className="text-xl">{kpi.icon}</span>
                   <span className="text-xs text-brand-slate">{kpi.label}</span>
                 </div>
-                <div className="text-3xl font-bold text-brand-lightest-slate mb-1">
+                <div className="text-3xl font-bold text-brand-lightest-slate mb-1 fiveg-kpi-value">
                   {kpi.value}
                 </div>
                 <div className="text-sm text-brand-slate mb-2">{kpi.unit}</div>
@@ -365,6 +410,23 @@ export default function FiveGFeaturesPage() {
           )}
         </main>
       </div>
+      <style jsx global>{`
+        .fiveg-header-h1 {
+          font-size: 18px !important;
+          font-weight: 600 !important;
+        }
+        .fiveg-header-p {
+          font-size: 13px !important;
+        }
+        .fiveg-kpi-value {
+          font-size: 24px !important;
+          font-weight: 600 !important;
+        }
+        header h2.text-lg {
+          font-size: 15px !important;
+          font-weight: 600 !important;
+        }
+      `}</style>
     </ErrorBoundary>
   );
 }

@@ -3,6 +3,8 @@
  * Centralized API client for tower data with caching and error handling
  */
 
+import { generateMockTowers, generateMockStats } from '../app/features/towers/utils/mockTowerData';
+
 export interface Tower {
   tower_id: string;
   latitude: number;
@@ -75,13 +77,13 @@ function getCacheKey(endpoint: string, params?: Record<string, any>): string {
 function getCached<T>(key: string): T | null {
   const cached = cache.get(key);
   if (!cached) return null;
-  
+
   const age = Date.now() - cached.timestamp;
   if (age > CACHE_TTL) {
     cache.delete(key);
     return null;
   }
-  
+
   return cached.data as T;
 }
 
@@ -119,8 +121,31 @@ export const towerService = {
    * Get all towers with optional filtering
    */
   async getTowers(filters?: TowerFilters): Promise<TowerResponse> {
+    // USE MOCKS IF CONFIGURED
+    if (process.env.NEXT_PUBLIC_USE_MOCKS === 'true') {
+      const mockTowers = generateMockTowers();
+      let filtered = [...mockTowers];
+
+      if (filters?.region) filtered = filtered.filter(t => t.region === filters.region);
+      if (filters?.state) filtered = filtered.filter(t => t.state === filters.state);
+      if (filters?.status) filtered = filtered.filter(t => t.status === filters.status);
+      if (filters?.priority) filtered = filtered.filter(t => t.priority === filters.priority);
+
+      const offset = filters?.offset || 0;
+      const limit = filters?.limit || 50;
+      const paginated = filtered.slice(offset, offset + limit);
+
+      return {
+        towers: paginated as any,
+        total: filtered.length,
+        limit,
+        offset,
+        has_more: offset + limit < filtered.length
+      };
+    }
+
     const params = new URLSearchParams();
-    
+
     if (filters?.region) params.append('region', filters.region);
     if (filters?.state) params.append('state', filters.state);
     if (filters?.zone) params.append('zone', filters.zone);
@@ -131,13 +156,13 @@ export const towerService = {
 
     const url = `${API_BASE_URL}/api/v1/towers?${params.toString()}`;
     const cacheKey = getCacheKey('/api/v1/towers', filters);
-    
+
     const cached = getCached<TowerResponse>(cacheKey);
     if (cached) return cached;
 
     const data = await fetchWithErrorHandling<TowerResponse>(url);
     setCache(cacheKey, data);
-    
+
     return data;
   },
 
@@ -145,15 +170,23 @@ export const towerService = {
    * Get a specific tower by ID
    */
   async getTower(towerId: string): Promise<Tower> {
+    // USE MOCKS IF CONFIGURED
+    if (process.env.NEXT_PUBLIC_USE_MOCKS === 'true') {
+      const mockTowers = generateMockTowers();
+      const tower = mockTowers.find(t => t.id === towerId);
+      if (tower) return tower as any;
+      throw new Error('Tower not found');
+    }
+
     const cacheKey = getCacheKey(`/api/v1/towers/${towerId}`);
-    
+
     const cached = getCached<Tower>(cacheKey);
     if (cached) return cached;
 
     const url = `${API_BASE_URL}/api/v1/towers/${towerId}`;
     const data = await fetchWithErrorHandling<Tower>(url);
     setCache(cacheKey, data);
-    
+
     return data;
   },
 
@@ -161,15 +194,21 @@ export const towerService = {
    * Get aggregated statistics
    */
   async getStats(): Promise<TowerStats> {
+    // USE MOCKS IF CONFIGURED
+    if (process.env.NEXT_PUBLIC_USE_MOCKS === 'true') {
+      const mockTowers = generateMockTowers();
+      return generateMockStats(mockTowers);
+    }
+
     const cacheKey = getCacheKey('/api/v1/towers/stats/summary');
-    
+
     const cached = getCached<TowerStats>(cacheKey);
     if (cached) return cached;
 
     const url = `${API_BASE_URL}/api/v1/towers/stats/summary`;
     const data = await fetchWithErrorHandling<TowerStats>(url);
     setCache(cacheKey, data);
-    
+
     return data;
   },
 
@@ -183,15 +222,28 @@ export const towerService = {
     average_signal_strength?: number;
     average_uptime?: number;
   }>> {
+    // USE MOCKS IF CONFIGURED
+    if (process.env.NEXT_PUBLIC_USE_MOCKS === 'true') {
+      const mockTowers = generateMockTowers();
+      const stats = generateMockStats(mockTowers);
+      return Object.entries(stats.by_region).map(([region, count]) => ({
+        region,
+        tower_count: count,
+        average_height: 45 + Math.random() * 10,
+        average_signal_strength: 75 + Math.random() * 20,
+        average_uptime: 95 + Math.random() * 5
+      }));
+    }
+
     const cacheKey = getCacheKey('/api/v1/towers/stats/by-region');
-    
+
     const cached = getCached<Array<any>>(cacheKey);
     if (cached) return cached;
 
     const url = `${API_BASE_URL}/api/v1/towers/stats/by-region`;
     const data = await fetchWithErrorHandling<Array<any>>(url);
     setCache(cacheKey, data);
-    
+
     return data;
   },
 
@@ -206,15 +258,28 @@ export const towerService = {
     average_signal_strength?: number;
     average_uptime?: number;
   }>> {
+    // USE MOCKS IF CONFIGURED
+    if (process.env.NEXT_PUBLIC_USE_MOCKS === 'true') {
+      const mockTowers = generateMockTowers();
+      const stats = generateMockStats(mockTowers);
+      return Object.entries(stats.by_state).map(([state, count]) => ({
+        state_code: state,
+        tower_count: count,
+        average_height: 45 + Math.random() * 10,
+        average_signal_strength: 75 + Math.random() * 20,
+        average_uptime: 95 + Math.random() * 5
+      }));
+    }
+
     const cacheKey = getCacheKey('/api/v1/towers/stats/by-state');
-    
+
     const cached = getCached<Array<any>>(cacheKey);
     if (cached) return cached;
 
     const url = `${API_BASE_URL}/api/v1/towers/stats/by-state`;
     const data = await fetchWithErrorHandling<Array<any>>(url);
     setCache(cacheKey, data);
-    
+
     return data;
   },
 

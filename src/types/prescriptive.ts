@@ -124,7 +124,7 @@ export interface ComprehensivePrescriptive {
 }
 
 export interface PrescriptiveKpiData {
-  riskLevel?: 'HIGH' | 'MEDIUM' | 'LOW';
+  riskLevel?: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
   riskScore?: number;
   actionBadge?: 'URGENT' | 'REVIEW' | 'OK';
   confidence?: number;
