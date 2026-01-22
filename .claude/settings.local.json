@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:npm:*)",
+      "Bash(npm run dev:npm:*)",
+      "Bash(timeout:*)",
+      "Bash(exit:*)",
+      "mcp__chrome-devtools__navigate_page"
+    ]
+  }
+}

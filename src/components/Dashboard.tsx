@@ -11,6 +11,10 @@ import OperationalStatus from './OperationalStatus';
 import InsightModal from './InsightModal';
 import PrescriptiveRecommendationsEnhanced from './PrescriptiveRecommendationsEnhanced';
 import { useToast } from '../hooks/useToast';
+import RiskMatrix from './RiskMatrix';
+import ActionBoard from './ActionBoard';
+import ScenarioComparison from './ScenarioComparison';
+import ExternalFactors from './ExternalFactors';
 
 const kpiMetrics: KpiData[] = [
     {
@@ -206,8 +210,8 @@ const Dashboard: React.FC<DashboardProps> = ({ searchTerm, onSelectAlert }) => {
 
              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in-up" style={{ animationDelay: '700ms' }}>
                 <div className="lg:col-span-2">
-                    <AlertsTable 
-                        alerts={filteredAlerts} 
+                    <AlertsTable
+                        alerts={filteredAlerts}
                         onSelectAlert={onSelectAlert}
                         onShowInsight={handleOpenInsightModal}
                     />
@@ -216,8 +220,29 @@ const Dashboard: React.FC<DashboardProps> = ({ searchTerm, onSelectAlert }) => {
                     <PrescriptiveRecommendationsEnhanced />
                 </div>
             </div>
+
+            {/* Risk Matrix and Action Board */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in-up" style={{ animationDelay: '800ms' }}>
+                <div className="risk-matrix-container">
+                    <RiskMatrix />
+                </div>
+                <div className="action-board-container">
+                    <ActionBoard />
+                </div>
+            </div>
+
+            {/* Scenario Comparison and External Factors */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in-up" style={{ animationDelay: '900ms' }}>
+                <div className="lg:col-span-1">
+                    <ScenarioComparison />
+                </div>
+                <div className="lg:col-span-1">
+                    <ExternalFactors />
+                </div>
+            </div>
+
             {isInsightModalOpen && insightModalAlert && (
-                <InsightModal 
+                <InsightModal
                     alert={insightModalAlert}
                     onClose={() => setIsInsightModalOpen(false)}
                 />

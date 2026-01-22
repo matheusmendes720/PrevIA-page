@@ -148,3 +148,36 @@ body {
   background: radial-gradient(circle, rgba(100, 255, 218, 0.4), transparent);
   animation: pulse-glow 2s ease-in-out infinite;
 }
+
+/* Subtle glow animation */
+@keyframes subtle-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(100, 255, 218, 0.05),
+                0 0 20px rgba(100, 255, 218, 0.02);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(100, 255, 218, 0.1),
+                0 0 30px rgba(100, 255, 218, 0.05);
+  }
+}
+
+.animate-subtle-glow {
+  animation: subtle-glow 4s ease-in-out infinite;
+}
+
+/* Glass card styling */
+.glass-card {
+  backdrop-filter: blur(12px);
+  background: rgba(10, 25, 47, 0.7);
+  border: 1px solid rgba(100, 255, 218, 0.1);
+}
+
+/* Hide scrollbar */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}

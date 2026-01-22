@@ -46,13 +46,17 @@ const Sidebar: React.FC<SidebarProps> = memo(({ activePage, setActivePage, isCol
 
   const navItems = useMemo(() => [
     { label: 'Dashboard', icon: <DashboardIcon /> },
-    { label: 'Relatórios', icon: <ReportIcon /> },
     { label: 'Análises', icon: <AnalyticsIcon /> },
+    { label: 'Chatbot', icon: <span className="text-lg">🤖</span> },
+    { label: 'Relatórios', icon: <ReportIcon /> },
     { label: 'Configurações', icon: <SettingsIcon /> },
   ], []);
 
   const handleMainNavClick = useCallback((page: string) => {
-    if (isOnFeaturesPage) {
+    if (page === 'Chatbot') {
+      // Navigate to chatbot page
+      router.push('/chatbot');
+    } else if (isOnFeaturesPage) {
       // If we're on a features page, navigate to /main first
       router.push('/main');
       // Store the target page in sessionStorage to restore after navigation
@@ -70,6 +74,7 @@ const Sidebar: React.FC<SidebarProps> = memo(({ activePage, setActivePage, isCol
   // Prefetch main navigation routes
   useEffect(() => {
     router.prefetch('/main');
+    router.prefetch('/chatbot');
   }, [router]);
 
   const featureLinks = useMemo(() => [

@@ -231,7 +231,7 @@ export default function TowersPage() {
     };
 
     loadTowers();
-  }, []);
+  }, [granularity]);
 
   // Generate mock alerts
   useEffect(() => {
