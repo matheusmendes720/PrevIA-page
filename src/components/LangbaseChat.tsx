@@ -65,11 +65,14 @@ export default function LangbaseChat({
       }));
   };
 
-  // Escape HTML to prevent XSS
+  // Escape HTML to prevent XSS (SSR-safe, no document dependency)
   const escapeHtml = (text: string) => {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   };
 
   // Send message to Langbase
@@ -216,8 +219,8 @@ export default function LangbaseChat({
           >
             <div
               className={`max-w-[80%] p-3 rounded-lg ${message.role === 'user'
-                  ? 'bg-brand-cyan/20 text-brand-lightest-slate border border-brand-cyan/30'
-                  : 'bg-brand-light-navy/50 text-brand-lightest-slate border border-brand-light-navy/50'
+                ? 'bg-brand-cyan/20 text-brand-lightest-slate border border-brand-cyan/30'
+                : 'bg-brand-light-navy/50 text-brand-lightest-slate border border-brand-light-navy/50'
                 }`}
             >
               <div

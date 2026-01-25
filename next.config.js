@@ -7,7 +7,7 @@ const nextConfig = {
     // Enable faster refresh with Bun
     optimizePackageImports: ['chart.js', 'recharts', 'd3', 'react-katex'],
     // Enable optimized CSS imports
-    optimizeCss: true,
+    optimizeCss: false,
   },
   // Compiler optimizations
   compiler: {
